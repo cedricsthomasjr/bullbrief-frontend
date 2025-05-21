@@ -12,8 +12,8 @@ export default function ComparePage() {
 
   useEffect(() => {
     if (!tickers) return;
-
-    fetch("http://localhost:8000/compare-summary", {
+  
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/compare-summary`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tickers: tickers.split(",") }),
@@ -28,6 +28,7 @@ export default function ComparePage() {
         setLoading(false);
       });
   }, [tickers]);
+  
 
   if (loading) return <LoadingScreen />;
 

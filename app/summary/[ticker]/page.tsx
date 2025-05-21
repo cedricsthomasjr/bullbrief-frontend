@@ -65,7 +65,7 @@ const [execs, setExecs] = useState<
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/summary/${ticker}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/summary/${ticker}`);
         const json = await res.json();
         if (res.ok) setData(json);
         else setError(json.error || "Unknown error");
@@ -75,14 +75,14 @@ const [execs, setExecs] = useState<
         setLoading(false);
       }
       try {
-        const res = await fetch(`http://localhost:8000/news/${ticker}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/news/${ticker}`);
         const json = await res.json();
         setNews(json.news || []);
       } catch (err) {
         console.error("Failed to fetch news:", err);
       }
       try {
-        const res = await fetch(`http://localhost:8000/executives/${ticker}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/executives/${ticker}`);
         const json = await res.json();
         setExecs(json.executives || []);
       } catch (err) {

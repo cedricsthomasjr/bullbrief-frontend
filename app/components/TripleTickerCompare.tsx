@@ -30,13 +30,13 @@ export default function TripleTickerCompare() {
   
     const fetchCompare = async () => {
       try {
-        const res = await fetch("http://localhost:8000/compare-summary", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/compare-summary`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ tickers: validTickers }),
         });
         const json = await res.json();
-  
+    
         const aligned = tickers.map((t) => json.tickers[t] ?? null);
         setData(aligned);
         setInsights(json.insights);
@@ -47,6 +47,7 @@ export default function TripleTickerCompare() {
         setLoadingStates([false, false, false]);
       }
     };
+    
   
     if (validTickers.length >= 1) {
       fetchCompare();

@@ -26,7 +26,7 @@ export default function TickerInput() {
 
     const fetchSuggestions = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/search/${query}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/search/${query}`);
         const data = await res.json();
         setSuggestions(data);
         setShowDropdown(true);
