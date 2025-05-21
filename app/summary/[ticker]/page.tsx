@@ -179,6 +179,10 @@ const [execs, setExecs] = useState<
       <section>
         <FinancialMetricsGrid data={data} />  
       </section>
+      <section>
+      {execs.length > 0 && <ExecutiveGrid execs={execs} />}
+
+      </section>
 
       {/* News Section */}
       <section>
@@ -205,7 +209,6 @@ const [execs, setExecs] = useState<
     </div>
   )}
 </section>
-{execs.length > 0 && <ExecutiveGrid execs={execs} />}
 </main>
   );
 }
