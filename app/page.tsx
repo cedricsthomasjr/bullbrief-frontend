@@ -7,7 +7,7 @@ import TickerInput from "@/app/components/TickerInput";
 
 export default function HomePage() {
   const router = useRouter();
-  const [ticker, setTicker] = useState("");
+  const [ticker] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
