@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import TickerInput from "@/app/components/TickerInput";
 
 export default function HomePage() {
   const router = useRouter();
-  const [ticker] = useState("");
 
  
   return (
