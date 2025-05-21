@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import TradingViewMiniChart from "@//app/components/TradingViewMiniChart";
 import SWOTCard from "@//app/components/SWOTCard";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -69,9 +68,7 @@ const [execs, setExecs] = useState<
         const json = await res.json();
         if (res.ok) setData(json);
         else setError(json.error || "Unknown error");
-      } catch (e) {
-        setError("Could not connect to backend.");
-      } finally {
+      }  finally {
         setLoading(false);
       }
       try {
