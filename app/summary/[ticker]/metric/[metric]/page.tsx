@@ -73,9 +73,8 @@ export default function MetricDetailPage() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/interpret/${ticker}?metric=${metric}`);
         const json = await res.json();
         setAiSummary(json.analysis ?? null);
-      } catch (err) {
-        setAiSummary(null);
-      } finally {
+      } 
+       finally {
         setSummaryLoading(false);
       }
     };
