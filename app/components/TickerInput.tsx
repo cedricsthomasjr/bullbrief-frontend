@@ -7,6 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 type Suggestion = {
   symbol: string;
   name: string;
+  exchange?: string;
+  sector?: string;
+  industry?: string;
 };
 
 export default function TickerInput() {
@@ -17,8 +20,17 @@ export default function TickerInput() {
   const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const formatExchange = (code?: string) => {
+    const map: Record<string, string> = {
+      NMS: "NASDAQ",
+      NYQ: "NYSE",
+      ASE: "AMEX",
+    };
+    return code ? map[code] ?? code : "—";
+  };
+
   useEffect(() => {
-    if (!query) {
+    if (!query.trim()) {
       setSuggestions([]);
       setShowDropdown(false);
       return;
@@ -26,8 +38,7 @@ export default function TickerInput() {
 
     const fetchSuggestions = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/search/${query}`)
-
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/search/${query}`);
         const data = await res.json();
         setSuggestions(data);
         setShowDropdown(true);
@@ -53,16 +64,16 @@ export default function TickerInput() {
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIndex((prev) => (prev + 1) % (suggestions.length + 1));
+      setActiveIndex((prev) => (prev + 1) % suggestions.length);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIndex((prev) => (prev - 1 + (suggestions.length + 1)) % (suggestions.length + 1));
+      setActiveIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (activeIndex >= 0 && activeIndex < suggestions.length) {
+      if (activeIndex >= 0 && suggestions[activeIndex]) {
         handleSelect(suggestions[activeIndex].symbol);
       } else {
-        handleSelect(query); // fallback search
+        handleSelect(query);
       }
     } else if (e.key === "Escape") {
       setShowDropdown(false);
@@ -71,50 +82,60 @@ export default function TickerInput() {
   };
 
   return (
-<div className="relative w-full max-w-xl">
+    <div className="w-full max-w-xl flex flex-col gap-2 relative">
       <input
         ref={inputRef}
+        autoFocus
         type="text"
-        placeholder="Search stock (e.g. Tesla, AAPL)"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="bg-zinc-900 text-white px-4 py-3 rounded-xl w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
+        placeholder="Search stocks (e.g. Tesla, AAPL, Nvidia)"
+        className="bg-zinc-900 text-white px-5 py-3 rounded-xl w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
       />
-      <AnimatePresence>
+
+      <AnimatePresence initial={false}>
         {showDropdown && (
-          <motion.ul
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.1, ease: "linear" }}
-            className="absolute z-10 mt-2 w-full bg-zinc-800 rounded-xl shadow-lg border border-zinc-700 overflow-hidden"
+          <motion.div
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeInOut" }}
+            className="w-full"
           >
-            {suggestions.length > 0 ? (
-              suggestions.map((s, i) => (
+            <motion.ul
+              initial={{ scaleY: 0.95 }}
+              animate={{ scaleY: 1 }}
+              exit={{ scaleY: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="bg-zinc-800 rounded-xl shadow-lg border border-zinc-700 origin-top max-h-72 overflow-y-auto divide-y divide-zinc-700"
+            >
+              {suggestions.map((s, i) => (
                 <li
                   key={s.symbol}
                   onClick={() => handleSelect(s.symbol)}
-                  className={`px-4 py-2 cursor-pointer text-white transition ${
-                    i === activeIndex ? "bg-blue-600" : "hover:bg-zinc-700"
+                  className={`flex justify-between items-start px-4 py-4 text-white text-sm sm:text-base cursor-pointer transition-all ${
+                    i === activeIndex ? "bg-blue-600 ring-1 ring-blue-400 rounded-md" : "hover:bg-zinc-700"
                   }`}
                 >
-                  <span className="font-semibold">{s.symbol}</span>{" "}
-                  <span className="text-gray-400">— {s.name}</span>
-                </li>
-              ))
-            ) : (
-              <li
-  onClick={() => handleSelect(query)}
-  className={`px-4 py-2 cursor-pointer text-white transition ${
-    activeIndex === 0 ? "bg-blue-600" : "hover:bg-zinc-700"
-  }`}
->
-  🔍 Search <span className="font-semibold">&quot;{query}&quot;</span>
-</li>
+                  {/* Left: Symbol + Name */}
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-lg">{s.symbol}</span>
+                    <span className="text-gray-300 text-sm">{s.name}</span>
+                  </div>
 
-            )}
-          </motion.ul>
+                  {/* Right: Sector + Exchange */}
+                  <div className="text-right text-gray-400 text-xs flex flex-col items-end gap-0.5">
+                    <span className="bg-zinc-700 px-2 py-0.5 rounded-full text-white font-medium">
+                      {s.sector || "—"}
+                    </span>
+                    <span className="text-blue-300 font-semibold">{formatExchange(s.exchange)}</span>
+                  </div>
+                </li>
+              ))}
+            </motion.ul>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

@@ -146,3 +146,17 @@
   animation: pulseBackground 12s ease-in-out infinite;
   background-size: 400% 400%;
 }
+@layer utilities {
+  .animate-marquee {
+    animation: ticker 30s linear infinite;
+  }
+
+  @keyframes ticker {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}

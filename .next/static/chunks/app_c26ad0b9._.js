@@ -133,7 +133,7 @@ function MetricChart({ data, title }) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/MetricChart.tsx",
-                            lineNumber: 78,
+                            lineNumber: 79,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Line"], {
@@ -152,7 +152,7 @@ function MetricChart({ data, title }) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/MetricChart.tsx",
-                            lineNumber: 79,
+                            lineNumber: 80,
                             columnNumber: 11
                         }, this)
                     ]
@@ -334,6 +334,7 @@ var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_
 __turbopack_context__.s({
     "default": (()=>MetricDetailPage)
 });
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/navigation.js [app-client] (ecmascript)");
@@ -362,11 +363,11 @@ function MetricDetailPage() {
                 "MetricDetailPage.useEffect.fetchData": async ()=>{
                     setDataLoading(true);
                     try {
+                        const baseURL = ("TURBOPACK compile-time value", "https://bullbrief-api.onrender.com");
                         const endpoint = [
                             "eps",
                             "revenue"
-                        ].includes(metric.toLowerCase()) ? `http://localhost:8000/metric/${ticker}/${metric}` // <— use new clean route
-                         : `http://localhost:8000/macrotrends/${ticker}`;
+                        ].includes(metric.toLowerCase()) ? `${baseURL}/metric/${ticker}/${metric}` : `${baseURL}/macrotrends/${ticker}`;
                         const res = await fetch(endpoint);
                         const json = await res.json();
                         let extractedData = null;
@@ -408,11 +409,9 @@ function MetricDetailPage() {
                 "MetricDetailPage.useEffect.fetchAISummary": async ()=>{
                     setSummaryLoading(true);
                     try {
-                        const res = await fetch(`http://localhost:8000/interpret/${ticker}?metric=${metric}`);
+                        const res = await fetch(`${("TURBOPACK compile-time value", "https://bullbrief-api.onrender.com")}/interpret/${ticker}?metric=${metric}`);
                         const json = await res.json();
                         setAiSummary(json.analysis ?? null);
-                    } catch (err) {
-                        setAiSummary(null);
                     } finally{
                         setSummaryLoading(false);
                     }
@@ -426,7 +425,7 @@ function MetricDetailPage() {
     ]);
     if (dataLoading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$LoadingScreen$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
         fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-        lineNumber: 84,
+        lineNumber: 86,
         columnNumber: 27
     }, this);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -441,7 +440,7 @@ function MetricDetailPage() {
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                lineNumber: 88,
+                lineNumber: 90,
                 columnNumber: 3
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -451,12 +450,12 @@ function MetricDetailPage() {
                     title: metric
                 }, void 0, false, {
                     fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                    lineNumber: 94,
+                    lineNumber: 96,
                     columnNumber: 5
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                lineNumber: 93,
+                lineNumber: 95,
                 columnNumber: 3
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -467,7 +466,7 @@ function MetricDetailPage() {
                         children: "🧠 AI Interpretation"
                     }, void 0, false, {
                         fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                        lineNumber: 99,
+                        lineNumber: 101,
                         columnNumber: 5
                     }, this),
                     summaryLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -475,7 +474,7 @@ function MetricDetailPage() {
                         children: "Generating summary..."
                     }, void 0, false, {
                         fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                        lineNumber: 102,
+                        lineNumber: 104,
                         columnNumber: 7
                     }, this) : bulletPoints && bulletPoints.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "grid grid-cols-1 sm:grid-cols-2 gap-4",
@@ -489,7 +488,7 @@ function MetricDetailPage() {
                                         children: title
                                     }, void 0, false, {
                                         fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                                        lineNumber: 109,
+                                        lineNumber: 111,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -497,38 +496,38 @@ function MetricDetailPage() {
                                         children: rest.join(":").trim()
                                     }, void 0, false, {
                                         fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                                        lineNumber: 110,
+                                        lineNumber: 112,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, idx, true, {
                                 fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                                lineNumber: 108,
+                                lineNumber: 110,
                                 columnNumber: 13
                             }, this);
                         })
                     }, void 0, false, {
                         fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                        lineNumber: 104,
+                        lineNumber: 106,
                         columnNumber: 7
                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                         className: "text-red-500 italic",
                         children: "Could not generate summary."
                     }, void 0, false, {
                         fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                        lineNumber: 116,
+                        lineNumber: 118,
                         columnNumber: 7
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-                lineNumber: 98,
+                lineNumber: 100,
                 columnNumber: 3
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/summary/[ticker]/metric/[metric]/page.tsx",
-        lineNumber: 87,
+        lineNumber: 89,
         columnNumber: 1
     }, this);
 }
