@@ -55,7 +55,7 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
 
   const metricGroups = [
     {
-      title: "💸 Valuation Metrics",
+      title: " Valuation Metrics",
       metrics: [
         { label: "EPS (TTM)", value: formatFixed(data.eps_ttm), icon: <BarChart3 className="w-4 h-4 text-blue-400" /> },
         { label: "Forward P/E", value: formatFixed(data.forward_pe), icon: <LineChart className="w-4 h-4 text-blue-400" /> },
@@ -65,7 +65,7 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
       ],
     },
     {
-      title: "📉 Risk & Ownership",
+      title: " Risk & Ownership",
       metrics: [
         { label: "Beta", value: formatFixed(data.beta), icon: <Activity className="w-4 h-4 text-blue-400" /> },
         { label: "Volume", value: formatNumber(data.volume), icon: <ArrowDownUp className="w-4 h-4 text-blue-400" /> },
@@ -75,7 +75,7 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
       ],
     },
     {
-      title: "📈 Profitability & Cashflow",
+      title: " Profitability & Cashflow",
       metrics: [
         { label: "Dividend Yield", value: formatPercent(data.dividend_yield), icon: <PiggyBank className="w-4 h-4 text-blue-400" /> },
         { label: "ROE", value: formatPercent(data.roe), icon: <Percent className="w-4 h-4 text-blue-400" /> },
@@ -88,9 +88,7 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
 
   return (
     <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-      <h2 className="text-2xl justify-center font-semibold text-blue-300 flex items-center gap-2">
-        📊 Key Financial Metrics
-      </h2>
+      
 
       {metricGroups.map((group, groupIdx) => (
         <div key={groupIdx} className="space-y-4">

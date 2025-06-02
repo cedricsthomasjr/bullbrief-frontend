@@ -105,12 +105,13 @@ export default function TickerInput() {
             className="w-full"
           >
             <motion.ul
-              initial={{ scaleY: 0.95 }}
-              animate={{ scaleY: 1 }}
-              exit={{ scaleY: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="bg-zinc-800 rounded-xl shadow-lg border border-zinc-700 origin-top max-h-72 overflow-y-auto divide-y divide-zinc-700"
-            >
+  initial={{ scaleY: 0.95 }}
+  animate={{ scaleY: 1 }}
+  exit={{ scaleY: 0.95 }}
+  transition={{ duration: 0.15 }}
+  className="bg-zinc-800 rounded-xl shadow-lg border border-zinc-700 origin-top max-h-72 overflow-y-auto divide-y divide-zinc-700 scrollbar-hide"
+>
+
               {suggestions.map((s, i) => (
                 <li
                   key={s.symbol}

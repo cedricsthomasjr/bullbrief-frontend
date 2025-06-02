@@ -16,7 +16,7 @@ export default function ExecutiveGrid({ execs }: { execs: Executive[] }) {
 
   return (
     <section className="mt-16">
-      <h2 className="text-2xl font-semibold text-blue-300 mb-4">💼 Executive Team</h2>
+      <h2 className="text-2xl font-semibold text-blue-300 mb-4"> Executive Team</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {execs.map((exec, i) => (
           <ExecutiveCard key={i} exec={exec} />

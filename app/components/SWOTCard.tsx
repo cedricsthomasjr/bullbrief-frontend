@@ -6,7 +6,7 @@ type SWOTProps = {
   content: string;
 };
 
-const parseSWOTSection = (label: string, content: string) => {
+const parseSWOTSection = (label: string, content: string): string[] => {
   const match = new RegExp(`\\*\\*${label}:\\*\\*[\\s\\n\\r]+([-\\s\\S]+?)(?=\\*\\*|$)`, "i").exec(content);
   if (!match) return [];
   return match[1]
@@ -16,6 +16,29 @@ const parseSWOTSection = (label: string, content: string) => {
     .map((line) => line.replace(/^-\s*/, ""));
 };
 
+const SWOTSection = ({
+  title,
+  points,
+  color,
+}: {
+  title: string;
+  points: string[];
+  color: string;
+}) => (
+  <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-xl shadow-sm">
+    <h3 className={`text-xl font-bold mb-3 text-${color}`}>{title}</h3>
+    {points.length > 0 ? (
+      <ul className="list-disc list-inside text-gray-200 space-y-1">
+        {points.map((point, i) => (
+          <li key={i}>{point}</li>
+        ))}
+      </ul>
+    ) : (
+      <p className="text-gray-400 italic">No data available.</p>
+    )}
+  </div>
+);
+
 export default function SWOTCard({ content }: SWOTProps) {
   const strengths = parseSWOTSection("Strengths", content);
   const weaknesses = parseSWOTSection("Weaknesses", content);
@@ -24,38 +47,10 @@ export default function SWOTCard({ content }: SWOTProps) {
 
   return (
     <section className="grid md:grid-cols-2 gap-6 mt-8">
-      <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-xl">
-        <h3 className="text-xl font-bold text-green-400 mb-2">Strengths</h3>
-        <ul className="list-disc list-inside text-gray-200 space-y-1">
-          {strengths.map((point, i) => (
-            <li key={`s-${i}`}>{point}</li>
-          ))}
-        </ul>
-      </div>
-      <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-xl">
-        <h3 className="text-xl font-bold text-red-400 mb-2">Weaknesses</h3>
-        <ul className="list-disc list-inside text-gray-200 space-y-1">
-          {weaknesses.map((point, i) => (
-            <li key={`w-${i}`}>{point}</li>
-          ))}
-        </ul>
-      </div>
-      <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-xl">
-        <h3 className="text-xl font-bold text-blue-400 mb-2">Opportunities</h3>
-        <ul className="list-disc list-inside text-gray-200 space-y-1">
-          {opportunities.map((point, i) => (
-            <li key={`o-${i}`}>{point}</li>
-          ))}
-        </ul>
-      </div>
-      <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-xl">
-        <h3 className="text-xl font-bold text-yellow-400 mb-2">Threats</h3>
-        <ul className="list-disc list-inside text-gray-200 space-y-1">
-          {threats.map((point, i) => (
-            <li key={`t-${i}`}>{point}</li>
-          ))}
-        </ul>
-      </div>
+      <SWOTSection title="Strengths" points={strengths} color="green-400" />
+      <SWOTSection title="Weaknesses" points={weaknesses} color="red-400" />
+      <SWOTSection title="Opportunities" points={opportunities} color="blue-400" />
+      <SWOTSection title="Threats" points={threats} color="yellow-400" />
     </section>
   );
 }

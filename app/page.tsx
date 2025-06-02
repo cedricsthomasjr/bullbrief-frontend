@@ -12,16 +12,7 @@ export default function HomePage() {
     <main className="relative min-h-screen bg-black text-white px-6 pt-20 overflow-x-hidden">
       {/* 🔵 Background Glow */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-black via-blue-950 to-black opacity-60 blur-2xl" />
-      {/* 📈 Market Snapshot */}
-      <section className="pt-5 z-10 pb-10 w-full max-w-6xl mx-auto px-4">
-        <h3 className="text-2xl font-semibold text-white mb-6 text-center">
-        </h3>
-        <div className="flex flex-wrap justify-center gap-6">
-          <MarketCard symbol="AAPL" />
-          <MarketCard symbol="QQQ" />
-          <MarketCard symbol="DIA" />
-        </div>
-      </section>
+      
 
       {/* 🏁 Hero */}
       <section className="flex flex-col items-center text-center space-y-6 z-10">
