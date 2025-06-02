@@ -9,8 +9,7 @@ import LoadingScreen from "@/app/components/LoadingScreen";
 import StockChartToggle from "@/app/components/StockChartToggle";
 import FinancialMetricsGrid from "@/app/components/FinancialMetricsGrid";
 import ExecutiveGrid from "@/app/components/ExecutiveGrid";
-import Tooltip from "@/app/components/Tooltip";
-import PeerSummaryCard from "@/app/components/PeerSummaryCard";
+
 
 type BackendSummary = {
   company_name: string;
@@ -67,7 +66,7 @@ export default function TickerPage() {
     { title: string; publisher: string; link: string; providerPublishTime: string }[]
   >([]);
   const [execs, setExecs] = useState<{ name: string; title: string; pay: string }[]>([]);
-  const [peerData, setPeerData] = useState<{ target: any; peers: any[] } | null>(null);
+  const [peerData] = useState<{ target: any; peers: any[] } | null>(null);
   const [peerInsight, setPeerInsight] = useState<string | null>(null);
 
   useEffect(() => {

@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import TickerInput from "@/app/components/TickerInput";
-import MarketCard from "@/app/components/MarketCard";
 
 export default function HomePage() {
   const router = useRouter();
