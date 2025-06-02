@@ -66,8 +66,13 @@ export default function TickerPage() {
     { title: string; publisher: string; link: string; providerPublishTime: string }[]
   >([]);
   const [execs, setExecs] = useState<{ name: string; title: string; pay: string }[]>([]);
-  const [peerData] = useState<{ target: any; peers: any[] } | null>(null);
-  const [peerInsight, setPeerInsight] = useState<string | null>(null);
+  type PeerData = {
+    target: { [key: string]: unknown };
+    peers: { [key: string]: unknown }[];
+  };
+  
+  const [peerData] = useState<PeerData | null>(null);
+    const [peerInsight, setPeerInsight] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ticker) return;
@@ -77,9 +82,10 @@ export default function TickerPage() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/company/peers/insight/${ticker}`);
         const json = await res.json();
         setPeerInsight(json.insight || null);
-      } catch (err) {
-        console.error("Failed to fetch peer insight:", err);
+      } catch {
+        setError("Failed to fetch summary");
       }
+      
       
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/summary/${ticker}`);
