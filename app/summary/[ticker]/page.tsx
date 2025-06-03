@@ -66,13 +66,13 @@ export default function TickerPage() {
     { title: string; publisher: string; link: string; providerPublishTime: string }[]
   >([]);
   const [execs, setExecs] = useState<{ name: string; title: string; pay: string }[]>([]);
-  type PeerData = {
-    target: { [key: string]: unknown };
-    peers: { [key: string]: unknown }[];
-  };
-  
-  const [peerData] = useState<PeerData | null>(null);
-    const [peerInsight, setPeerInsight] = useState<string | null>(null);
+type PeerData = {
+  target: { [key: string]: unknown };
+  peers: { [key: string]: unknown }[];
+};
+
+const [peerData] = useState<PeerData | null>(null);
+  const [peerInsight, setPeerInsight] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ticker) return;
@@ -91,7 +91,7 @@ export default function TickerPage() {
         const json = await res.json();
         if (res.ok) setData(json);
         else setError(json.error || "Unknown error");
-      } catch (err) {
+      } catch  {
         setError("Failed to fetch summary");
       } finally {
         setLoading(false);

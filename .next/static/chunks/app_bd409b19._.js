@@ -1250,7 +1250,7 @@ function TickerPage() {
                         const json = await res.json();
                         if (res.ok) setData(json);
                         else setError(json.error || "Unknown error");
-                    } catch (err) {
+                    } catch  {
                         setError("Failed to fetch summary");
                     } finally{
                         setLoading(false);
