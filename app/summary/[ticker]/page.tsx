@@ -82,20 +82,18 @@ export default function TickerPage() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/company/peers/insight/${ticker}`);
         const json = await res.json();
         setPeerInsight(json.insight || null);
-      } catch {
-        setError("Failed to fetch summary");
+      } catch (err) {
+        console.error("Failed to fetch peer insight:", err);
       }
-      
       
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/summary/${ticker}`);
         const json = await res.json();
         if (res.ok) setData(json);
         else setError(json.error || "Unknown error");
-      } catch {
+      } catch (err) {
         setError("Failed to fetch summary");
-      }
-       finally {
+      } finally {
         setLoading(false);
       }
 
