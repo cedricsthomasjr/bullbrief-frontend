@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import CompareMetricsGrid from "@/app/components/CompareMetricsGrid";
 import CompareCharts from "@/app/components/CompareCharts";
-import MasterCompareSummary from "@/app/components/MasterCompareSummary";
 import LoadingScreen from "@/app/components/LoadingScreen";
+import { cachedFetch } from "@/app/lib/summaryCache";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lightbulb, Layers3, Scale } from "lucide-react";
 
 type TickerData = {
   ticker: string;
@@ -17,6 +17,7 @@ type TickerData = {
   roe: number | null;
   profit_margin: number | null;
   sector: string | null;
+  industry?: string | null;
 };
 
 type CompareSummaryResponse = {
@@ -31,19 +32,21 @@ export default function ComparePage() {
 
   useEffect(() => {
     if (!tickers) return;
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/compare-summary`, {
+    cachedFetch<CompareSummaryResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/compare-summary`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tickers: tickers.split(",") }),
     })
-      .then((r) => r.json())
-      .then((j: CompareSummaryResponse) => { setData(j); setLoading(false); })
+      .then((j) => { setData(j); setLoading(false); })
       .catch((err) => { console.error(err); setLoading(false); });
   }, [tickers]);
 
   if (loading) return <LoadingScreen />;
 
   const tickerList = tickers.split(",");
+  const sectors = Array.from(new Set((data?.tickers ?? []).map((item) => item.sector).filter(Boolean)));
+  const industries = Array.from(new Set((data?.tickers ?? []).map((item) => item.industry).filter(Boolean)));
+  const sectorAligned = (data?.tickers?.length ?? 0) > 1 && sectors.length === 1;
 
   return (
     <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
@@ -95,10 +98,56 @@ export default function ComparePage() {
           </p>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {[
+            { icon: <Layers3 className="w-3.5 h-3.5" />, title: "Same Sector", text: "Comparisons are cleaner when business models rhyme." },
+            { icon: <Scale className="w-3.5 h-3.5" />, title: "Similar Scale", text: "Market cap context keeps valuation spreads honest." },
+            { icon: <Lightbulb className="w-3.5 h-3.5" />, title: "Use The Toggles", text: "Switch metrics and hide tickers to isolate the signal." },
+          ].map((tip) => (
+            <div
+              key={tip.title}
+              className="bb-card p-3"
+              style={{ backgroundColor: "rgba(15,32,64,0.36)", borderColor: "rgba(56,189,248,0.08)" }}
+            >
+              <div className="flex items-center gap-2 text-sky-400">
+                {tip.icon}
+                <p className="text-[10px] font-bold uppercase tracking-widest">{tip.title}</p>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-slate-600">{tip.text}</p>
+            </div>
+          ))}
+        </div>
+
+        {(data?.tickers?.length ?? 0) > 1 && (
+          <div
+            className="bb-card p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+            style={{
+              borderColor: sectorAligned ? "rgba(16,185,129,0.18)" : "rgba(245,158,11,0.18)",
+              background: sectorAligned
+                ? "linear-gradient(135deg, rgba(16,185,129,0.06), rgba(56,189,248,0.04))"
+                : "linear-gradient(135deg, rgba(245,158,11,0.055), rgba(56,189,248,0.035))",
+            }}
+          >
+            <div>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${sectorAligned ? "text-emerald-400" : "text-amber-400"}`}>
+                {sectorAligned ? "Strong comparison set" : "Mixed comparison set"}
+              </p>
+              <p className="mt-1 text-xs leading-6 text-slate-500">
+                {sectorAligned
+                  ? `All selected companies sit in ${sectors[0]}, so the chart is more apples-to-apples.`
+                  : "These companies appear to span different sectors or missing sector data, so compare ratios with extra context."}
+              </p>
+            </div>
+            {industries.length > 0 && (
+              <p className="text-[10px] font-mono uppercase tracking-widest text-slate-600">
+                {industries.slice(0, 3).join(" / ")}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Metrics summary table */}
         <CompareMetricsGrid data={data?.tickers} />
-
-        {data?.master_insight && <MasterCompareSummary summary={data.master_insight} />}
 
         {/* Interactive charts */}
         <CompareCharts data={data?.tickers} />

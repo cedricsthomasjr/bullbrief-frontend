@@ -5,12 +5,15 @@ import { useParams } from "next/navigation";
 import { cachedFetch } from "@/app/lib/summaryCache";
 import SWOTCard from "@/app/components/SWOTCard";
 import Link from "next/link";
-import { ArrowLeft, TrendingUp, TrendingDown, ArrowUpRight, Brain } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, ArrowUpRight, Brain, Clock3, Newspaper } from "lucide-react";
 import LoadingScreen from "@/app/components/LoadingScreen";
 import StockChartToggle from "@/app/components/StockChartToggle";
 import FinancialMetricsGrid from "@/app/components/FinancialMetricsGrid";
 import ExecutiveGrid from "@/app/components/ExecutiveGrid";
 import StockDriversCard, { type StockDriversData } from "@/app/components/StockDriversCard";
+import ExploreMetricsChart from "@/app/components/ExploreMetricsChart";
+import BullBriefCard from "@/app/components/BullBriefCard";
+import RevenueBreakdownModal from "@/app/components/RevenueBreakdownModal";
 
 type BackendSummary = {
   company_name: string;
@@ -41,6 +44,20 @@ type BackendSummary = {
   institutional_ownership: number;
   short_percent: number;
   raw_summary: string;
+};
+
+type NewsItem = {
+  title: string;
+  publisher: string;
+  link: string;
+  providerPublishTime: string | null;
+  summary?: string;
+  image?: string | null;
+  provider?: string;
+  domain?: string;
+  relevanceScore?: number;
+  is_industry?: boolean;
+  industry_label?: string;
 };
 
 function fmtNum(v: number): string {
@@ -77,14 +94,34 @@ function SectionHeader({ num, title }: { num: string; title: string }) {
   );
 }
 
+function formatNewsDate(value: string | null | undefined) {
+  if (!value) return "Recent";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Recent";
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function newsBadge(item: NewsItem) {
+  if (item.is_industry) return item.industry_label ?? "Industry";
+  const score = item.relevanceScore;
+  if (!score) return "Relevant";
+  if (score >= 80) return "Top match";
+  if (score >= 60) return "High signal";
+  return "Relevant";
+}
+
 export default function TickerPage() {
-  const { ticker } = useParams();
+  const { ticker } = useParams() as { ticker: string };
   const [data, setData] = useState<BackendSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [news, setNews] = useState<{ title: string; publisher: string; link: string; providerPublishTime: string }[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
   const [execs, setExecs] = useState<{ name: string; title: string; pay: string }[]>([]);
-  const [peerInsight, setPeerInsight] = useState<string | null>(null);
+  const [revenueBreakdownOpen, setRevenueBreakdownOpen] = useState(false);
   const [drivers, setDrivers] = useState<StockDriversData | null>(null);
   const [driversLoading, setDriversLoading] = useState(false);
   const [driversError, setDriversError] = useState<string | null>(null);
@@ -92,40 +129,63 @@ export default function TickerPage() {
   useEffect(() => {
     if (!ticker) return;
     const base = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const symbol = ticker.toUpperCase();
+    let active = true;
+
     const fetchData = async () => {
-      try {
-        const j = await cachedFetch<{ insight?: string }>(`${base}/compare/peers/insight/${ticker}`);
-        setPeerInsight(j.insight || null);
-      } catch { /* optional */ }
-
-      try {
-        const j = await cachedFetch<BackendSummary>(`${base}/summary/${ticker}`);
-        setData(j);
-      } catch (e) { setError(e instanceof Error ? e.message : "Failed to fetch summary"); }
-      finally { setLoading(false); }
-
-      try {
-        const j = await cachedFetch<{ news?: typeof news }>(`${base}/news/${ticker}`);
-        setNews(j.news || []);
-      } catch { /* optional */ }
-
-      try {
-        const j = await cachedFetch<{ executives?: typeof execs }>(`${base}/executives/${ticker}`);
-        setExecs(j.executives || []);
-      } catch { /* optional */ }
-
-      setDriversLoading(true);
+      setLoading(true);
+      setError(null);
+      setData(null);
+      setDrivers(null);
       setDriversError(null);
-      try {
-        const j = await cachedFetch<StockDriversData>(`${base}/drivers/${ticker}`);
-        setDrivers(j);
-      } catch {
-        setDriversError("Failed to fetch SEC driver data.");
-      } finally {
-        setDriversLoading(false);
+      setDriversLoading(true);
+      setNews([]);
+      setExecs([]);
+
+      const summaryPromise = cachedFetch<BackendSummary>(`${base}/summary/${encodeURIComponent(symbol)}`);
+      const driversPromise = cachedFetch<StockDriversData>(`${base}/drivers/${encodeURIComponent(symbol)}`);
+
+      const optionalPromise = Promise.allSettled([
+        cachedFetch<{ news?: typeof news }>(`${base}/news/${encodeURIComponent(symbol)}?v=2`)
+          .then((j) => {
+            if (active) setNews(j.news || []);
+          }),
+        cachedFetch<{ executives?: typeof execs }>(`${base}/executives/${encodeURIComponent(symbol)}`)
+          .then((j) => {
+            if (active) setExecs(j.executives || []);
+          }),
+      ]);
+
+      const [summaryResult, driversResult] = await Promise.allSettled([
+        summaryPromise,
+        driversPromise,
+      ]);
+
+      if (!active) return;
+
+      if (summaryResult.status === "fulfilled") {
+        setData(summaryResult.value);
+      } else {
+        const reason = summaryResult.reason;
+        setError(reason instanceof Error ? reason.message : "Failed to fetch summary");
       }
+
+      if (driversResult.status === "fulfilled") {
+        setDrivers(driversResult.value);
+      } else {
+        setDriversError("Failed to fetch SEC driver data.");
+      }
+
+      setDriversLoading(false);
+      setLoading(false);
+      void optionalPromise;
     };
+
     fetchData();
+
+    return () => {
+      active = false;
+    };
   }, [ticker]);
 
   if (loading) return <LoadingScreen isLoading={loading} />;
@@ -259,42 +319,34 @@ export default function TickerPage() {
         {/* ── Explore Metrics ── */}
         <section>
           <SectionHeader num={sectionNum(sectionIdx++)} title="Explore Metrics" />
-          <div className="flex gap-3 flex-wrap">
-            {[
-              { label: "Revenue", href: `/summary/${ticker}/metric/revenue` },
-              { label: "EPS",     href: `/summary/${ticker}/metric/eps` },
-            ].map((m) => (
-              <Link key={m.href} href={m.href}>
-                <button
-                  className="flex items-center gap-2 text-sm font-medium text-sky-300 px-5 py-2.5 rounded-xl transition-all"
-                  style={{
-                    backgroundColor: "rgba(56,189,248,0.07)",
-                    border: "1px solid rgba(56,189,248,0.18)",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(56,189,248,0.12)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(56,189,248,0.07)")}
-                >
-                  {m.label} <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
-                </button>
-              </Link>
-            ))}
-          </div>
+          <ExploreMetricsChart ticker={ticker} />
         </section>
 
         {/* ── BullBrief ── */}
         <section>
           <SectionHeader num={sectionNum(sectionIdx++)} title="The BullBrief" />
-          <div
-            className="bb-card p-3 text-sm leading-7 text-slate-400 whitespace-pre-wrap"
-          >
-            {data.business_summary}
-          </div>
+          <BullBriefCard
+            ticker={data.ticker}
+            companyName={data.company_name}
+            sector={data.sector}
+            summary={data.business_summary}
+            marketCap={data.market_cap}
+            peRatio={data.pe_ratio}
+            currentPrice={data.current_price}
+            range52w={data.range_52w}
+            isBearish={isBearish}
+          />
         </section>
 
         {/* ── Stock Drivers ── */}
         <section>
           <SectionHeader num={sectionNum(sectionIdx++)} title="What Drives The Stock" />
-          <StockDriversCard data={drivers} loading={driversLoading} error={driversError} />
+          <StockDriversCard
+            data={drivers}
+            loading={driversLoading}
+            error={driversError}
+            onRevenueClick={() => setRevenueBreakdownOpen(true)}
+          />
         </section>
 
         {/* ── SWOT ── */}
@@ -319,18 +371,6 @@ export default function TickerPage() {
           <FinancialMetricsGrid data={data} />
         </section>
 
-        {/* ── Peer Insight ── */}
-        {peerInsight && (
-          <section>
-            <SectionHeader num={sectionNum(sectionIdx++)} title="AI Peer Insight" />
-            <div
-              className="bb-card p-3 text-sm leading-7 text-slate-400 whitespace-pre-wrap"
-            >
-              {peerInsight}
-            </div>
-          </section>
-        )}
-
         {/* ── Executives ── */}
         {execs.length > 0 && (
           <section>
@@ -343,33 +383,143 @@ export default function TickerPage() {
         <section>
           <SectionHeader num={sectionNum(sectionIdx++)} title="Recent News" />
           {news.length === 0 ? (
-            <p className="text-slate-700 text-sm">No recent news found.</p>
+            <div className="bb-card p-4">
+              <p className="text-sm font-semibold text-blue-50">No high-signal headlines found.</p>
+              <p className="mt-1 text-xs leading-6 text-slate-600">
+                BullBrief filtered for major outlets and ticker-specific market coverage.
+              </p>
+            </div>
           ) : (
-            <div className="space-y-2">
-              {news.map((item, idx) => (
-                <a
-                  key={idx}
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bb-card bb-card-hover group flex items-start justify-between gap-4 p-3"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm text-blue-50 font-medium leading-snug group-hover:text-sky-300 transition-colors">
-                      {item.title}
-                    </p>
-                    <p className="text-xs text-slate-600 mt-1">
-                      {item.publisher} · {new Date(item.providerPublishTime).toLocaleDateString()}
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.18)" }}
+                  >
+                    <Newspaper className="w-4 h-4 text-sky-400" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold text-blue-50">Major Outlet Filter</p>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-600">
+                      Ranked by source, relevance, and recency
                     </p>
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-slate-700 shrink-0 mt-0.5 group-hover:text-sky-400 transition-colors" />
+                </div>
+                <span
+                  className="self-start rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
+                  style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
+                >
+                  {news.length} headlines
+                </span>
+              </div>
+
+              {news[0] && (
+                <a
+                  href={news[0].link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bb-card bb-card-hover group grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_168px] gap-4 overflow-hidden p-4"
+                >
+                  <div className="min-w-0">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <span
+                        className="rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-widest"
+                        style={
+                          news[0].is_industry
+                            ? { color: "#f59e0b", backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }
+                            : { color: "#7dd3fc", backgroundColor: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.16)" }
+                        }
+                      >
+                        {newsBadge(news[0])}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-widest text-slate-600">
+                        <Clock3 className="w-3 h-3" />
+                        {formatNewsDate(news[0].providerPublishTime)}
+                      </span>
+                    </div>
+                    <p className="text-lg font-bold leading-7 text-blue-50 group-hover:text-sky-300 transition-colors">
+                      {news[0].title}
+                    </p>
+                    {news[0].summary && (
+                      <p className="mt-2 text-sm leading-7 text-slate-500">
+                        {news[0].summary}
+                      </p>
+                    )}
+                    <p className="mt-3 text-xs font-semibold text-slate-600">
+                      {news[0].publisher}
+                    </p>
+                  </div>
+                  <div
+                    className="hidden md:flex min-h-32 items-end justify-end rounded-lg p-3"
+                    style={{
+                      backgroundImage: news[0].image
+                        ? `linear-gradient(180deg, rgba(6,12,26,0.1), rgba(6,12,26,0.82)), url(${news[0].image})`
+                        : "linear-gradient(135deg, rgba(56,189,248,0.1), rgba(129,140,248,0.12))",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      border: "1px solid rgba(56,189,248,0.1)",
+                    }}
+                  >
+                    <ArrowUpRight className="w-5 h-5 text-sky-300 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  </div>
                 </a>
-              ))}
+              )}
+
+              {news.length > 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {news.slice(1).map((item, idx) => (
+                    <a
+                      key={`${item.link}-${idx}`}
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bb-card-soft group p-3 transition-all hover:-translate-y-0.5 hover:border-sky-400/30"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="mb-2 flex flex-wrap items-center gap-2">
+                            {item.is_industry && (
+                              <span
+                                className="rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest"
+                                style={{ color: "#f59e0b", backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}
+                              >
+                                {item.industry_label ?? "Industry"}
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+                              {item.publisher}
+                            </span>
+                            <span className="text-[10px] text-slate-700">
+                              {formatNewsDate(item.providerPublishTime)}
+                            </span>
+                          </div>
+                          <p className="text-sm font-semibold leading-6 text-blue-50 group-hover:text-sky-300 transition-colors">
+                            {item.title}
+                          </p>
+                          {item.summary && (
+                            <p className="mt-2 text-xs leading-6 text-slate-600">
+                              {item.summary}
+                            </p>
+                          )}
+                        </div>
+                        <ArrowUpRight className="w-4 h-4 text-slate-700 shrink-0 mt-0.5 group-hover:text-sky-400 transition-colors" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>
 
       </div>
+
+      <RevenueBreakdownModal
+        ticker={ticker}
+        isOpen={revenueBreakdownOpen}
+        onClose={() => setRevenueBreakdownOpen(false)}
+      />
     </main>
   );
 }

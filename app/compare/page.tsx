@@ -22,7 +22,7 @@ export default function ComparePage() {
           <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Tool</p>
           <h1 className="text-4xl font-bold tracking-tighter text-blue-50">Deep Compare</h1>
           <p className="text-sm text-slate-500 max-w-lg leading-relaxed">
-            Enter up to three stock tickers for a side-by-side AI breakdown of fundamentals, valuation, and strategic outlook.
+            Enter up to three stock tickers for a side-by-side breakdown of fundamentals, valuation, and strategic outlook. For cleaner signals, compare companies in the same sector or industry.
           </p>
         </div>
 

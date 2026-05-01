@@ -9,7 +9,13 @@ import { ArrowRight } from "lucide-react";
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Sparkline({ points, color = "#10b981" }: { points: string; color?: string }) {
+function Sparkline({
+  points,
+  color = "#10b981",
+}: {
+  points: string;
+  color?: string;
+}) {
   return (
     <svg
       width="100%"
@@ -19,21 +25,38 @@ function Sparkline({ points, color = "#10b981" }: { points: string; color?: stri
       className="w-full"
     >
       <defs>
-        <linearGradient id={`sg-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient
+          id={`sg-${color.replace("#", "")}`}
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="1"
+        >
           <stop offset="0%" stopColor={color} stopOpacity="0.18" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={points + " L120,44 L0,44 Z"} fill={`url(#sg-${color.replace("#", "")})`} />
-      <path d={points} stroke={color} strokeWidth="1.5" fill="none" vectorEffect="non-scaling-stroke" />
+      <path
+        d={points + " L120,44 L0,44 Z"}
+        fill={`url(#sg-${color.replace("#", "")})`}
+      />
+      <path
+        d={points}
+        stroke={color}
+        strokeWidth="1.5"
+        fill="none"
+        vectorEffect="non-scaling-stroke"
+      />
     </svg>
   );
 }
 
 // Upward sparkline
-const UP_LINE = "M0,40 C12,35 22,28 34,22 C46,16 54,20 66,13 C78,6 88,10 98,5 C108,2 114,1 120,0";
+const UP_LINE =
+  "M0,40 C12,35 22,28 34,22 C46,16 54,20 66,13 C78,6 88,10 98,5 C108,2 114,1 120,0";
 // Slight up sparkline
-const UP_LINE_2 = "M0,36 C14,32 26,26 38,20 C50,14 60,18 72,12 C84,7 96,9 108,4 C112,2 116,1 120,0";
+const UP_LINE_2 =
+  "M0,36 C14,32 26,26 38,20 C50,14 60,18 72,12 C84,7 96,9 108,4 C112,2 116,1 120,0";
 
 function BadgePct({ pct }: { pct: number }) {
   const up = pct >= 0;
@@ -46,7 +69,8 @@ function BadgePct({ pct }: { pct: number }) {
         border: `1px solid ${up ? "rgba(16,185,129,0.2)" : "rgba(244,63,94,0.2)"}`,
       }}
     >
-      {up ? "+" : ""}{pct.toFixed(2)}%
+      {up ? "+" : ""}
+      {pct.toFixed(2)}%
     </span>
   );
 }
@@ -54,8 +78,12 @@ function BadgePct({ pct }: { pct: number }) {
 function StatCell({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[8px] uppercase tracking-wider text-slate-600 font-mono mb-0.5">{label}</p>
-      <p className="text-[10px] font-bold text-slate-300 tabular-nums">{value}</p>
+      <p className="text-[8px] uppercase tracking-wider text-slate-600 font-mono mb-0.5">
+        {label}
+      </p>
+      <p className="text-[10px] font-bold text-slate-300 tabular-nums">
+        {value}
+      </p>
     </div>
   );
 }
@@ -71,9 +99,12 @@ function CardNVDA() {
         <BadgePct pct={2.41} />
       </div>
       <Sparkline points={UP_LINE} color="#10b981" />
-      <div className="flex gap-3 pt-1" style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}>
-        <StatCell label="Price"   value="$1,892" />
-        <StatCell label="P/E"     value="38.4×" />
+      <div
+        className="flex gap-3 pt-1"
+        style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}
+      >
+        <StatCell label="Price" value="$1,892" />
+        <StatCell label="P/E" value="38.4×" />
         <StatCell label="Mkt Cap" value="$4.6T" />
       </div>
     </div>
@@ -92,9 +123,13 @@ function CardGOOGL() {
       </div>
       <Sparkline points={UP_LINE_2} color="#10b981" />
       <p className="text-[9px] text-slate-400 leading-relaxed">
-        Cloud revenue surged 63% YoY. The only Mag 7 name where capex was matched by growth.
+        Cloud revenue surged 63% YoY. The only Mag 7 name where capex was
+        matched by growth.
       </p>
-      <div className="flex gap-3 pt-1" style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}>
+      <div
+        className="flex gap-3 pt-1"
+        style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}
+      >
         <StatCell label="Price" value="$216.80" />
         <StatCell label="Cloud" value="+63%" />
       </div>
@@ -113,11 +148,15 @@ function CardMETA() {
         <BadgePct pct={-7.18} />
       </div>
       <p className="text-[9px] text-slate-400 leading-relaxed">
-        Capex guide raised to $145B for 2026 - market punished the spend without matching cloud growth.
+        Capex guide raised to $145B for 2026 - market punished the spend without
+        matching cloud growth.
       </p>
-      <div className="flex gap-3 pt-1" style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}>
+      <div
+        className="flex gap-3 pt-1"
+        style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}
+      >
         <StatCell label="Price" value="$782" />
-        <StatCell label="P/E"   value="22.1×" />
+        <StatCell label="P/E" value="22.1×" />
       </div>
     </div>
   );
@@ -134,9 +173,12 @@ function CardXOM() {
         <BadgePct pct={3.84} />
       </div>
       <Sparkline points={UP_LINE} color="#10b981" />
-      <div className="flex gap-3 pt-1" style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}>
+      <div
+        className="flex gap-3 pt-1"
+        style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}
+      >
         <StatCell label="Price" value="$142" />
-        <StatCell label="P/E"   value="12.4×" />
+        <StatCell label="P/E" value="12.4×" />
       </div>
     </div>
   );
@@ -147,30 +189,52 @@ function CardXOM() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const fadeUp = {
-  hidden:  { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 24 },
   visible: (i = 0) => ({
-    opacity: 1, y: 0,
+    opacity: 1,
+    y: 0,
     transition: { duration: 0.65, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] },
   }),
 };
 
 const MARQUEE_ITEMS = [
-  "EARNINGS", "REVENUE GROWTH", "P/E RATIO", "SWOT ANALYSIS",
-  "MARKET CAP", "AI SUMMARIES", "ROE", "FREE CASH FLOW",
-  "PEER COMPARISON", "EPS TRENDS", "PROFIT MARGINS", "ANALYST RATING",
+  "EARNINGS",
+  "REVENUE GROWTH",
+  "P/E RATIO",
+  "SWOT ANALYSIS",
+  "MARKET CAP",
+  "AI SUMMARIES",
+  "ROE",
+  "FREE CASH FLOW",
+  "PEER COMPARISON",
+  "EPS TRENDS",
+  "PROFIT MARGINS",
+  "ANALYST RATING",
 ];
 
 const STEPS = [
-  { num: "01", title: "Search any stock",   desc: "Type a ticker or company name. We pull live financials instantly." },
-  { num: "02", title: "AI does the work",   desc: "Our model analyzes fundamentals, risks, valuation, and competitive position." },
-  { num: "03", title: "Get the brief",      desc: "A complete research brief in seconds - no jargon, no paywall, no wait." },
+  {
+    num: "01",
+    title: "Search any stock",
+    desc: "Type a ticker or company name. We pull live financials instantly.",
+  },
+  {
+    num: "02",
+    title: "AI does the work",
+    desc: "Our model analyzes fundamentals, risks, valuation, and competitive position.",
+  },
+  {
+    num: "03",
+    title: "Get the brief",
+    desc: "A complete research brief in seconds - no jargon, no paywall, no wait.",
+  },
 ];
 
 const PROOF = [
-  { value: "50+",    label: "Financial metrics" },
-  { value: "Live",   label: "Real-time data" },
-  { value: "GPT-4o", label: "AI-powered" },
-  { value: "Free",   label: "No paywall" },
+  { value: "10-K", label: "SEC filing scans" },
+  { value: "50+", label: "Metrics per summary" },
+  { value: "6+", label: "Research sections" },
+  { value: "0", label: "Paywalls" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -181,25 +245,41 @@ export default function HomePage() {
   const router = useRouter();
 
   return (
-    <main className="min-h-screen overflow-x-hidden" style={{ backgroundColor: "#060c1a" }}>
+    <main
+      className="min-h-screen overflow-x-hidden"
+      style={{ backgroundColor: "#060c1a" }}
+    >
       {/* Background orbs */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div
           className="absolute -top-48 left-[30%] w-[900px] h-[700px] rounded-full animate-orb"
-          style={{ background: "radial-gradient(ellipse, rgba(56,189,248,0.1) 0%, transparent 68%)", filter: "blur(70px)" }}
+          style={{
+            background:
+              "radial-gradient(ellipse, rgba(56,189,248,0.1) 0%, transparent 68%)",
+            filter: "blur(70px)",
+          }}
         />
         <div
           className="absolute top-20 right-[-5%] w-[600px] h-[500px] rounded-full animate-orb-2"
-          style={{ background: "radial-gradient(ellipse, rgba(129,140,248,0.08) 0%, transparent 70%)", filter: "blur(80px)" }}
+          style={{
+            background:
+              "radial-gradient(ellipse, rgba(129,140,248,0.08) 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
         />
         <div
           className="absolute bottom-[30%] left-[-8%] w-[500px] h-[400px] rounded-full animate-orb-3"
-          style={{ background: "radial-gradient(ellipse, rgba(167,139,250,0.06) 0%, transparent 70%)", filter: "blur(80px)" }}
+          style={{
+            background:
+              "radial-gradient(ellipse, rgba(167,139,250,0.06) 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
         />
         <div
           className="absolute inset-0 opacity-[0.015]"
           style={{
-            backgroundImage: "linear-gradient(rgba(56,189,248,1) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,1) 1px, transparent 1px)",
+            backgroundImage:
+              "linear-gradient(rgba(56,189,248,1) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,1) 1px, transparent 1px)",
             backgroundSize: "60px 60px",
           }}
         />
@@ -208,7 +288,6 @@ export default function HomePage() {
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center pt-[88px]">
         <div className="max-w-7xl mx-auto w-full px-8 lg:px-12 grid lg:grid-cols-[minmax(0,1.14fr)_minmax(300px,0.78fr)] gap-10 xl:gap-14 items-center py-16">
-
           {/* LEFT - copy */}
           <motion.div
             initial="hidden"
@@ -219,7 +298,10 @@ export default function HomePage() {
             <motion.div custom={0} variants={fadeUp}>
               <div
                 className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-sky-400 font-mono"
-                style={{ backgroundColor: "rgba(56,189,248,0.06)", border: "1px solid rgba(56,189,248,0.18)" }}
+                style={{
+                  backgroundColor: "rgba(56,189,248,0.06)",
+                  border: "1px solid rgba(56,189,248,0.18)",
+                }}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-live" />
                 Live · AI-Powered Stock Intelligence
@@ -237,7 +319,8 @@ export default function HomePage() {
                 <span
                   className="italic"
                   style={{
-                    background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 45%, #38bdf8 100%)",
+                    background:
+                      "linear-gradient(135deg, #818cf8 0%, #a78bfa 45%, #38bdf8 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
@@ -254,18 +337,26 @@ export default function HomePage() {
               variants={fadeUp}
               className="text-sm sm:text-[15px] text-slate-500 leading-relaxed max-w-[420px]"
             >
-              Search any public company. Get an institutional-grade
-              analysis - financials, risks, valuation - without the jargon,
-              the paywall, or the wait.
+              Search any public company. Get an institutional-grade analysis -
+              financials, risks, valuation - without the jargon, the paywall, or
+              the wait.
             </motion.p>
 
             {/* Search */}
-            <motion.div custom={3} variants={fadeUp} className="w-full max-w-[480px]">
+            <motion.div
+              custom={3}
+              variants={fadeUp}
+              className="w-full max-w-[480px]"
+            >
               <TickerInput />
             </motion.div>
 
             {/* Quick tickers */}
-            <motion.div custom={4} variants={fadeUp} className="flex items-center gap-3 text-xs text-slate-700">
+            <motion.div
+              custom={4}
+              variants={fadeUp}
+              className="flex items-center gap-3 text-xs text-slate-700"
+            >
               <span className="font-mono">Try</span>
               {["AAPL", "NVDA", "MSFT", "GOOGL"].map((t) => (
                 <button
@@ -286,14 +377,22 @@ export default function HomePage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.5,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
               >
                 <CardNVDA />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.65,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
               >
                 <CardGOOGL />
               </motion.div>
@@ -304,41 +403,44 @@ export default function HomePage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.6,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
               >
                 <CardMETA />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.75,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
               >
                 <CardXOM />
               </motion.div>
             </div>
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.8 }}
-          className="absolute bottom-8 left-8 lg:left-12 flex flex-col items-start gap-2"
-        >
-          <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-700 font-mono">Scroll</span>
-          <div className="w-px h-8 bg-gradient-to-b from-slate-700 to-transparent" />
-        </motion.div>
       </section>
 
       {/* ── CAPABILITY STRIP ─────────────────────────────────────────────── */}
       <div
         className="overflow-hidden py-3 border-y"
-        style={{ borderColor: "rgba(56,189,248,0.06)", backgroundColor: "rgba(4,9,20,0.8)" }}
+        style={{
+          borderColor: "rgba(56,189,248,0.06)",
+          backgroundColor: "rgba(4,9,20,0.8)",
+        }}
       >
         <div className="flex animate-marquee gap-10 whitespace-nowrap select-none">
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
-            <span key={i} className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-700 font-mono flex items-center gap-4">
+            <span
+              key={i}
+              className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-700 font-mono flex items-center gap-4"
+            >
               {item}
               <span className="text-sky-900/40">◆</span>
             </span>
@@ -363,7 +465,10 @@ export default function HomePage() {
             >
               <p
                 className="font-fraunces font-black gradient-text-animated"
-                style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)", letterSpacing: "-0.03em" }}
+                style={{
+                  fontSize: "clamp(1.8rem, 3vw, 2.4rem)",
+                  letterSpacing: "-0.03em",
+                }}
               >
                 {s.value}
               </p>
@@ -383,7 +488,9 @@ export default function HomePage() {
         className="max-w-5xl mx-auto px-8 lg:px-12 pb-20"
       >
         <motion.div variants={fadeUp} custom={0} className="mb-12 space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-500 font-mono">How it works</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-500 font-mono">
+            How it works
+          </p>
           <h2
             className="font-fraunces font-black tracking-tight text-blue-50 leading-none"
             style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
@@ -405,11 +512,17 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
           {STEPS.map((step, i) => (
-            <motion.div key={step.num} custom={i + 1} variants={fadeUp} className="space-y-4">
+            <motion.div
+              key={step.num}
+              custom={i + 1}
+              variants={fadeUp}
+              className="space-y-4"
+            >
               <span
                 className="font-mono font-black text-3xl"
                 style={{
-                  background: "linear-gradient(135deg, rgba(56,189,248,0.55) 0%, rgba(129,140,248,0.55) 100%)",
+                  background:
+                    "linear-gradient(135deg, rgba(56,189,248,0.55) 0%, rgba(129,140,248,0.55) 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -418,8 +531,12 @@ export default function HomePage() {
                 {step.num}
               </span>
               <div>
-                <p className="font-fraunces font-bold text-lg text-blue-50 tracking-tight">{step.title}</p>
-                <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">{step.desc}</p>
+                <p className="font-fraunces font-bold text-lg text-blue-50 tracking-tight">
+                  {step.title}
+                </p>
+                <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
+                  {step.desc}
+                </p>
               </div>
             </motion.div>
           ))}
@@ -438,17 +555,23 @@ export default function HomePage() {
           custom={0}
           className="bb-card relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(14,165,233,0.08) 0%, rgba(99,102,241,0.09) 55%, rgba(167,139,250,0.07) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(14,165,233,0.08) 0%, rgba(99,102,241,0.09) 55%, rgba(167,139,250,0.07) 100%)",
             borderColor: "rgba(56,189,248,0.16)",
           }}
         >
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(ellipse at 75% 50%, rgba(99,102,241,0.1) 0%, transparent 65%)" }}
+            style={{
+              background:
+                "radial-gradient(ellipse at 75% 50%, rgba(99,102,241,0.1) 0%, transparent 65%)",
+            }}
           />
           <div className="relative px-8 sm:px-12 py-12 sm:py-14 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
             <div className="space-y-3 max-w-md">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-400 font-mono">Featured Tool</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-400 font-mono">
+                Featured Tool
+              </p>
               <h2
                 className="font-fraunces font-black tracking-tight text-blue-50 leading-none"
                 style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
@@ -457,7 +580,8 @@ export default function HomePage() {
                 <span
                   className="italic"
                   style={{
-                    background: "linear-gradient(135deg, #38bdf8 0%, #818cf8 55%, #a78bfa 100%)",
+                    background:
+                      "linear-gradient(135deg, #38bdf8 0%, #818cf8 55%, #a78bfa 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
@@ -468,7 +592,8 @@ export default function HomePage() {
               </h2>
               <p className="text-sm text-slate-400 leading-relaxed">
                 Side-by-side AI-powered analysis across fundamentals, valuation,
-                and market outlook. Compare up to three companies with interactive charts.
+                and market outlook. Compare up to three companies with
+                interactive charts.
               </p>
             </div>
             <button

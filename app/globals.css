@@ -3,6 +3,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@property --bb-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -122,22 +128,30 @@
 
   /* Navy card surface */
   .surface {
+    position: relative;
+    isolation: isolate;
     background-color: rgba(8, 18, 36, 0.95);
     border: 1px solid rgba(56, 189, 248, 0.12);
     border-radius: 0.75rem;
     backdrop-filter: blur(20px);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(56, 189, 248, 0.08);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   }
 
   .surface-elevated {
+    position: relative;
+    isolation: isolate;
     background-color: rgba(8, 18, 36, 0.95);
     border: 1px solid rgba(56, 189, 248, 0.12);
     border-radius: 0.75rem;
     backdrop-filter: blur(20px);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(56, 189, 248, 0.08);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   }
 
   .bb-card {
+    position: relative;
+    isolation: isolate;
     background-color: rgba(8, 18, 36, 0.95);
     border: 1px solid rgba(56, 189, 248, 0.12);
     border-radius: 0.75rem;
@@ -146,9 +160,12 @@
       0 16px 48px rgba(0, 0, 0, 0.55),
       0 0 0 0.5px rgba(56, 189, 248, 0.08),
       0 0 42px rgba(129, 140, 248, 0.045);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   }
 
   .bb-card-soft {
+    position: relative;
+    isolation: isolate;
     background-color: rgba(8, 18, 36, 0.86);
     border: 1px solid rgba(56, 189, 248, 0.1);
     border-radius: 0.75rem;
@@ -157,14 +174,18 @@
       0 12px 36px rgba(0, 0, 0, 0.42),
       0 0 0 0.5px rgba(56, 189, 248, 0.06),
       0 0 34px rgba(167, 139, 250, 0.04);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   }
 
   .bb-card-danger {
+    position: relative;
+    isolation: isolate;
     background-color: rgba(8, 18, 36, 0.95);
     border: 1px solid rgba(244, 63, 94, 0.18);
     border-radius: 0.75rem;
     backdrop-filter: blur(20px);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(244, 63, 94, 0.08);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   }
 
   .bb-card-hover {
@@ -184,14 +205,14 @@
     overflow: hidden;
     background:
       linear-gradient(rgba(8, 18, 36, 0.96), rgba(8, 18, 36, 0.96)) padding-box,
-      linear-gradient(135deg, rgba(56, 189, 248, 0.72), rgba(129, 140, 248, 0.75), rgba(167, 139, 250, 0.78), rgba(56, 189, 248, 0.72)) border-box;
-    background-size: 100% 100%, 280% 280%;
+      conic-gradient(from var(--bb-angle), rgba(56, 189, 248, 0.78), rgba(129, 140, 248, 0.84), rgba(167, 139, 250, 0.88), rgba(56, 189, 248, 0.78)) border-box;
+    background-size: 100% 100%, 100% 100%;
     backdrop-filter: blur(20px);
     box-shadow:
       0 18px 54px rgba(0, 0, 0, 0.58),
       0 0 22px rgba(129, 140, 248, 0.18),
       0 0 48px rgba(167, 139, 250, 0.12);
-    animation: example-border-flow 7s ease-in-out infinite, example-border-glow 4.8s ease-in-out infinite;
+    animation: card-glow-rotate 8s linear infinite, example-border-glow 4.8s ease-in-out infinite;
   }
 
   .example-card-glow::before {
@@ -212,6 +233,25 @@
     z-index: 1;
   }
 
+  .example-card-glow::after {
+    content: "";
+    position: absolute;
+    inset: -32%;
+    background:
+      conic-gradient(
+        from var(--bb-angle),
+        transparent 0deg,
+        rgba(56, 189, 248, 0.28) 70deg,
+        rgba(129, 140, 248, 0.24) 150deg,
+        rgba(167, 139, 250, 0.3) 235deg,
+        transparent 320deg
+      );
+    filter: blur(28px);
+    opacity: 0.32;
+    pointer-events: none;
+    animation: card-glow-rotate 9s linear infinite reverse;
+  }
+
   /* Gradient text */
   .gradient-text {
     background: linear-gradient(135deg, #38bdf8 0%, #818cf8 60%, #a78bfa 100%);
@@ -230,14 +270,42 @@
 
   /* Animated gradient button */
   .btn-gradient {
-    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
-    transition: opacity 0.2s, transform 0.1s;
+    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 52%, #a78bfa 100%);
+    background-size: 180% 180%;
+    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+    animation: gradient-flow 7s ease infinite;
   }
   .btn-gradient:hover {
     opacity: 0.9;
+    box-shadow: 0 0 24px rgba(129, 140, 248, 0.24), 0 0 36px rgba(56, 189, 248, 0.14);
   }
   .btn-gradient:active {
     transform: scale(0.98);
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      color 0.2s ease,
+      background-color 0.2s ease,
+      transform 0.2s ease,
+      opacity 0.2s ease;
+  }
+
+  button:hover,
+  a:hover {
+    filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.16));
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.28), 0 0 30px rgba(129, 140, 248, 0.12);
   }
 
   /* Marquee */
@@ -315,13 +383,9 @@
     }
   }
 
-  @keyframes example-border-flow {
-    0%, 100% {
-      background-position: 0 0, 0% 50%;
-    }
-    50% {
-      background-position: 0 0, 100% 50%;
-    }
+  @keyframes card-glow-rotate {
+    0% { --bb-angle: 0deg; }
+    100% { --bb-angle: 360deg; }
   }
 
   @keyframes example-border-glow {
@@ -347,7 +411,9 @@
   @media (prefers-reduced-motion: reduce) {
     main,
     .example-card-glow,
-    .example-card-glow::before {
+    .example-card-glow::before,
+    .example-card-glow::after,
+    .btn-gradient {
       animation: none;
     }
   }

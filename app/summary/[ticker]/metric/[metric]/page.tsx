@@ -8,6 +8,15 @@ import LoadingScreen from "@/app/components/LoadingScreen";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+const FINANCIAL_METRICS = new Set([
+  "revenue",
+  "gross-profit",
+  "operating-income",
+  "net-income",
+  "ebitda",
+  "eps",
+]);
+
 export default function MetricDetailPage() {
   const { ticker, metric } = useParams() as { ticker: string; metric: string };
   const [aiSummary, setAiSummary] = useState<string | null>(null);
@@ -27,17 +36,19 @@ export default function MetricDetailPage() {
       setDataLoading(true);
       try {
         const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-        const endpoint = ["eps", "revenue"].includes(metric.toLowerCase())
+        const normalizedMetric = metric.toLowerCase();
+        const endpoint = FINANCIAL_METRICS.has(normalizedMetric)
           ? `${baseURL}/metric/${ticker}/${metric}`
           : `${baseURL}/macrotrends/${ticker}`;
         type MetricRow = { year: number; value: number };
-        const json = await cachedFetch<{ data: Record<string, unknown> }>(endpoint);
+        const json = await cachedFetch<{ data: MetricRow[] | Record<string, unknown> }>(endpoint);
         let extracted: MetricRow[] | null = null;
-        if (["eps", "revenue"].includes(metric.toLowerCase())) {
-          extracted = json.data as unknown as MetricRow[];
+        if (FINANCIAL_METRICS.has(normalizedMetric)) {
+          extracted = Array.isArray(json.data) ? json.data : null;
         } else {
-          const key = Object.keys(json.data).find((k) => k.toLowerCase() === metric.toLowerCase());
-          extracted = key && Array.isArray(json.data[key]) ? (json.data[key] as MetricRow[]) : null;
+          const metricData = json.data as Record<string, unknown>;
+          const key = Object.keys(metricData).find((k) => k.toLowerCase() === metric.toLowerCase());
+          extracted = key && Array.isArray(metricData[key]) ? (metricData[key] as MetricRow[]) : null;
         }
         if (extracted) { lastGoodData.current = extracted; setData(extracted); }
         else setData(lastGoodData.current);

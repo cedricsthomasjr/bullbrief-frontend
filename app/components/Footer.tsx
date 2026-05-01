@@ -24,7 +24,9 @@ export default function Footer() {
           <p className="text-xs text-slate-600">
             AI-powered stock intelligence for modern investors.
           </p>
-          <p className="text-xs text-slate-700">Not financial advice.</p>
+          <p className="max-w-sm text-xs leading-6 text-slate-700">
+            Educational research only. BullBrief is not investment advice and is not a registered investment adviser or broker-dealer.
+          </p>
         </div>
 
         {/* Links */}
@@ -32,6 +34,7 @@ export default function Footer() {
           <div className="flex flex-col gap-2">
             <span className="text-[10px] uppercase tracking-widest font-medium text-slate-700">Navigate</span>
             <Link href="/" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Home</Link>
+            <Link href="/about" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">About</Link>
             <Link href="/compare" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Compare</Link>
             <Link href="/glossary" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Glossary</Link>
           </div>
@@ -39,6 +42,12 @@ export default function Footer() {
             <span className="text-[10px] uppercase tracking-widest font-medium text-slate-700">Connect</span>
             <a href="https://github.com/cedricsthomasjr" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">GitHub</a>
             <a href="https://www.linkedin.com/in/cedric-thomas-jr/" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">LinkedIn</a>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] uppercase tracking-widest font-medium text-slate-700">Legal</span>
+            <Link href="/terms" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Terms</Link>
+            <Link href="/disclaimer" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Disclaimer</Link>
+            <Link href="/privacy" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Privacy</Link>
           </div>
         </div>
       </div>
@@ -48,9 +57,11 @@ export default function Footer() {
         style={{ borderTop: "1px solid rgba(56, 189, 248, 0.04)" }}
       >
         <p className="text-xs text-slate-700">
-          © {new Date().getFullYear()} BullBrief - Built by CJ Thomas
+          (c) {new Date().getFullYear()} BullBrief - Built by CJ Thomas
         </p>
-        <p className="text-[10px] text-slate-800 font-mono">v0.1.0</p>
+        <Link href="/disclaimer" className="text-[10px] text-slate-800 hover:text-sky-500 transition-colors font-mono">
+          Not investment advice
+        </Link>
       </div>
     </footer>
   );

@@ -4,9 +4,10 @@ import { useState } from "react";
 import SingleTickerSearch from "./SingleTickerSearch";
 import VerticalStatCard from "./VerticalStatCard";
 import AISummaryBlock from "@/app/components/AISummaryBlock";
-import MasterCompareSummary from "@/app/components/MasterCompareSummary";
+import CompareCharts from "@/app/components/CompareCharts";
+import { cachedFetch } from "@/app/lib/summaryCache";
 import type { SingleSummaryData, InsightSection } from "@/app/types/stock";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Lightbulb, Layers3, Scale } from "lucide-react";
 
 type CompareSummaryResponse = {
   tickers?: SingleSummaryData[];
@@ -18,9 +19,13 @@ export default function TripleTickerCompare() {
   const [tickers, setTickers] = useState(["", "", ""]);
   const [data, setData] = useState<(SingleSummaryData | null)[]>([null, null, null]);
   const [insights, setInsights] = useState<InsightSection[]>([]);
-  const [masterInsight, setMasterInsight] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingStates, setLoadingStates] = useState([false, false, false]);
+
+  const validData = data.filter(Boolean) as SingleSummaryData[];
+  const sectors = Array.from(new Set(validData.map((item) => item.sector).filter(Boolean)));
+  const industries = Array.from(new Set(validData.map((item) => item.industry).filter(Boolean)));
+  const sectorAligned = validData.length > 1 && sectors.length === 1;
 
   const handleChange = (index: number, ticker: string) => {
     const updated = [...tickers];
@@ -35,18 +40,15 @@ export default function TripleTickerCompare() {
     setLoadingStates([true, true, true]);
     setData([null, null, null]);
     setInsights([]);
-    setMasterInsight("");
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/compare-summary`, {
+      const json = await cachedFetch<CompareSummaryResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/compare-summary`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tickers: validTickers }),
       });
-      const json = (await res.json()) as CompareSummaryResponse;
       const byTicker = new Map((json.tickers ?? []).map((item) => [item.ticker, item]));
       setData(tickers.map((t) => byTicker.get(t.toUpperCase()) ?? null));
       setInsights(json.insights ?? []);
-      setMasterInsight(json.master_insight ?? "");
     } catch (err) {
       console.error("Compare fetch failed:", err);
     } finally {
@@ -63,7 +65,41 @@ export default function TripleTickerCompare() {
       <div
         className="bb-card p-3 space-y-4"
       >
-        <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Enter up to 3 tickers</p>
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Enter up to 3 tickers</p>
+            <p className="mt-1 text-xs leading-6 text-slate-600">
+              Deep Compare works best when the companies share a sector, industry, or business model.
+            </p>
+          </div>
+          <div
+            className="rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
+            style={{ backgroundColor: "rgba(129,140,248,0.07)", border: "1px solid rgba(129,140,248,0.14)" }}
+          >
+            Try AAPL MSFT GOOGL
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {[
+            { icon: <Layers3 className="w-3.5 h-3.5" />, title: "Same Sector", text: "Software vs software reads cleaner than software vs oil." },
+            { icon: <Scale className="w-3.5 h-3.5" />, title: "Similar Scale", text: "Mega-cap peers make valuation ratios easier to compare." },
+            { icon: <Lightbulb className="w-3.5 h-3.5" />, title: "Clear Question", text: "Use the chart to test valuation, margins, and profitability." },
+          ].map((tip) => (
+            <div
+              key={tip.title}
+              className="rounded-lg p-3"
+              style={{ backgroundColor: "rgba(15,32,64,0.36)", border: "1px solid rgba(56,189,248,0.08)" }}
+            >
+              <div className="flex items-center gap-2 text-sky-400">
+                {tip.icon}
+                <p className="text-[10px] font-bold uppercase tracking-widest">{tip.title}</p>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-slate-600">{tip.text}</p>
+            </div>
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[0, 1, 2].map((i) => (
             <SingleTickerSearch
@@ -113,9 +149,37 @@ export default function TripleTickerCompare() {
         </div>
       )}
 
-      {/* Master Summary */}
-      {!loading && masterInsight && (
-        <MasterCompareSummary summary={masterInsight} />
+      {!loading && validData.length > 1 && (
+        <div
+          className="bb-card p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+          style={{
+            borderColor: sectorAligned ? "rgba(16,185,129,0.18)" : "rgba(245,158,11,0.18)",
+            background: sectorAligned
+              ? "linear-gradient(135deg, rgba(16,185,129,0.06), rgba(56,189,248,0.04))"
+              : "linear-gradient(135deg, rgba(245,158,11,0.055), rgba(56,189,248,0.035))",
+          }}
+        >
+          <div>
+            <p className={`text-[10px] font-bold uppercase tracking-widest ${sectorAligned ? "text-emerald-400" : "text-amber-400"}`}>
+              {sectorAligned ? "Strong comparison set" : "Mixed comparison set"}
+            </p>
+            <p className="mt-1 text-xs leading-6 text-slate-500">
+              {sectorAligned
+                ? `All selected companies sit in ${sectors[0]}, so the financial chart should be more apples-to-apples.`
+                : "These companies appear to span different sectors or missing sector data, so compare ratios with extra context."}
+            </p>
+          </div>
+          {industries.length > 0 && (
+            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-600">
+              {industries.slice(0, 3).join(" / ")}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Graphed financial metrics */}
+      {!loading && validData.length > 1 && (
+        <CompareCharts data={validData} />
       )}
     </div>
   );

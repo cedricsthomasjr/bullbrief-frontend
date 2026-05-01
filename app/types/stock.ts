@@ -8,6 +8,8 @@ export type SingleSummaryData = {
   roe: number | null;
   profit_margin: number | null;
   ai_summary: string;
+  sector?: string | null;
+  industry?: string | null;
 };
 
 export type InsightSection = {

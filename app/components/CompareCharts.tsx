@@ -139,9 +139,12 @@ export default function CompareCharts({ data }: { data: TickerData[] | undefined
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
           <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">
-            Metric Comparison
+            Financial Metrics Explorer
           </p>
         </div>
+        <p className="text-[10px] uppercase tracking-widest text-slate-600">
+          Toggle companies and metrics
+        </p>
         {/* Company toggles */}
         <div className="flex gap-3 flex-wrap">
           {data.map((d, i) => {

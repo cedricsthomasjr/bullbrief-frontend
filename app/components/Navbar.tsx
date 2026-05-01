@@ -6,6 +6,7 @@ import MarketTicker from "./MarketTicker";
 
 const NAV_LINKS = [
   { href: "/",          label: "Home" },
+  { href: "/about",     label: "About" },
   { href: "/compare",   label: "Compare" },
   { href: "/glossary",  label: "Glossary" },
 ];
