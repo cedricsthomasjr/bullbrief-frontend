@@ -9,7 +9,7 @@ export default function AnalyzingCard() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="mx-auto max-w-md w-full bg-[#0d1117] border border-gray-800 shadow-xl rounded-2xl p-6 flex flex-col items-center space-y-4"
+      className="bb-card mx-auto max-w-md w-full p-3 flex flex-col items-center space-y-4"
     >
       <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       <h2 className="text-lg font-semibold text-white tracking-tight text-center">

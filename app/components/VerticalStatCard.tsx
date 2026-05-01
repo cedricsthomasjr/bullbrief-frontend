@@ -4,13 +4,12 @@ type Props = { data: SingleSummaryData | null; loading?: boolean };
 
 export default function VerticalStatCard({ data, loading = false }: Props) {
   const render = (v: number | null, suffix = "", divide = 1) =>
-    v != null ? `${(v / divide).toFixed(2)}${suffix}` : "—";
+    v != null ? `${(v / divide).toFixed(2)}${suffix}` : "-";
 
   if (loading) {
     return (
       <div
-        className="rounded-2xl p-5 flex flex-col items-center justify-center min-h-[140px] gap-3"
-        style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
+        className="bb-card p-3 flex flex-col items-center justify-center min-h-[120px] gap-3"
       >
         <div
           className="w-5 h-5 rounded-full animate-spin"
@@ -24,8 +23,7 @@ export default function VerticalStatCard({ data, loading = false }: Props) {
   if (!data) {
     return (
       <div
-        className="rounded-2xl p-5 flex items-center justify-center min-h-[140px]"
-        style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
+        className="bb-card p-3 flex items-center justify-center min-h-[120px]"
       >
         <p className="text-xs text-slate-700">No data loaded.</p>
       </div>
@@ -41,11 +39,10 @@ export default function VerticalStatCard({ data, loading = false }: Props) {
 
   return (
     <div
-      className="rounded-2xl overflow-hidden"
-      style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.12)" }}
+      className="bb-card overflow-hidden"
     >
       <div
-        className="px-5 py-4"
+        className="px-3 py-3"
         style={{ borderBottom: "1px solid rgba(56,189,248,0.08)" }}
       >
         <p className="text-sm font-bold text-blue-50">{data.company_name}</p>
@@ -53,7 +50,7 @@ export default function VerticalStatCard({ data, loading = false }: Props) {
       </div>
       <div className="divide-y" style={{ borderColor: "rgba(56,189,248,0.05)" }}>
         {stats.map((s) => (
-          <div key={s.label} className="flex items-center justify-between px-5 py-3">
+          <div key={s.label} className="flex items-center justify-between px-3 py-2.5">
             <p className="text-xs text-slate-600">{s.label}</p>
             <p className="text-xs font-bold text-blue-50 tabular-nums">{s.value}</p>
           </div>

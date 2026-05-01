@@ -50,7 +50,7 @@ export default function PeerSummaryCard({ target, peers }: Props) {
   ).toFixed(1);
 
   return (
-    <Card className="p-4 rounded-2xl shadow-md border border-neutral-800 bg-black text-white space-y-2">
+    <Card className="bb-card p-3 text-white space-y-2">
       <h3 className="text-lg font-bold text-blue-400 mb-1">Peer Snapshot</h3>
 
       <div className="flex justify-between">
@@ -77,7 +77,7 @@ export default function PeerSummaryCard({ target, peers }: Props) {
         </span>
       </div>
 
-      <div className="mt-2 pt-2 border-t border-neutral-700 text-sm text-neutral-400">
+      <div className="mt-2 pt-2 text-sm text-neutral-400" style={{ borderTop: "1px solid rgba(56,189,248,0.08)" }}>
         <div>Sector Peer Averages:</div>
         <div>P/E: {avgPE} | P/S: {avgPS} | Margin: {avgPM}%</div>
       </div>

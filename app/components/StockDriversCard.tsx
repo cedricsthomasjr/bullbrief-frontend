@@ -46,8 +46,7 @@ export default function StockDriversCard({ data, loading, error }: Props) {
   if (loading) {
     return (
       <div
-        className="rounded-2xl p-6 flex items-center gap-3"
-        style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
+        className="bb-card p-3 flex items-center gap-3"
       >
         <Loader2 className="w-4 h-4 animate-spin text-sky-400" />
         <p className="text-sm text-slate-500">Reading latest SEC filing...</p>
@@ -58,8 +57,7 @@ export default function StockDriversCard({ data, loading, error }: Props) {
   if (error || !data) {
     return (
       <div
-        className="rounded-2xl p-6"
-        style={{ backgroundColor: "#0c1829", border: "1px solid rgba(244,63,94,0.18)" }}
+        className="bb-card-danger p-3"
       >
         <p className="text-sm text-rose-400">Could not load SEC driver analysis.</p>
         {error && <p className="text-xs text-slate-600 mt-1">{error}</p>}
@@ -70,14 +68,13 @@ export default function StockDriversCard({ data, loading, error }: Props) {
   return (
     <div className="space-y-5">
       <div
-        className="rounded-2xl p-6 space-y-5"
-        style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.12)" }}
+        className="bb-card p-3 space-y-4"
       >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
                 style={{ backgroundColor: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}
               >
                 <Building2 className="w-4 h-4 text-emerald-400" />
@@ -97,7 +94,7 @@ export default function StockDriversCard({ data, loading, error }: Props) {
               href={data.source.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl shrink-0"
+                className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg shrink-0"
               style={{ color: "#38bdf8", backgroundColor: "rgba(56,189,248,0.07)", border: "1px solid rgba(56,189,248,0.16)" }}
             >
               SEC Filing <ArrowUpRight className="w-3.5 h-3.5" />
@@ -110,14 +107,13 @@ export default function StockDriversCard({ data, loading, error }: Props) {
             {data.financial_drivers.slice(0, 3).map((driver) => (
               <div
                 key={driver.label}
-                className="rounded-xl p-4"
-                style={{ backgroundColor: "rgba(56,189,248,0.04)", border: "1px solid rgba(56,189,248,0.1)" }}
+                className="bb-card-soft p-3"
               >
                 <div className="flex items-center gap-1.5 text-sky-400 mb-2">
                   <Gauge className="w-3.5 h-3.5" />
                   <p className="text-[9px] uppercase tracking-wider font-medium text-slate-500">{driver.label}</p>
                 </div>
-                <p className="text-blue-50 font-bold text-lg tabular-nums">{formatMoney(driver.value)}</p>
+                <p className="text-blue-50 font-bold text-sm tabular-nums">{formatMoney(driver.value)}</p>
                 <p className="text-xs text-slate-600 leading-relaxed mt-1">{driver.description}</p>
               </div>
             ))}
@@ -128,14 +124,14 @@ export default function StockDriversCard({ data, loading, error }: Props) {
           {data.operations.map((operation) => (
             <div
               key={operation.name}
-              className="rounded-xl p-5 space-y-3"
-              style={{ backgroundColor: "rgba(16,185,129,0.045)", border: "1px solid rgba(16,185,129,0.13)" }}
+              className="bb-card p-3 space-y-3"
+              style={{ borderColor: "rgba(16,185,129,0.13)" }}
             >
               <div>
                 <p className="text-sm font-bold text-blue-50">{operation.name}</p>
                 <p className="text-xs text-emerald-400 mt-1">{operation.role}</p>
               </div>
-              <p className="text-sm text-slate-400 leading-7">{operation.why_it_matters}</p>
+              <p className="text-xs text-slate-400 leading-relaxed">{operation.why_it_matters}</p>
               {operation.evidence && (
                 <div className="flex items-start gap-2 pt-1">
                   <FileText className="w-3.5 h-3.5 text-slate-600 shrink-0 mt-0.5" />
@@ -148,8 +144,8 @@ export default function StockDriversCard({ data, loading, error }: Props) {
 
         {data.watch_items.length > 0 && (
           <div
-            className="rounded-xl p-4"
-            style={{ backgroundColor: "rgba(245,158,11,0.045)", border: "1px solid rgba(245,158,11,0.14)" }}
+            className="bb-card p-3"
+            style={{ borderColor: "rgba(245,158,11,0.14)" }}
           >
             <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-3">Investor Watch Items</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

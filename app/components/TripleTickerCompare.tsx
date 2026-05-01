@@ -8,6 +8,12 @@ import MasterCompareSummary from "@/app/components/MasterCompareSummary";
 import type { SingleSummaryData, InsightSection } from "@/app/types/stock";
 import { ArrowRight } from "lucide-react";
 
+type CompareSummaryResponse = {
+  tickers?: SingleSummaryData[];
+  insights?: InsightSection[];
+  master_insight?: string;
+};
+
 export default function TripleTickerCompare() {
   const [tickers, setTickers] = useState(["", "", ""]);
   const [data, setData] = useState<(SingleSummaryData | null)[]>([null, null, null]);
@@ -36,10 +42,11 @@ export default function TripleTickerCompare() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tickers: validTickers }),
       });
-      const json = await res.json();
-      setData(tickers.map((t) => json.tickers[t] ?? null));
-      setInsights(json.insights);
-      setMasterInsight(json.master_insight);
+      const json = (await res.json()) as CompareSummaryResponse;
+      const byTicker = new Map((json.tickers ?? []).map((item) => [item.ticker, item]));
+      setData(tickers.map((t) => byTicker.get(t.toUpperCase()) ?? null));
+      setInsights(json.insights ?? []);
+      setMasterInsight(json.master_insight ?? "");
     } catch (err) {
       console.error("Compare fetch failed:", err);
     } finally {
@@ -54,8 +61,7 @@ export default function TripleTickerCompare() {
     <div className="space-y-8">
       {/* Input panel */}
       <div
-        className="rounded-2xl p-6 space-y-5"
-        style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.12)" }}
+        className="bb-card p-3 space-y-4"
       >
         <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Enter up to 3 tickers</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -63,7 +69,7 @@ export default function TripleTickerCompare() {
             <SingleTickerSearch
               key={i}
               value={tickers[i]}
-              placeholder={`Ticker ${i + 1} — e.g. ${["AAPL", "MSFT", "NVDA"][i]}`}
+              placeholder={`Ticker ${i + 1} - e.g. ${["AAPL", "MSFT", "NVDA"][i]}`}
               onSubmit={(val) => handleChange(i, val)}
             />
           ))}

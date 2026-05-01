@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { cachedFetch } from "@/app/lib/summaryCache";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -138,12 +139,12 @@ function scoreColor(score: number): string {
 }
 
 function fmtPrice(v: number | null | undefined): string {
-  if (v == null) return "—";
+  if (v == null) return "-";
   return `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function fmtCap(v: number | null | undefined): string {
-  if (v == null) return "—";
+  if (v == null) return "-";
   if (v >= 1e12) return `$${(v / 1e12).toFixed(2)}T`;
   if (v >= 1e9)  return `$${(v / 1e9).toFixed(2)}B`;
   if (v >= 1e6)  return `$${(v / 1e6).toFixed(2)}M`;
@@ -155,8 +156,7 @@ function fmtCap(v: number | null | undefined): string {
 function SectionCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`rounded-2xl overflow-hidden ${className}`}
-      style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
+      className={`bb-card overflow-hidden ${className}`}
     >
       {children}
     </div>
@@ -166,7 +166,7 @@ function SectionCard({ children, className = "" }: { children: React.ReactNode; 
 function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
     <div
-      className="flex items-center gap-3 px-6 py-4"
+      className="flex items-center gap-3 px-3 py-3"
       style={{ borderBottom: "1px solid rgba(56,189,248,0.08)" }}
     >
       <span className="text-sky-400">{icon}</span>
@@ -183,8 +183,7 @@ function ScoreBar({ score, label, rationale, dimension }: { score: number; label
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl p-4 space-y-3"
-      style={{ backgroundColor: "rgba(56,189,248,0.03)", border: "1px solid rgba(56,189,248,0.08)" }}
+      className="bb-card-soft p-3 space-y-3"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -306,8 +305,9 @@ export default function AnalystReportPage() {
 
   useEffect(() => {
     if (!ticker) return;
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/analyst/${ticker}`)
-      .then((r) => r.json())
+    cachedFetch<AnalystReport & { error?: string }>(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/analyst/${ticker}`
+    )
       .then((j) => {
         if (j.error) setError(j.error);
         else setReport(j);
@@ -337,7 +337,7 @@ export default function AnalystReportPage() {
   const overallScore = Math.round(Object.values(report.scores).reduce((a, b) => a + b, 0) / scoreKeys.length * 10) / 10;
 
   return (
-    <main className="min-h-screen pt-14" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
       {/* Background glows */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         <div
@@ -384,8 +384,8 @@ export default function AnalystReportPage() {
         >
           {/* Rating card */}
           <div
-            className="rounded-2xl p-6 flex flex-col items-center justify-center gap-4 text-center"
-            style={{ backgroundColor: ratingCfg.bg, border: `1px solid ${ratingCfg.border}`, boxShadow: ratingCfg.glow }}
+            className="bb-card p-3 flex flex-col items-center justify-center gap-4 text-center"
+            style={{ borderColor: ratingCfg.border, boxShadow: ratingCfg.glow }}
           >
             <div className="space-y-1">
               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium">AI Rating</p>
@@ -423,8 +423,7 @@ export default function AnalystReportPage() {
 
           {/* Executive summary */}
           <div
-            className="lg:col-span-2 rounded-2xl p-6 flex flex-col justify-between gap-4"
-            style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
+            className="bb-card lg:col-span-2 p-3 flex flex-col justify-between gap-4"
           >
             <div>
               <p className="text-[10px] text-sky-400 uppercase tracking-widest font-bold mb-3">Executive Summary</p>
@@ -464,7 +463,7 @@ export default function AnalystReportPage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.16 }}>
           <SectionCard>
             <SectionTitle icon={<BarChart3 className="w-4 h-4" />} title="AI Scorecard" />
-            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {scoreKeys.map((key) => (
                 <ScoreBar
                   key={key}
@@ -487,14 +486,14 @@ export default function AnalystReportPage() {
         >
           {/* Bull */}
           <div
-            className="rounded-2xl overflow-hidden"
-            style={{ backgroundColor: "rgba(16,185,129,0.04)", border: "1px solid rgba(16,185,129,0.18)" }}
+            className="bb-card overflow-hidden"
+            style={{ borderColor: "rgba(16,185,129,0.18)" }}
           >
-            <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "1px solid rgba(16,185,129,0.1)" }}>
+            <div className="flex items-center gap-3 px-3 py-3" style={{ borderBottom: "1px solid rgba(16,185,129,0.1)" }}>
               <TrendingUp className="w-4 h-4 text-emerald-400" />
               <p className="text-sm font-bold text-emerald-400">Bull Case</p>
             </div>
-            <ul className="p-5 space-y-3">
+            <ul className="p-3 space-y-3">
               {report.bull_thesis.map((point, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span
@@ -503,7 +502,7 @@ export default function AnalystReportPage() {
                   >
                     {i + 1}
                   </span>
-                  <p className="text-sm text-slate-400 leading-relaxed">{point}</p>
+                  <p className="text-xs text-slate-400 leading-relaxed">{point}</p>
                 </li>
               ))}
             </ul>
@@ -511,14 +510,14 @@ export default function AnalystReportPage() {
 
           {/* Bear */}
           <div
-            className="rounded-2xl overflow-hidden"
-            style={{ backgroundColor: "rgba(244,63,94,0.04)", border: "1px solid rgba(244,63,94,0.18)" }}
+            className="bb-card overflow-hidden"
+            style={{ borderColor: "rgba(244,63,94,0.18)" }}
           >
-            <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "1px solid rgba(244,63,94,0.1)" }}>
+            <div className="flex items-center gap-3 px-3 py-3" style={{ borderBottom: "1px solid rgba(244,63,94,0.1)" }}>
               <TrendingDown className="w-4 h-4 text-rose-400" />
               <p className="text-sm font-bold text-rose-400">Bear Case</p>
             </div>
-            <ul className="p-5 space-y-3">
+            <ul className="p-3 space-y-3">
               {report.bear_thesis.map((point, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span
@@ -527,7 +526,7 @@ export default function AnalystReportPage() {
                   >
                     {i + 1}
                   </span>
-                  <p className="text-sm text-slate-400 leading-relaxed">{point}</p>
+                  <p className="text-xs text-slate-400 leading-relaxed">{point}</p>
                 </li>
               ))}
             </ul>
@@ -538,7 +537,7 @@ export default function AnalystReportPage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.24 }}>
           <SectionCard>
             <SectionTitle icon={<Zap className="w-4 h-4" />} title="Key Catalysts" />
-            <div className="p-5 space-y-0">
+            <div className="p-3 space-y-0">
               {report.catalysts.map((c, i) => {
                 const tc = TIMELINE_CONFIG[c.timeline];
                 const isLast = i === report.catalysts.length - 1;
@@ -573,14 +572,14 @@ export default function AnalystReportPage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.28 }}>
           <SectionCard>
             <SectionTitle icon={<AlertTriangle className="w-4 h-4" />} title="Risk Factors" />
-            <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {report.risks.map((r, i) => {
                 const sc = SEVERITY_CONFIG[r.severity];
                 return (
                   <div
                     key={i}
-                    className="rounded-xl p-4 space-y-2"
-                    style={{ backgroundColor: sc.bg, border: `1px solid ${sc.border}`, borderLeft: `3px solid ${sc.color}` }}
+                    className="bb-card p-3 space-y-2"
+                    style={{ borderColor: sc.border, borderLeft: `3px solid ${sc.color}` }}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-bold text-blue-50">{r.title}</p>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -16,8 +16,16 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
+  style: ["normal", "italic"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+});
+
 export const metadata: Metadata = {
-  title: "BullBrief — AI Stock Intelligence",
+  title: "BullBrief - AI Stock Intelligence",
   description: "AI-powered stock breakdowns for modern investors.",
 };
 
@@ -29,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en" style={{ backgroundColor: "#060c1a" }}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} font-sans antialiased min-h-screen flex flex-col`}
         style={{ backgroundColor: "#060c1a", color: "#eff6ff" }}
       >
         <Navbar />

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
+import { cachedFetch } from "@/app/lib/summaryCache";
 import MetricChart from "@/app/components/MetricChart";
 import LoadingScreen from "@/app/components/LoadingScreen";
 import Link from "next/link";
@@ -29,14 +30,14 @@ export default function MetricDetailPage() {
         const endpoint = ["eps", "revenue"].includes(metric.toLowerCase())
           ? `${baseURL}/metric/${ticker}/${metric}`
           : `${baseURL}/macrotrends/${ticker}`;
-        const res = await fetch(endpoint);
-        const json = await res.json();
-        let extracted = null;
+        type MetricRow = { year: number; value: number };
+        const json = await cachedFetch<{ data: Record<string, unknown> }>(endpoint);
+        let extracted: MetricRow[] | null = null;
         if (["eps", "revenue"].includes(metric.toLowerCase())) {
-          extracted = json.data;
+          extracted = json.data as unknown as MetricRow[];
         } else {
           const key = Object.keys(json.data).find((k) => k.toLowerCase() === metric.toLowerCase());
-          extracted = key && Array.isArray(json.data[key]) ? json.data[key] : null;
+          extracted = key && Array.isArray(json.data[key]) ? (json.data[key] as MetricRow[]) : null;
         }
         if (extracted) { lastGoodData.current = extracted; setData(extracted); }
         else setData(lastGoodData.current);
@@ -51,8 +52,9 @@ export default function MetricDetailPage() {
     const fetchAI = async () => {
       setSummaryLoading(true);
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/interpret/${ticker}?metric=${metric}`);
-        const json = await res.json();
+        const json = await cachedFetch<{ analysis?: string }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/interpret/${ticker}?metric=${metric}`
+        );
         setAiSummary(json.analysis ?? null);
       } finally { setSummaryLoading(false); }
     };
@@ -62,7 +64,7 @@ export default function MetricDetailPage() {
   if (dataLoading) return <LoadingScreen />;
 
   return (
-    <main className="min-h-screen pt-14" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
       <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
         {/* Header */}
         <div className="space-y-3 pt-2">
@@ -76,10 +78,7 @@ export default function MetricDetailPage() {
         </div>
 
         {/* Chart */}
-        <section
-          className="rounded-2xl p-6"
-          style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
-        >
+        <section>
           <MetricChart data={data} title={metric} />
         </section>
 
@@ -105,19 +104,14 @@ export default function MetricDetailPage() {
               <p className="text-xs text-slate-600">Generating analysis...</p>
             </div>
           ) : bulletPoints && bulletPoints.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {bulletPoints.map((point, idx) => {
                 const [title, ...rest] = point.split(":");
                 return (
                   <div
                     key={idx}
-                    className="rounded-xl p-5 space-y-1.5 transition-all"
-                    style={{
-                      backgroundColor: "rgba(129,140,248,0.05)",
-                      border: "1px solid rgba(129,140,248,0.15)",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(129,140,248,0.09)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(129,140,248,0.05)")}
+                    className="bb-card bb-card-hover p-3 space-y-1.5"
+                    style={{ borderColor: "rgba(129,140,248,0.15)" }}
                   >
                     <p className="text-xs font-bold text-indigo-400">{title}</p>
                     <p className="text-sm text-slate-400 leading-relaxed">{rest.join(":").trim()}</p>

@@ -6,10 +6,7 @@ export default function ExecutiveCard({ exec }: { exec: Exec }) {
 
   return (
     <div
-      className="rounded-xl p-5 space-y-2 transition-all"
-      style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(56,189,248,0.22)")}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(56,189,248,0.1)")}
+      className="bb-card bb-card-hover p-3 space-y-2"
     >
       <div>
         <h3 className="text-sm font-semibold text-blue-50 leading-snug">{exec.name}</h3>

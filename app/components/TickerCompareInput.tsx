@@ -15,7 +15,7 @@ export default function TickerCompareInput() {
       .filter(Boolean);
 
     if (tickers.length < 2 || tickers.length > 3) {
-      alert("Please enter 2–3 valid tickers.");
+      alert("Please enter 2-3 valid tickers.");
       return;
     }
 

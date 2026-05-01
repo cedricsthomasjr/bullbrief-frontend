@@ -26,15 +26,14 @@ function TermCard({
   return (
     <div
       id={term.id}
-      className="rounded-2xl transition-all duration-200 cursor-pointer"
+      className="bb-card bb-card-hover cursor-pointer"
       style={{
-        backgroundColor: "#0c1829",
-        border: `1px solid ${isExpanded ? color.border : "rgba(56,189,248,0.1)"}`,
+        borderColor: isExpanded ? color.border : "rgba(56,189,248,0.12)",
       }}
       onClick={onToggle}
     >
       {/* Always-visible header */}
-      <div className="p-5">
+      <div className="p-3">
         <div className="flex items-center justify-between mb-3">
           <span
             className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
@@ -68,7 +67,7 @@ function TermCard({
 
         {term.formula && (
           <div
-            className="rounded-lg px-3 py-1.5 text-[10px] font-mono text-slate-400 mb-3 leading-relaxed"
+            className="rounded-lg px-2.5 py-1.5 text-[10px] font-mono text-slate-400 mb-3 leading-relaxed"
             style={{
               backgroundColor: "rgba(56,189,248,0.04)",
               border: "1px solid rgba(56,189,248,0.08)",
@@ -92,7 +91,7 @@ function TermCard({
       {/* Expanded detail section */}
       {isExpanded && (
         <div
-          className="px-5 pb-5 space-y-4"
+          className="px-3 pb-3 space-y-3"
           style={{ borderTop: "1px solid rgba(56,189,248,0.08)" }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -111,7 +110,7 @@ function TermCard({
                 Example
               </p>
               <p
-                className="text-xs text-slate-400 leading-relaxed rounded-xl p-3"
+                className="bb-card-soft text-xs text-slate-400 leading-relaxed p-3"
                 style={{
                   backgroundColor: "rgba(16,185,129,0.04)",
                   border: "1px solid rgba(16,185,129,0.1)",
@@ -129,7 +128,7 @@ function TermCard({
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <div
-                  className="rounded-xl p-3"
+                  className="bb-card-soft p-3"
                   style={{
                     backgroundColor: "rgba(16,185,129,0.06)",
                     border: "1px solid rgba(16,185,129,0.15)",
@@ -143,7 +142,7 @@ function TermCard({
                   </p>
                 </div>
                 <div
-                  className="rounded-xl p-3"
+                  className="bb-card-soft p-3"
                   style={{
                     backgroundColor: "rgba(244,63,94,0.06)",
                     border: "1px solid rgba(244,63,94,0.15)",
@@ -184,7 +183,7 @@ export default function GlossaryPage() {
   const terms = searchGlossary(query, activeCategory ?? undefined);
 
   return (
-    <main className="min-h-screen pt-14" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
       {/* Background glow */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <div
@@ -217,7 +216,7 @@ export default function GlossaryPage() {
               Term Glossary
             </h1>
             <p className="text-slate-500 text-sm max-w-xl leading-relaxed">
-              Plain-English definitions for every financial metric — so you can
+              Plain-English definitions for every financial metric - so you can
               read any stock&apos;s fundamentals with confidence.
             </p>
           </div>
@@ -225,7 +224,7 @@ export default function GlossaryPage() {
 
         {/* Sticky search + filter bar */}
         <div
-          className="sticky top-14 z-10 pb-4 -mx-6 px-6 pt-2"
+          className="sticky top-[88px] z-10 pb-4 -mx-6 px-6 pt-2"
           style={{
             backgroundColor: "rgba(6,12,26,0.95)",
             backdropFilter: "blur(12px)",
@@ -239,10 +238,9 @@ export default function GlossaryPage() {
               placeholder='Search terms... (e.g. "P/E ratio", "beta", "EPS")'
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-3 text-sm text-blue-50 placeholder-slate-600 rounded-xl outline-none transition-all"
+              className="bb-card w-full pl-10 pr-10 py-3 text-sm text-blue-50 placeholder-slate-600 outline-none transition-all"
               style={{
-                backgroundColor: "#0c1829",
-                border: "1px solid rgba(56,189,248,0.12)",
+                borderColor: "rgba(56,189,248,0.12)",
               }}
               onFocus={(e) =>
                 (e.currentTarget.style.borderColor = "rgba(56,189,248,0.35)")

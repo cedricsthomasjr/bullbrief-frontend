@@ -9,7 +9,7 @@ const facts = [
   "Peter Lynch averaged 29% annual returns managing the Magellan Fund.",
   "Only ~60 companies in the world have a $200B+ market cap.",
   "Dividends account for ~40% of total S&P 500 returns over time.",
-  "Amazon didn't turn a yearly profit until 2003 — 9 years after launching.",
+  "Amazon didn't turn a yearly profit until 2003 - 9 years after launching.",
   "Dollar-cost averaging can reduce timing risk over long investment periods.",
   "Bear markets typically last less than a year; bull markets ~3.8 years on average.",
   "The VIX is often called the market's fear gauge.",

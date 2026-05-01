@@ -4,7 +4,7 @@ import TripleTickerCompare from "@/app/components/TripleTickerCompare";
 
 export default function ComparePage() {
   return (
-    <main className="min-h-screen pt-14" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
       {/* Background glow */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         <div

@@ -15,7 +15,7 @@ export default function SingleTickerSearch({ value = "", onSubmit, placeholder =
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const suggestions = useTickerSuggestions(input);
+  const suggestions = useTickerSuggestions(input, 6);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -28,6 +28,10 @@ export default function SingleTickerSearch({ value = "", onSubmit, placeholder =
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [input, suggestions.length]);
+
   const handleSelect = (symbol: string) => {
     setInput(symbol);
     onSubmit(symbol);
@@ -36,20 +40,22 @@ export default function SingleTickerSearch({ value = "", onSubmit, placeholder =
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!suggestions.length) return;
-    if (e.key === "ArrowDown") { e.preventDefault(); setSelectedIndex((p) => (p + 1) % suggestions.length); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); setSelectedIndex((p) => (p - 1 + suggestions.length) % suggestions.length); }
-    else if (e.key === "Enter") { e.preventDefault(); const s = suggestions[selectedIndex]; if (s) handleSelect(s.symbol); }
+    if (e.key === "ArrowDown" && suggestions.length) { e.preventDefault(); setSelectedIndex((p) => (p + 1) % suggestions.length); }
+    else if (e.key === "ArrowUp" && suggestions.length) { e.preventDefault(); setSelectedIndex((p) => (p - 1 + suggestions.length) % suggestions.length); }
+    else if (e.key === "Enter") {
+      e.preventDefault();
+      const s = suggestions[selectedIndex];
+      if (s) handleSelect(s.symbol);
+      else if (input.trim()) handleSelect(input.trim());
+    }
+    else if (e.key === "Escape") { setShowSuggestions(false); setSelectedIndex(0); }
   };
 
   return (
     <div ref={containerRef} className="relative w-full">
       <div
-        className="relative rounded-xl overflow-hidden"
-        style={{
-          backgroundColor: "#0f1e38",
-          border: "1px solid rgba(56,189,248,0.15)",
-        }}
+        className="bb-card relative overflow-hidden"
+        style={{ borderColor: "rgba(56,189,248,0.15)" }}
       >
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600 pointer-events-none" />
         <input
@@ -65,11 +71,9 @@ export default function SingleTickerSearch({ value = "", onSubmit, placeholder =
 
       {showSuggestions && suggestions.length > 0 && (
         <ul
-          className="absolute z-20 mt-1.5 w-full rounded-xl overflow-hidden max-h-52 overflow-y-auto scrollbar-hide"
+          className="bb-card absolute z-20 mt-1.5 w-full overflow-hidden max-h-52 overflow-y-auto scrollbar-hide"
           style={{
-            backgroundColor: "#0c1829",
-            border: "1px solid rgba(56,189,248,0.15)",
-            boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+            borderColor: "rgba(56,189,248,0.15)",
           }}
         >
           {suggestions.map((s, i) => (

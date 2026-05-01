@@ -24,7 +24,7 @@ const SWOT_CONFIG = {
 function SWOTSection({ title, points }: { title: keyof typeof SWOT_CONFIG; points: string[] }) {
   const c = SWOT_CONFIG[title];
   return (
-    <div className="rounded-2xl p-5 space-y-3" style={{ backgroundColor: c.bg, border: `1px solid ${c.border}` }}>
+    <div className="bb-card p-3 space-y-3" style={{ borderColor: c.border }}>
       <div className="flex items-center gap-2">
         <span className={`w-2 h-2 rounded-full ${c.dot}`} />
         <h3
@@ -37,7 +37,7 @@ function SWOTSection({ title, points }: { title: keyof typeof SWOT_CONFIG; point
       {points.length > 0 ? (
         <ul className="space-y-2">
           {points.map((p, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-sm text-slate-400 leading-relaxed">
+            <li key={i} className="flex items-start gap-2.5 text-xs text-slate-400 leading-relaxed">
               <span className="shrink-0 mt-2 w-1 h-1 rounded-full" style={{ backgroundColor: c.color, opacity: 0.5 }} />
               {p}
             </li>
@@ -52,7 +52,7 @@ function SWOTSection({ title, points }: { title: keyof typeof SWOT_CONFIG; point
 
 export default function SWOTCard({ content }: SWOTProps) {
   return (
-    <div className="grid md:grid-cols-2 gap-4">
+    <div className="grid md:grid-cols-2 gap-3">
       <SWOTSection title="Strengths"     points={parseSWOTSection("Strengths", content)} />
       <SWOTSection title="Weaknesses"    points={parseSWOTSection("Weaknesses", content)} />
       <SWOTSection title="Opportunities" points={parseSWOTSection("Opportunities", content)} />

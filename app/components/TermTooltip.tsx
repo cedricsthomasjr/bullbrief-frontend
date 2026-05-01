@@ -33,11 +33,9 @@ export default function TermTooltip({ termId, accentColor = "#38bdf8" }: TermToo
 
       {visible && (
         <div
-          className="absolute top-full left-0 mt-1.5 w-60 rounded-xl p-3 text-left"
+          className="bb-card absolute top-full left-0 mt-1.5 w-60 p-3 text-left"
           style={{
-            backgroundColor: "#0c1829",
-            border: "1px solid rgba(56,189,248,0.22)",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.65)",
+            borderColor: "rgba(56,189,248,0.22)",
             zIndex: 50,
           }}
         >

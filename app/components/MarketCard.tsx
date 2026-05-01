@@ -41,11 +41,11 @@ export default function MarketCard({ symbol }: Props) {
   }, [symbol]);
 
   const cardClasses =
-    "w-60 p-4 rounded-xl transition-all duration-300 shadow-md border hover:scale-105";
+    "bb-card bb-card-hover w-60 p-3 transition-all duration-300";
 
   if (loading) {
     return (
-      <div className={`${cardClasses} bg-zinc-900 border-zinc-800 animate-pulse text-gray-500 text-sm text-center`}>
+      <div className={`${cardClasses} animate-pulse text-gray-500 text-sm text-center`}>
         Loading {symbol}...
       </div>
     );
@@ -53,7 +53,7 @@ export default function MarketCard({ symbol }: Props) {
 
   if (error || !data) {
     return (
-      <div className={`${cardClasses} bg-zinc-900 border-red-800 text-red-400 text-sm text-center`}>
+      <div className={`${cardClasses} text-red-400 text-sm text-center`} style={{ borderColor: "rgba(244,63,94,0.18)" }}>
         Failed to load {symbol}
       </div>
     );
@@ -68,11 +68,11 @@ export default function MarketCard({ symbol }: Props) {
       href={`/summary/${data.symbol}`}
       className="block focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-xl"
     >
-      <div className={`${cardClasses} bg-zinc-900 border-zinc-700 cursor-pointer`}>
+      <div className={`${cardClasses} cursor-pointer`}>
         <h2 className="text-white font-semibold text-sm mb-1 truncate">
           {data.name} ({data.symbol})
         </h2>
-        <p className="text-2xl font-bold text-white">${data.price.toFixed(2)}</p>
+        <p className="text-lg font-bold text-white">${data.price.toFixed(2)}</p>
         <p className={`text-sm mt-1 font-medium ${changeColor}`}>
           {arrow} {data.change.toFixed(2)} ({data.percent.toFixed(2)}%)
         </p>

@@ -10,12 +10,11 @@ const SECTIONS = [
 export default function AISummaryBlock({ insight }: { insight: InsightSection }) {
   return (
     <div
-      className="rounded-2xl overflow-hidden"
-      style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.12)" }}
+      className="bb-card overflow-hidden"
     >
       {/* Header */}
       <div
-        className="px-5 py-3.5"
+        className="px-3 py-3"
         style={{ borderBottom: "1px solid rgba(56,189,248,0.08)" }}
       >
         <p className="text-[10px] text-slate-600 uppercase tracking-widest font-medium">AI Summary</p>
@@ -27,7 +26,7 @@ export default function AISummaryBlock({ insight }: { insight: InsightSection })
         {SECTIONS.map((s) => (
           <div
             key={s.key}
-            className="px-5 py-4"
+            className="px-3 py-3"
             style={{
               backgroundColor: s.bg,
               borderLeft: `2px solid ${s.color}`,

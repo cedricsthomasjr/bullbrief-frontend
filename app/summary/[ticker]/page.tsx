@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { cachedFetch } from "@/app/lib/summaryCache";
 import SWOTCard from "@/app/components/SWOTCard";
 import Link from "next/link";
 import { ArrowLeft, TrendingUp, TrendingDown, ArrowUpRight, Brain } from "lucide-react";
@@ -90,40 +91,34 @@ export default function TickerPage() {
 
   useEffect(() => {
     if (!ticker) return;
+    const base = process.env.NEXT_PUBLIC_BACKEND_URL;
     const fetchData = async () => {
       try {
-        const r = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/company/peers/insight/${ticker}`);
-        const j = await r.json();
+        const j = await cachedFetch<{ insight?: string }>(`${base}/compare/peers/insight/${ticker}`);
         setPeerInsight(j.insight || null);
       } catch { /* optional */ }
 
       try {
-        const r = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/summary/${ticker}`);
-        const j = await r.json();
-        if (r.ok) setData(j);
-        else setError(j.error || "Unknown error");
-      } catch { setError("Failed to fetch summary"); }
+        const j = await cachedFetch<BackendSummary>(`${base}/summary/${ticker}`);
+        setData(j);
+      } catch (e) { setError(e instanceof Error ? e.message : "Failed to fetch summary"); }
       finally { setLoading(false); }
 
       try {
-        const r = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/news/${ticker}`);
-        const j = await r.json();
+        const j = await cachedFetch<{ news?: typeof news }>(`${base}/news/${ticker}`);
         setNews(j.news || []);
       } catch { /* optional */ }
 
       try {
-        const r = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/executives/${ticker}`);
-        const j = await r.json();
+        const j = await cachedFetch<{ executives?: typeof execs }>(`${base}/executives/${ticker}`);
         setExecs(j.executives || []);
       } catch { /* optional */ }
 
       setDriversLoading(true);
       setDriversError(null);
       try {
-        const r = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/drivers/${ticker}`);
-        const j = await r.json();
-        if (r.ok) setDrivers(j);
-        else setDriversError(j.error || "No SEC driver data found.");
+        const j = await cachedFetch<StockDriversData>(`${base}/drivers/${ticker}`);
+        setDrivers(j);
       } catch {
         setDriversError("Failed to fetch SEC driver data.");
       } finally {
@@ -154,7 +149,7 @@ export default function TickerPage() {
   let sectionIdx = 1;
 
   return (
-    <main className="min-h-screen pt-14" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
       {/* Page glow */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         <div
@@ -203,18 +198,14 @@ export default function TickerPage() {
             {[
               { label: "Price", value: `$${data.current_price?.toFixed(2)}` },
               { label: "Market Cap", value: fmtNum(data.market_cap) },
-              { label: "P/E Ratio", value: data.pe_ratio?.toFixed(1) ?? "—" },
+              { label: "P/E Ratio", value: data.pe_ratio?.toFixed(1) ?? "-" },
               { label: "EPS (TTM)", value: `$${data.eps_ttm?.toFixed(2)}` },
               { label: "52W Range", value: data.range_52w },
               { label: "Volume", value: fmtVol(data.volume) },
             ].map((item, i) => (
               <div
                 key={i}
-                className="rounded-xl px-4 py-3"
-                style={{
-                  backgroundColor: "#0c1829",
-                  border: "1px solid rgba(56,189,248,0.1)",
-                }}
+                className="bb-card px-3 py-3"
               >
                 <p className="text-[10px] uppercase tracking-wider text-slate-600">{item.label}</p>
                 <p className="text-blue-50 font-bold text-sm mt-1 tabular-nums">{item.value}</p>
@@ -227,17 +218,15 @@ export default function TickerPage() {
         <section>
           <Link href={`/summary/${ticker}/analyst`}>
             <div
-              className="group rounded-2xl p-5 flex items-center justify-between gap-4 cursor-pointer transition-all"
+              className="bb-card bb-card-hover group p-3 flex items-center justify-between gap-4 cursor-pointer"
               style={{
                 background: "linear-gradient(135deg, rgba(129,140,248,0.08) 0%, rgba(56,189,248,0.06) 100%)",
-                border: "1px solid rgba(129,140,248,0.25)",
+                borderColor: "rgba(129,140,248,0.25)",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(129,140,248,0.45)")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(129,140,248,0.25)")}
             >
               <div className="flex items-center gap-4">
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                   style={{ backgroundColor: "rgba(129,140,248,0.12)", border: "1px solid rgba(129,140,248,0.25)" }}
                 >
                   <Brain className="w-5 h-5 text-indigo-400" />
@@ -245,12 +234,12 @@ export default function TickerPage() {
                 <div>
                   <p className="text-sm font-bold text-blue-50">AI Analyst Report</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Full investment thesis — rating, scorecard, price target, bull/bear cases, catalysts & risks
+                    Full investment thesis - rating, scorecard, price target, bull/bear cases, catalysts & risks
                   </p>
                 </div>
               </div>
               <div
-                className="shrink-0 flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+                className="shrink-0 flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
                 style={{ backgroundColor: "rgba(129,140,248,0.12)", color: "#818cf8", border: "1px solid rgba(129,140,248,0.2)" }}
               >
                 Generate Report <ArrowUpRight className="w-3.5 h-3.5" />
@@ -262,7 +251,7 @@ export default function TickerPage() {
         {/* ── Chart ── */}
         <section>
           <SectionHeader num={sectionNum(sectionIdx++)} title="Stock Performance" />
-          <div className="rounded-2xl overflow-hidden p-1" style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}>
+          <div className="bb-card overflow-hidden p-1">
             <StockChartToggle symbol={data.exchange_symbol} />
           </div>
         </section>
@@ -296,8 +285,7 @@ export default function TickerPage() {
         <section>
           <SectionHeader num={sectionNum(sectionIdx++)} title="The BullBrief" />
           <div
-            className="rounded-2xl p-6 text-sm leading-8 text-slate-400 whitespace-pre-wrap"
-            style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
+            className="bb-card p-3 text-sm leading-7 text-slate-400 whitespace-pre-wrap"
           >
             {data.business_summary}
           </div>
@@ -319,8 +307,7 @@ export default function TickerPage() {
         <section>
           <SectionHeader num={sectionNum(sectionIdx++)} title="Outlook" />
           <div
-            className="rounded-2xl p-6 text-sm leading-8 text-slate-400 whitespace-pre-wrap"
-            style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
+            className="bb-card p-3 text-sm leading-7 text-slate-400 whitespace-pre-wrap"
           >
             {data.outlook}
           </div>
@@ -337,8 +324,7 @@ export default function TickerPage() {
           <section>
             <SectionHeader num={sectionNum(sectionIdx++)} title="AI Peer Insight" />
             <div
-              className="rounded-2xl p-6 text-sm leading-8 text-slate-400 whitespace-pre-wrap"
-              style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.1)" }}
+              className="bb-card p-3 text-sm leading-7 text-slate-400 whitespace-pre-wrap"
             >
               {peerInsight}
             </div>
@@ -366,10 +352,7 @@ export default function TickerPage() {
                   href={item.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-start justify-between gap-4 rounded-xl p-4 transition-all"
-                  style={{ backgroundColor: "#0c1829", border: "1px solid rgba(56,189,248,0.08)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(56,189,248,0.2)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(56,189,248,0.08)")}
+                  className="bb-card bb-card-hover group flex items-start justify-between gap-4 p-3"
                 >
                   <div className="min-w-0">
                     <p className="text-sm text-blue-50 font-medium leading-snug group-hover:text-sky-300 transition-colors">

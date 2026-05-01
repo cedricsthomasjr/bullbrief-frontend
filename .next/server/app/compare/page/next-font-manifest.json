@@ -2,8 +2,10 @@
   "pages": {},
   "app": {
     "[project]/app/compare/page": [
+      "static/media/or3nQ6H_1_WfwkMZI_qYFrcdmhHkjko-s.p.be19f591.woff2",
       "static/media/gyByhwUxId8gMEwcGFWNOITd-s.p.1a6fa3e1.woff2",
-      "static/media/or3nQ6H_1_WfwkMZI_qYFrcdmhHkjko-s.p.be19f591.woff2"
+      "static/media/6NUu8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0K7iN7hzFUPJH58nib14c7qv8oRcTn-s.p.8943a95c.woff2",
+      "static/media/6NUs8FyLNQOQZAnv9ZwNjucMHVn85Ni7emAe9lKqZTnbB_gzTK0K1ChJdt9vIVYX9G37lvd9mv0iQublWII-s.p.d13e357d.woff2"
     ]
   },
   "appUsingSizeAdjust": true,

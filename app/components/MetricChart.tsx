@@ -45,9 +45,9 @@ export default function MetricChart({ data, title }: Props) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-zinc-900 p-6 rounded-xl shadow border border-zinc-700"
+      className="bb-card p-3"
     >
-      <h2 className="text-2xl font-bold text-white mb-6 capitalize tracking-tight">
+      <h2 className="text-lg font-bold text-white mb-4 capitalize tracking-tight">
         {title} Trend
       </h2>
       <ResponsiveContainer width="100%" height={350}>

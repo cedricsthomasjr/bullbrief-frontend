@@ -77,13 +77,8 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
                 return (
                   <div
                     key={idx}
-                    className="group relative rounded-xl p-4 transition-all cursor-default"
-                    style={{
-                      backgroundColor: accent.bg,
-                      border: `1px solid ${accent.border}`,
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = accent.bg.replace("0.06", "0.1"))}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = accent.bg)}
+                    className="bb-card group relative p-3 transition-all cursor-default"
+                    style={{ borderColor: accent.border }}
                   >
                     <div className="flex items-center gap-1.5 mb-2" style={{ color: accent.color, opacity: 0.7 }}>
                       {item.icon}
@@ -92,7 +87,7 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
                         <TermTooltip termId={item.termId} accentColor={accent.color} />
                       )}
                     </div>
-                    <p className="text-blue-50 text-base font-bold tabular-nums">{item.value}</p>
+                    <p className="text-blue-50 text-sm font-bold tabular-nums">{item.value}</p>
                     {isEPS && (
                       <button
                         onClick={() => setShowModal(true)}
