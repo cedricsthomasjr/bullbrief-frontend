@@ -23,10 +23,10 @@ export const metadata: Metadata = {
 
 const PROVIDERS = [
   {
-    name: "Yahoo Finance / yfinance",
-    share: 28,
+    name: "Yahoo Finance",
+    share: 32,
     accent: "#38bdf8",
-    role: "Company profiles, quotes, ratios, market snapshot fields, peers, executives, and fallback headlines.",
+    role: "Company profiles, real-time quotes, key ratios, market snapshot fields, live ticker bar, market movers (gainers/losers/actives), peers, executives, and fallback headlines.",
   },
   {
     name: "SEC EDGAR",
@@ -36,9 +36,9 @@ const PROVIDERS = [
   },
   {
     name: "Financial Modeling Prep",
-    share: 16,
+    share: 12,
     accent: "#818cf8",
-    role: "Historical financial statements, market ticker data, ratios, price change data, and stock-news fallback.",
+    role: "Historical financial statements, forward estimates, key ratios, and stock-news fallback.",
   },
   {
     name: "OpenAI",

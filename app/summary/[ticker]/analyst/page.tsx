@@ -19,6 +19,8 @@ import {
   Brain,
 } from "lucide-react";
 import LoadingScreen from "@/app/components/LoadingScreen";
+import { useSideNavSections } from "@/app/hooks/useSideNavSections";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -316,6 +318,19 @@ export default function AnalystReportPage() {
       .finally(() => setLoading(false));
   }, [ticker]);
 
+  const ratingCfg = report ? RATING_CONFIG[report.rating] : RATING_CONFIG["BUY"];
+  useSideNavSections(
+    [
+      { id: "overview", label: "Overview" },
+      { id: "price-target", label: "Price Target" },
+      { id: "scorecard", label: "AI Scorecard" },
+      { id: "bull-bear", label: "Bull vs Bear" },
+      { id: "catalysts", label: "Key Catalysts" },
+      { id: "risks", label: "Risk Factors" },
+    ],
+    ratingCfg.color,
+  );
+
   if (loading) return <LoadingScreen isLoading />;
 
   if (error || !report) {
@@ -332,7 +347,6 @@ export default function AnalystReportPage() {
     );
   }
 
-  const ratingCfg = RATING_CONFIG[report.rating];
   const scoreKeys = Object.keys(report.scores) as (keyof typeof report.scores)[];
   const overallScore = Math.round(Object.values(report.scores).reduce((a, b) => a + b, 0) / scoreKeys.length * 10) / 10;
 
@@ -377,10 +391,11 @@ export default function AnalystReportPage() {
 
         {/* ── Rating + Executive Summary ── */}
         <motion.div
+          id="overview"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.08 }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-5 scroll-mt-24"
         >
           {/* Rating card */}
           <div
@@ -419,6 +434,11 @@ export default function AnalystReportPage() {
                 {overallScore}<span className="text-sm font-normal text-slate-700">/10</span>
               </p>
             </div>
+            <DataSourceNote
+              label="Yahoo Finance via yfinance; BullBrief AI rating model"
+              align="left"
+              className="w-full"
+            />
           </div>
 
           {/* Executive summary */}
@@ -445,7 +465,7 @@ export default function AnalystReportPage() {
         </motion.div>
 
         {/* ── Price Target Visualization ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 }}>
+        <motion.div id="price-target" className="scroll-mt-24" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 }}>
           <SectionCard>
             <SectionTitle icon={<Target className="w-4 h-4" />} title="12-Month Price Target" />
             <PriceTargetBar
@@ -456,11 +476,15 @@ export default function AnalystReportPage() {
               wk52Low={report.wk52_low}
               wk52High={report.wk52_high}
             />
+            <DataSourceNote
+              label="Yahoo Finance via yfinance; BullBrief AI target estimates"
+              className="px-3 pb-3"
+            />
           </SectionCard>
         </motion.div>
 
         {/* ── Scorecard ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.16 }}>
+        <motion.div id="scorecard" className="scroll-mt-24" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.16 }}>
           <SectionCard>
             <SectionTitle icon={<BarChart3 className="w-4 h-4" />} title="AI Scorecard" />
             <div className="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -474,15 +498,20 @@ export default function AnalystReportPage() {
                 />
               ))}
             </div>
+            <DataSourceNote
+              label="Yahoo Finance via yfinance; BullBrief AI score rationale"
+              className="px-3 pb-3"
+            />
           </SectionCard>
         </motion.div>
 
         {/* ── Bull vs Bear ── */}
         <motion.div
+          id="bull-bear"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-5"
+          className="grid grid-cols-1 md:grid-cols-2 gap-5 scroll-mt-24"
         >
           {/* Bull */}
           <div
@@ -534,7 +563,7 @@ export default function AnalystReportPage() {
         </motion.div>
 
         {/* ── Catalysts ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.24 }}>
+        <motion.div id="catalysts" className="scroll-mt-24" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.24 }}>
           <SectionCard>
             <SectionTitle icon={<Zap className="w-4 h-4" />} title="Key Catalysts" />
             <div className="p-3 space-y-0">
@@ -569,7 +598,7 @@ export default function AnalystReportPage() {
         </motion.div>
 
         {/* ── Risks ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.28 }}>
+        <motion.div id="risks" className="scroll-mt-24" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.28 }}>
           <SectionCard>
             <SectionTitle icon={<AlertTriangle className="w-4 h-4" />} title="Risk Factors" />
             <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">

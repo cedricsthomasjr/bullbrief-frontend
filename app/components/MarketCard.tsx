@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 type Props = { symbol: string };
 
@@ -76,6 +77,7 @@ export default function MarketCard({ symbol }: Props) {
         <p className={`text-sm mt-1 font-medium ${changeColor}`}>
           {arrow} {data.change.toFixed(2)} ({data.percent.toFixed(2)}%)
         </p>
+        <DataSourceNote label="Financial Modeling Prep quote API" align="left" />
       </div>
     </Link>
   );

@@ -1,3 +1,5 @@
+import DataSourceNote from "@/app/components/DataSourceNote";
+
 type CompanyMetric = {
   ticker: string;
   market_cap: number | null;
@@ -64,6 +66,7 @@ export default function CompareMetricsGrid({ data }: { data: CompanyMetric[] | u
           </tbody>
         </table>
       </div>
+      <DataSourceNote label="Yahoo Finance via yfinance" className="px-3 pb-3" />
     </div>
   );
 }

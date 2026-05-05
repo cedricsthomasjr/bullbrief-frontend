@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity, BarChart3, Building2, CheckCircle2, TrendingDown, TrendingUp } from "lucide-react";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 type Props = {
   ticker: string;
@@ -55,13 +56,53 @@ function splitBrief(summary: string) {
     .filter(Boolean) ?? [];
 
   const source = sentenceMatches.length > 1 ? sentenceMatches : bulletPoints;
-  const lead = source.slice(0, Math.min(2, source.length)).join(" ");
-  const points = source.slice(2, 6);
+  // Use only the first sentence as lead so more content is available for points
+  const lead = source[0] ?? cleaned;
+  const points = source.slice(1, 5);
 
   return {
     lead: lead || cleaned,
     points,
   };
+}
+
+function buildFallbackPoints(
+  sector: string,
+  marketCap: number,
+  peRatio: number,
+  isBearish: boolean,
+): string[] {
+  const pts: string[] = [];
+
+  if (sector) {
+    pts.push(`Operates in the ${sector} sector.`);
+  }
+
+  if (Number.isFinite(peRatio) && peRatio > 0 && peRatio < 500) {
+    if (peRatio > 40) {
+      pts.push(`Trades at a premium P/E of ${peRatio.toFixed(1)}x, pricing in elevated growth expectations.`);
+    } else if (peRatio > 15) {
+      pts.push(`P/E of ${peRatio.toFixed(1)}x reflects moderate market expectations baked into the price.`);
+    } else {
+      pts.push(`Low P/E of ${peRatio.toFixed(1)}x may signal value relative to current earnings.`);
+    }
+  }
+
+  if (Number.isFinite(marketCap) && marketCap > 0) {
+    if (marketCap >= 1e12) {
+      pts.push(`Mega-cap company with a market cap exceeding $1T, carrying significant index weight.`);
+    } else if (marketCap >= 2e11) {
+      pts.push(`Large-cap company with substantial institutional coverage and index presence.`);
+    } else if (marketCap >= 1e10) {
+      pts.push(`Mid-to-large cap company with meaningful but still-growing market presence.`);
+    }
+  }
+
+  if (isBearish) {
+    pts.push(`Current valuation warrants caution — elevated multiples leave less room for error.`);
+  }
+
+  return pts;
 }
 
 export default function BullBriefCard({
@@ -75,7 +116,14 @@ export default function BullBriefCard({
   range52w,
   isBearish,
 }: Props) {
-  const { lead, points } = splitBrief(summary);
+  const { lead, points: rawPoints } = splitBrief(summary);
+  const points =
+    rawPoints.length >= 2
+      ? rawPoints
+      : [
+          ...rawPoints,
+          ...buildFallbackPoints(sector, marketCap, peRatio, isBearish),
+        ].slice(0, Math.max(2, rawPoints.length));
   const signal = isBearish
     ? { label: "Watch Valuation", icon: <TrendingDown className="w-3.5 h-3.5" />, color: "#f43f5e", bg: "rgba(244,63,94,0.1)", border: "rgba(244,63,94,0.22)" }
     : { label: "Constructive Setup", icon: <TrendingUp className="w-3.5 h-3.5" />, color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.22)" };
@@ -179,6 +227,10 @@ export default function BullBriefCard({
               Start with business quality, then compare valuation and growth in the sections below.
             </p>
           </div>
+          <DataSourceNote
+            label="Yahoo Finance via yfinance; BullBrief AI summary"
+            align="left"
+          />
         </aside>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 type SWOTProps = { content: string };
 
@@ -52,11 +53,14 @@ function SWOTSection({ title, points }: { title: keyof typeof SWOT_CONFIG; point
 
 export default function SWOTCard({ content }: SWOTProps) {
   return (
-    <div className="grid md:grid-cols-2 gap-3">
-      <SWOTSection title="Strengths"     points={parseSWOTSection("Strengths", content)} />
-      <SWOTSection title="Weaknesses"    points={parseSWOTSection("Weaknesses", content)} />
-      <SWOTSection title="Opportunities" points={parseSWOTSection("Opportunities", content)} />
-      <SWOTSection title="Threats"       points={parseSWOTSection("Threats", content)} />
+    <div className="space-y-3">
+      <div className="grid md:grid-cols-2 gap-3">
+        <SWOTSection title="Strengths"     points={parseSWOTSection("Strengths", content)} />
+        <SWOTSection title="Weaknesses"    points={parseSWOTSection("Weaknesses", content)} />
+        <SWOTSection title="Opportunities" points={parseSWOTSection("Opportunities", content)} />
+        <SWOTSection title="Threats"       points={parseSWOTSection("Threats", content)} />
+      </div>
+      <DataSourceNote label="Yahoo Finance via yfinance; BullBrief AI SWOT summary" />
     </div>
   );
 }

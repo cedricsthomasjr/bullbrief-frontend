@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import GlobalSideNav from "./components/GlobalSideNav";
+import ClientShell from "./components/ClientShell";
 import Footer from "./components/Footer";
 import SitewideLegalNotice from "./components/SitewideLegalNotice";
 
@@ -41,12 +43,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} font-sans antialiased min-h-screen flex flex-col`}
         style={{ backgroundColor: "#060c1a", color: "#eff6ff" }}
       >
-        <Navbar />
-        <div className="flex-grow">
-          {children}
-        </div>
-        <SitewideLegalNotice />
-        <Footer />
+        <ClientShell>
+          <Navbar />
+          <GlobalSideNav />
+          <div className="flex-grow">
+            {children}
+          </div>
+          <SitewideLegalNotice />
+          <Footer />
+        </ClientShell>
       </body>
     </html>
   );

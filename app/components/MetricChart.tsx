@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { motion } from "framer-motion";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 const formatNumber = (num: number) => {
   return num >= 1e9
@@ -24,10 +25,11 @@ const formatNumber = (num: number) => {
 type Props = {
     data: { year: number; value: number }[] | null;
     title: string;
+    source?: string;
   };
   
 
-export default function MetricChart({ data, title }: Props) {
+export default function MetricChart({ data, title, source = "Financial Modeling Prep income statements" }: Props) {
   if (!data || !Array.isArray(data) || data.length === 0) {
     console.warn("MetricChart: No valid data passed", data);
     return (
@@ -88,6 +90,7 @@ export default function MetricChart({ data, title }: Props) {
           />
         </LineChart>
       </ResponsiveContainer>
+      <DataSourceNote label={source} />
     </motion.div>
   );
 }

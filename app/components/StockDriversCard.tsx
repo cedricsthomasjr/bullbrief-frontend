@@ -1,15 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import {
   ArrowUpRight,
   BarChart3,
   Building2,
   CircleAlert,
   Gauge,
+  Layers,
   Loader2,
   Network,
 } from "lucide-react";
 import { formatNumber } from "@/app/lib/format";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 export type StockDriverOperation = {
   name: string;
@@ -43,7 +46,7 @@ type Props = {
   data: StockDriversData | null;
   loading: boolean;
   error: string | null;
-  onRevenueClick?: () => void;
+  revenueHref?: string;
 };
 
 const ACCENTS = [
@@ -103,12 +106,17 @@ function barWidth(value: number, max: number) {
   return Math.max(14, Math.min(100, (value / max) * 100));
 }
 
-function operationStrength(index: number, total: number) {
-  if (total <= 1) return 100;
-  return Math.max(38, 100 - index * (62 / (total - 1)));
+function formatRevenue(value: number | null | undefined) {
+  if (value === null || value === undefined) return "N/A";
+  return `$${formatNumber(value)}`;
 }
 
-export default function StockDriversCard({ data, loading, error, onRevenueClick }: Props) {
+export default function StockDriversCard({
+  data,
+  loading,
+  error,
+  revenueHref,
+}: Props) {
   if (loading) {
     return (
       <div className="bb-card p-3 flex items-center gap-3">
@@ -176,21 +184,12 @@ export default function StockDriversCard({ data, loading, error, onRevenueClick 
           {financialDrivers.length > 0 && (
             <div className="bb-card-soft p-3 space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <button
-                  onClick={onRevenueClick}
-                  className="flex items-center gap-2 group/rev transition-all"
-                  title="Click to view full revenue breakdown from SEC filings"
-                  disabled={!onRevenueClick}
-                  style={{ cursor: onRevenueClick ? "pointer" : "default" }}
-                >
-                  <BarChart3 className="w-4 h-4 text-sky-400 transition group-hover/rev:scale-110" />
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 group-hover/rev:text-sky-400 transition-colors">
-                    Revenue Breakdown
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-sky-400" />
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    SEC Financial Signals
                   </p>
-                  {onRevenueClick && (
-                    <ArrowUpRight className="w-3 h-3 text-slate-700 group-hover/rev:text-sky-400 transition-colors" />
-                  )}
-                </button>
+                </div>
                 <span className="text-[10px] text-slate-600 tabular-nums">
                   {financialDrivers.length} signals
                 </span>
@@ -244,6 +243,10 @@ export default function StockDriversCard({ data, loading, error, onRevenueClick 
                   );
                 })}
               </div>
+              <DataSourceNote
+                label={data.source?.name ?? "SEC EDGAR 10-K filing"}
+                href={data.source?.url}
+              />
             </div>
           )}
 
@@ -260,98 +263,56 @@ export default function StockDriversCard({ data, loading, error, onRevenueClick 
               <p className="mt-1 text-sm font-bold text-blue-50 tabular-nums">{operations.length}</p>
             </div>
 
-            <div className="group bb-card-soft col-span-2 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-purple-400/40">
-              <p className="text-[10px] uppercase tracking-widest text-slate-600">SEC Signal</p>
-              <div className="mt-3 grid grid-cols-12 gap-1.5">
-                {operations.slice(0, 12).map((operation, idx) => {
-                  const accent = ACCENTS[idx % ACCENTS.length];
-                  const height = Math.max(28, operationStrength(idx, Math.max(operations.length, 1)));
-
-                  return (
-                    <span
-                      key={`${operation.name}-${idx}`}
-                      className="h-16 rounded-md bg-slate-950/70 flex items-end overflow-hidden"
-                      title={`${operation.name}: ${operation.role}`}
-                    >
-                      <span
-                        className="w-full rounded-md transition-all duration-500 group-hover:brightness-125"
-                        style={{
-                          height: `${height}%`,
-                          background: `linear-gradient(180deg, ${accent.color}, ${accent.end})`,
-                        }}
-                      />
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {operations.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Network className="w-4 h-4 text-emerald-400" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Business Engine</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {operations.map((operation, idx) => {
-                const accent = ACCENTS[idx % ACCENTS.length];
-                const strength = operationStrength(idx, operations.length);
-
-                return (
-                  <div
-                    key={operation.name}
-                    className="group bb-card-soft p-3 space-y-3 transition-all duration-300 hover:-translate-y-0.5"
-                    title={operation.why_it_matters}
-                    style={{ borderColor: "rgba(16,185,129,0.12)" }}
+            <Link
+              href={revenueHref ?? "#business-engine"}
+              className="group bb-card-soft col-span-2 p-3 text-left transition-all duration-300 hover:-translate-y-0.5"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(129,140,248,0.06) 50%, rgba(167,139,250,0.05) 100%)",
+                borderColor: "rgba(129,140,248,0.22)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "rgba(129,140,248,0.5)";
+                e.currentTarget.style.boxShadow = "0 0 28px rgba(129,140,248,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "rgba(129,140,248,0.22)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span
+                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                    style={{
+                      backgroundColor: "rgba(129,140,248,0.14)",
+                      border: "1px solid rgba(129,140,248,0.28)",
+                    }}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-bold text-blue-50">{operation.name}</p>
-                        <p className="mt-1 truncate text-xs text-emerald-400">{operation.role}</p>
-                      </div>
-                      <span
-                        className="shrink-0 rounded-md px-2 py-1 text-[10px] font-bold tabular-nums"
-                        style={{ color: accent.color, backgroundColor: accent.bg, border: `1px solid ${accent.border}` }}
-                      >
-                        Signal {idx + 1}
-                      </span>
-                    </div>
-
-                    <div className="h-2 overflow-hidden rounded-full bg-slate-950/70">
-                      <div
-                        className="h-full rounded-full transition-all duration-500 group-hover:brightness-125"
-                        style={{
-                          width: `${strength}%`,
-                          background: `linear-gradient(90deg, ${accent.color}, ${accent.end})`,
-                        }}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-8 gap-1.5">
-                      {Array.from({ length: 8 }).map((_, markerIdx) => (
-                        <span
-                          key={markerIdx}
-                          className="h-9 rounded-md transition-all duration-300 group-hover:scale-y-110"
-                          style={{
-                            backgroundColor: markerIdx / 8 < strength / 100 ? accent.bg : "rgba(15, 23, 42, 0.8)",
-                            border: `1px solid ${markerIdx / 8 < strength / 100 ? accent.border : "rgba(56, 189, 248, 0.08)"}`,
-                          }}
-                        />
-                      ))}
-                    </div>
-
-                    <p className="min-h-8 text-[11px] leading-4 text-slate-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      {operation.evidence || operation.why_it_matters}
+                    <Layers className="w-4 h-4 text-indigo-300" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-blue-50">Open Business Engine</p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5 truncate">
+                      Segment revenue, source detail, and year-over-year history.
                     </p>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+                <span
+                  className="shrink-0 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-2 rounded-lg transition-colors"
+                  style={{
+                    color: "#a5b4fc",
+                    backgroundColor: "rgba(129,140,248,0.12)",
+                    border: "1px solid rgba(129,140,248,0.28)",
+                  }}
+                >
+                  View Page
+                  <ArrowUpRight className="w-3 h-3" />
+                </span>
+              </div>
+            </Link>
           </div>
-        )}
+        </div>
 
         {data.watch_items.length > 0 && (
           <div className="bb-card p-3" style={{ borderColor: "rgba(245,158,11,0.14)" }}>

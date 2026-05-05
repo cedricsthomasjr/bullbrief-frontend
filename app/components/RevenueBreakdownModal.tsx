@@ -12,6 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { ArrowUpRight, Loader2, X } from "lucide-react";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 type Segment = {
   name: string;
@@ -29,6 +30,7 @@ type RevenueBreakdownData = {
   company_name: string;
   concept: string;
   concept_label: string;
+  source_name?: string;
   segments: Segment[];
   years: YearEntry[];
   source_url: string;
@@ -369,7 +371,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Data Source</p>
                   <p className="mt-0.5 text-xs text-slate-500">
-                    SEC EDGAR XBRL · {data.concept_label ?? data.concept}
+                    {data.source_name ?? "SEC EDGAR XBRL"} · {data.concept_label ?? data.concept}
                   </p>
                 </div>
                 <a
@@ -382,6 +384,10 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                   SEC Filing <ArrowUpRight className="w-3 h-3" />
                 </a>
               </div>
+              <DataSourceNote
+                label={data.source_name ?? "SEC EDGAR Company Facts XBRL API"}
+                href={data.source_url}
+              />
             </>
           )}
         </div>

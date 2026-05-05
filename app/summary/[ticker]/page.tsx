@@ -13,7 +13,8 @@ import ExecutiveGrid from "@/app/components/ExecutiveGrid";
 import StockDriversCard, { type StockDriversData } from "@/app/components/StockDriversCard";
 import ExploreMetricsChart from "@/app/components/ExploreMetricsChart";
 import BullBriefCard from "@/app/components/BullBriefCard";
-import RevenueBreakdownModal from "@/app/components/RevenueBreakdownModal";
+import { useSideNavSections } from "@/app/hooks/useSideNavSections";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 type BackendSummary = {
   company_name: string;
@@ -121,7 +122,6 @@ export default function TickerPage() {
   const [loading, setLoading] = useState(true);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [execs, setExecs] = useState<{ name: string; title: string; pay: string }[]>([]);
-  const [revenueBreakdownOpen, setRevenueBreakdownOpen] = useState(false);
   const [drivers, setDrivers] = useState<StockDriversData | null>(null);
   const [driversLoading, setDriversLoading] = useState(false);
   const [driversError, setDriversError] = useState<string | null>(null);
@@ -188,6 +188,23 @@ export default function TickerPage() {
     };
   }, [ticker]);
 
+  const revenueEngineHref = `/summary/${ticker}/business-engine`;
+  useSideNavSections(
+    [
+      { id: "stock-performance", label: "Stock Performance" },
+      { id: "explore-metrics", label: "Explore Metrics" },
+      { id: "bullbrief", label: "The BullBrief" },
+      { id: "what-drives", label: "What Drives The Stock" },
+      { id: "business-engine-page", label: "Business Engine", href: revenueEngineHref },
+      { id: "swot", label: "SWOT Analysis" },
+      { id: "outlook", label: "Outlook" },
+      { id: "financials", label: "Financial Metrics" },
+      ...(execs.length > 0 ? [{ id: "executives", label: "Executive Team" }] : []),
+      { id: "news", label: "Recent News" },
+    ],
+    "#38bdf8",
+  );
+
   if (loading) return <LoadingScreen isLoading={loading} />;
 
   if (error) return (
@@ -204,7 +221,8 @@ export default function TickerPage() {
 
   if (!data) return null;
 
-  const isBearish = data.pe_ratio > 100;
+  const peRatio = typeof data.pe_ratio === "string" ? parseFloat(data.pe_ratio) : data.pe_ratio;
+  const isBearish = peRatio > 100;
   const sectionNum = (n: number) => String(n).padStart(2, "0");
   let sectionIdx = 1;
 
@@ -258,7 +276,7 @@ export default function TickerPage() {
             {[
               { label: "Price", value: `$${data.current_price?.toFixed(2)}` },
               { label: "Market Cap", value: fmtNum(data.market_cap) },
-              { label: "P/E Ratio", value: data.pe_ratio?.toFixed(1) ?? "-" },
+              { label: "P/E Ratio", value: peRatio != null && !isNaN(peRatio) ? peRatio.toFixed(1) : "-" },
               { label: "EPS (TTM)", value: `$${data.eps_ttm?.toFixed(2)}` },
               { label: "52W Range", value: data.range_52w },
               { label: "Volume", value: fmtVol(data.volume) },
@@ -272,6 +290,7 @@ export default function TickerPage() {
               </div>
             ))}
           </div>
+          <DataSourceNote label="Yahoo Finance via yfinance" />
         </section>
 
         {/* ── AI Analyst Report CTA ── */}
@@ -309,7 +328,7 @@ export default function TickerPage() {
         </section>
 
         {/* ── Chart ── */}
-        <section>
+        <section id="stock-performance" className="scroll-mt-24">
           <SectionHeader num={sectionNum(sectionIdx++)} title="Stock Performance" />
           <div className="bb-card overflow-hidden p-1">
             <StockChartToggle symbol={data.exchange_symbol} />
@@ -317,13 +336,13 @@ export default function TickerPage() {
         </section>
 
         {/* ── Explore Metrics ── */}
-        <section>
+        <section id="explore-metrics" className="scroll-mt-24">
           <SectionHeader num={sectionNum(sectionIdx++)} title="Explore Metrics" />
           <ExploreMetricsChart ticker={ticker} />
         </section>
 
         {/* ── BullBrief ── */}
-        <section>
+        <section id="bullbrief" className="scroll-mt-24">
           <SectionHeader num={sectionNum(sectionIdx++)} title="The BullBrief" />
           <BullBriefCard
             ticker={data.ticker}
@@ -331,7 +350,7 @@ export default function TickerPage() {
             sector={data.sector}
             summary={data.business_summary}
             marketCap={data.market_cap}
-            peRatio={data.pe_ratio}
+            peRatio={peRatio}
             currentPrice={data.current_price}
             range52w={data.range_52w}
             isBearish={isBearish}
@@ -339,48 +358,51 @@ export default function TickerPage() {
         </section>
 
         {/* ── Stock Drivers ── */}
-        <section>
+        <section id="what-drives" className="scroll-mt-24">
           <SectionHeader num={sectionNum(sectionIdx++)} title="What Drives The Stock" />
           <StockDriversCard
             data={drivers}
             loading={driversLoading}
             error={driversError}
-            onRevenueClick={() => setRevenueBreakdownOpen(true)}
+            revenueHref={revenueEngineHref}
           />
         </section>
 
         {/* ── SWOT ── */}
-        <section>
+        <section id="swot" className="scroll-mt-24">
           <SectionHeader num={sectionNum(sectionIdx++)} title="SWOT Analysis" />
           <SWOTCard content={data.swot} />
         </section>
 
         {/* ── Outlook ── */}
-        <section>
+        <section id="outlook" className="scroll-mt-24">
           <SectionHeader num={sectionNum(sectionIdx++)} title="Outlook" />
           <div
             className="bb-card p-3 text-sm leading-7 text-slate-400 whitespace-pre-wrap"
           >
             {data.outlook}
+            <DataSourceNote
+              label="Yahoo Finance via yfinance; BullBrief AI outlook summary"
+            />
           </div>
         </section>
 
         {/* ── Financials ── */}
-        <section>
+        <section id="financials" className="scroll-mt-24">
           <SectionHeader num={sectionNum(sectionIdx++)} title="Financial Metrics" />
           <FinancialMetricsGrid data={data} />
         </section>
 
         {/* ── Executives ── */}
         {execs.length > 0 && (
-          <section>
+          <section id="executives" className="scroll-mt-24">
             <SectionHeader num={sectionNum(sectionIdx++)} title="Executive Team" />
             <ExecutiveGrid execs={execs} />
           </section>
         )}
 
         {/* ── News ── */}
-        <section>
+        <section id="news" className="scroll-mt-24">
           <SectionHeader num={sectionNum(sectionIdx++)} title="Recent News" />
           {news.length === 0 ? (
             <div className="bb-card p-4">
@@ -509,17 +531,13 @@ export default function TickerPage() {
                   ))}
                 </div>
               )}
+              <DataSourceNote label="Yahoo Finance news feed and linked publishers" />
             </div>
           )}
         </section>
 
       </div>
 
-      <RevenueBreakdownModal
-        ticker={ticker}
-        isOpen={revenueBreakdownOpen}
-        onClose={() => setRevenueBreakdownOpen(false)}
-      />
     </main>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import TradingViewMiniChart from "./TradingViewMiniChart";
 import TradingViewFullChart from "./TradingViewFullChart";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 export default function StockChartToggle({ symbol }: { symbol: string }) {
   const [view, setView] = useState<"mini" | "full">("mini");
@@ -44,6 +45,7 @@ export default function StockChartToggle({ symbol }: { symbol: string }) {
           <TradingViewFullChart symbol={symbol} />
         )}
       </div>
+      <DataSourceNote label="TradingView market data and charting widget" />
     </div>
   );
 }

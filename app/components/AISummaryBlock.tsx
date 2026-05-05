@@ -1,4 +1,5 @@
 import type { InsightSection } from "@//app/types/stock";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 const SECTIONS = [
   { key: "valuation",    label: "Valuation",    color: "#38bdf8", border: "rgba(56,189,248,0.2)",  bg: "rgba(56,189,248,0.04)" },
@@ -45,6 +46,10 @@ export default function AISummaryBlock({ insight }: { insight: InsightSection })
           </div>
         ))}
       </div>
+      <DataSourceNote
+        label="Yahoo Finance via yfinance; BullBrief AI comparison summary"
+        className="px-3 pb-3"
+      />
     </div>
   );
 }

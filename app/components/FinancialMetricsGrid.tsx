@@ -9,6 +9,7 @@ import {
 import { formatFixed, formatNumber, formatPercent } from "@/app/lib/format";
 import EPSChartModal from "@/app/components/EPSChartModal";
 import TermTooltip from "@/app/components/TermTooltip";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 type BackendSummary = {
   company_name: string; ticker: string; business_summary: string; swot: string; outlook: string;
@@ -108,6 +109,7 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
           </div>
         );
       })}
+      <DataSourceNote label="Yahoo Finance via yfinance" className="-mt-6" />
       {showModal && <EPSChartModal ticker={data.ticker} onClose={() => setShowModal(false)} />}
     </div>
   );

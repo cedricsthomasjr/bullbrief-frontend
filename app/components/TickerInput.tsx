@@ -61,7 +61,7 @@ export default function TickerInput() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setShowDropdown(query.trim().length > 0 && suggestions.length > 0)}
           onKeyDown={handleKeyDown}
-          placeholder="Search any stock - AAPL, NVDA..."
+          placeholder="Search NVDA, Apple, JPM, Tesla..."
           className="flex-1 bg-transparent text-blue-50 pl-11 pr-4 py-4 focus:outline-none placeholder-slate-600 text-sm"
         />
         <button

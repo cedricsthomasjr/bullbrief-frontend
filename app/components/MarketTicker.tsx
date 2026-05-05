@@ -1,26 +1,122 @@
 "use client";
 
-const TICKERS = [
-  { symbol: "SPY",   price: 521.85, change: -0.84 },
-  { symbol: "NVDA",  price: 1892.10, change: +2.41 },
-  { symbol: "MSFT",  price: 498.73, change: -2.96 },
-  { symbol: "GOOGL", price: 216.80, change: +7.04 },
-  { symbol: "META",  price: 782.45, change: -7.18 },
-  { symbol: "AMZN",  price: 264.34, change: -4.05 },
-  { symbol: "TSLA",  price: 412.88, change: +1.62 },
-  { symbol: "JPM",   price: 318.94, change: +0.32 },
-  { symbol: "XOM",   price: 142.18, change: +3.84 },
-  { symbol: "BRK.B", price: 524.30, change: -0.21 },
-  { symbol: "V",     price: 389.12, change: +1.15 },
-  { symbol: "AAPL",  price: 213.49, change: +0.84 },
-  { symbol: "NFLX",  price: 638.72, change: +2.07 },
-  { symbol: "AMD",   price: 162.44, change: -1.33 },
+import { useEffect, useMemo, useState } from "react";
+
+const TICKER_SYMBOLS = [
+  { request: "SPY", display: "SPY" },
+  { request: "NVDA", display: "NVDA" },
+  { request: "MSFT", display: "MSFT" },
+  { request: "GOOGL", display: "GOOGL" },
+  { request: "META", display: "META" },
+  { request: "AMZN", display: "AMZN" },
+  { request: "TSLA", display: "TSLA" },
+  { request: "JPM", display: "JPM" },
+  { request: "XOM", display: "XOM" },
+  { request: "COST", display: "COST" },
+  { request: "V", display: "V" },
+  { request: "AAPL", display: "AAPL" },
+  { request: "NFLX", display: "NFLX" },
+  { request: "AMD", display: "AMD" },
 ];
 
+type MarketQuote = {
+  name: string;
+  symbol: string;
+  price: number | null;
+  change: number | null;
+  percent: number | null;
+};
+
+type MarketResponse = {
+  quotes?: MarketQuote[];
+  source?: {
+    quote?: string;
+    updated_at?: string;
+  };
+  error?: string;
+};
+
+const TICKER_SOURCE = "Financial Modeling Prep quote API";
+const REFRESH_MS = 5 * 60_000;
+
+function formatPrice(value: number | null | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export default function MarketTicker() {
+  const [quotes, setQuotes] = useState<MarketQuote[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+
+  const requestedSymbols = useMemo(
+    () => TICKER_SYMBOLS.map((item) => item.request).join(","),
+    [],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchQuotes() {
+      try {
+        const response = await fetch(`/api/market?symbols=${encodeURIComponent(requestedSymbols)}`, {
+          cache: "no-store",
+        });
+
+        if (!response.ok) throw new Error("Market ticker request failed");
+
+        const json = (await response.json()) as MarketResponse;
+        if (json.error || !Array.isArray(json.quotes)) {
+          throw new Error(json.error ?? "Market ticker data unavailable");
+        }
+
+        if (!cancelled) {
+          setQuotes(json.quotes);
+          setUpdatedAt(json.source?.updated_at ?? null);
+          setError(false);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Market ticker fetch failed", err);
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchQuotes();
+    const interval = window.setInterval(fetchQuotes, REFRESH_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [requestedSymbols]);
+
+  const orderedQuotes = useMemo(() => {
+    const bySymbol = new Map(quotes.map((quote) => [quote.symbol, quote]));
+    return TICKER_SYMBOLS.map(({ request, display }) => {
+      const quote = bySymbol.get(request);
+      return quote ? { ...quote, displaySymbol: display } : null;
+    }).filter((quote): quote is MarketQuote & { displaySymbol: string } => Boolean(quote));
+  }, [quotes]);
+
+  const tickerRows = orderedQuotes.length > 0 ? orderedQuotes : [];
+  const sourceTitle = updatedAt
+    ? `Source: ${TICKER_SOURCE}; updated ${new Date(updatedAt).toLocaleTimeString()}`
+    : `Source: ${TICKER_SOURCE}`;
+  const statusLabel = loading ? "Loading" : error ? "Offline" : "Live";
+  const statusColor = error ? "#f43f5e" : loading ? "#64748b" : "#10b981";
+
   return (
     <div
       className="w-full overflow-hidden h-8 flex items-center"
+      title={sourceTitle}
       style={{
         backgroundColor: "rgba(4,9,20,0.95)",
         borderBottom: "1px solid rgba(56,189,248,0.06)",
@@ -31,33 +127,58 @@ export default function MarketTicker() {
         className="shrink-0 flex items-center gap-1.5 px-4 h-full border-r"
         style={{ borderColor: "rgba(56,189,248,0.08)" }}
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-live" />
-        <span className="text-[9px] font-black uppercase tracking-[0.18em] text-emerald-500 font-mono">
-          Live
+        <span
+          className="w-1.5 h-1.5 rounded-full animate-live"
+          style={{ backgroundColor: statusColor }}
+        />
+        <span
+          className="text-[9px] font-black uppercase tracking-[0.18em] font-mono"
+          style={{ color: statusColor }}
+        >
+          {statusLabel}
         </span>
       </div>
 
       {/* Scrolling strip */}
       <div className="flex-1 overflow-hidden">
         <div className="flex animate-marquee gap-8 whitespace-nowrap select-none">
-          {[...TICKERS, ...TICKERS].map((t, i) => {
-            const up = t.change >= 0;
-            return (
-              <span key={i} className="flex items-center gap-2 text-[10px] font-mono">
-                <span className="font-bold text-slate-400">{t.symbol}</span>
-                <span className="text-slate-500 tabular-nums">
-                  {t.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {tickerRows.length > 0 ? (
+            [...tickerRows, ...tickerRows].map((ticker, i) => {
+              const percent = ticker.percent ?? 0;
+              const up = percent >= 0;
+              return (
+                <span key={`${ticker.symbol}-${i}`} className="flex items-center gap-2 text-[10px] font-mono">
+                  <span className="font-bold text-slate-400">{ticker.displaySymbol}</span>
+                  <span className="text-slate-500 tabular-nums">
+                    {formatPrice(ticker.price)}
+                  </span>
+                  <span
+                    className="font-semibold tabular-nums"
+                    style={{ color: up ? "#10b981" : "#f43f5e" }}
+                  >
+                    {up ? "▲" : "▼"} {Math.abs(percent).toFixed(2)}%
+                  </span>
                 </span>
-                <span
-                  className="font-semibold tabular-nums"
-                  style={{ color: up ? "#10b981" : "#f43f5e" }}
-                >
-                  {up ? "▲" : "▼"} {Math.abs(t.change).toFixed(2)}%
-                </span>
-              </span>
-            );
-          })}
+              );
+            })
+          ) : (
+            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-700">
+              {loading ? "Loading market data..." : "Market data unavailable"}
+            </span>
+          )}
         </div>
+      </div>
+
+      <div
+        className="hidden sm:flex shrink-0 items-center gap-1.5 px-3 h-full border-l"
+        style={{ borderColor: "rgba(56,189,248,0.08)" }}
+      >
+        <span className="text-[8px] font-medium uppercase tracking-widest text-slate-700">
+          Source:
+        </span>
+        <span className="text-[8px] font-semibold uppercase tracking-widest text-slate-600">
+          FMP
+        </span>
       </div>
     </div>
   );

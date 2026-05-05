@@ -1,4 +1,5 @@
 import type { SingleSummaryData } from "@/app/types/stock";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 type Props = { data: SingleSummaryData | null; loading?: boolean };
 
@@ -56,6 +57,7 @@ export default function VerticalStatCard({ data, loading = false }: Props) {
           </div>
         ))}
       </div>
+      <DataSourceNote label="Yahoo Finance via yfinance" className="px-3 pb-3" />
     </div>
   );
 }

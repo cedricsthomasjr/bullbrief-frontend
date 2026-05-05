@@ -11,6 +11,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 type EPSData = {
   year: string;
@@ -19,11 +20,13 @@ type EPSData = {
 
 type EPSResponse = {
   data?: { year: number; value: number }[];
+  source?: { historical?: string };
   error?: string;
 };
 
 export default function EPSChartCard({ ticker }: { ticker: string }) {
   const [data, setData] = useState<EPSData[]>([]);
+  const [source, setSource] = useState("Financial Modeling Prep income statements");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -40,6 +43,13 @@ export default function EPSChartCard({ ticker }: { ticker: string }) {
           .map((row) => ({ year: String(row.year), eps: row.value }))
           .sort((a, b) => Number(a.year) - Number(b.year));
         setData(sorted);
+        setSource(
+          json.source?.historical === "financialmodelingprep"
+            ? "Financial Modeling Prep income statements"
+            : json.source?.historical === "yfinance"
+              ? "Yahoo Finance via yfinance income statements"
+            : "Historical income statements"
+        );
       } catch (err) {
         console.error("Failed to fetch EPS history", err);
         setError("EPS history is unavailable right now.");
@@ -89,6 +99,7 @@ export default function EPSChartCard({ ticker }: { ticker: string }) {
           />
         </BarChart>
       </ResponsiveContainer>
+      <DataSourceNote label={source} />
     </div>
   );
 }

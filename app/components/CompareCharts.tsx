@@ -12,6 +12,7 @@ import {
   Cell,
   LabelList,
 } from "recharts";
+import DataSourceNote from "@/app/components/DataSourceNote";
 
 type TickerData = {
   ticker: string;
@@ -249,6 +250,7 @@ export default function CompareCharts({ data }: { data: TickerData[] | undefined
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            <DataSourceNote label="Yahoo Finance via yfinance" />
           </motion.div>
         </AnimatePresence>
       </div>

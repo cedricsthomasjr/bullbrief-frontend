@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
         source: "/api/market",
         destination: `${backendUrl}/api/market`,
       },
+      {
+        source: "/api/movers",
+        destination: `${backendUrl}/movers`,
+      },
     ];
   },
 };
