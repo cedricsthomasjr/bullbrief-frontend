@@ -21,6 +21,10 @@ type Segment = {
 
 type YearEntry = {
   year: number;
+  label?: string;
+  fiscal_period?: string;
+  fiscal_year?: number;
+  end?: string;
   total: number;
   breakdown: Record<string, number>;
 };
@@ -32,10 +36,15 @@ type RevenueBreakdownData = {
   concept_label: string;
   source_name?: string;
   segments: Segment[];
+  quarterly_segments?: Segment[];
   years: YearEntry[];
+  quarters?: YearEntry[];
+  quarterly_source_name?: string | null;
   source_url: string;
   has_segments: boolean;
 };
+
+type PeriodMode = "annual" | "quarterly";
 
 function fmt(v: number): string {
   const abs = Math.abs(v);
@@ -53,6 +62,14 @@ function fmtShort(v: number): string {
   if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(1)}B`;
   if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(0)}M`;
   return `${sign}$${abs.toLocaleString()}`;
+}
+
+function periodEntryLabel(entry: YearEntry | undefined, period: PeriodMode) {
+  if (!entry) return "N/A";
+  if (period === "quarterly") {
+    return entry.label ?? (entry.fiscal_period ? `FY${String(entry.year).slice(-2)} ${entry.fiscal_period}` : String(entry.year));
+  }
+  return `FY${entry.year}`;
 }
 
 type CustomTooltipProps = {
@@ -75,7 +92,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
         boxShadow: "0 0 28px rgba(56,189,248,0.12)",
       }}
     >
-      <p className="font-bold text-blue-50">FY{label}</p>
+      <p className="font-bold text-blue-50">{label}</p>
       <p className="text-[10px] uppercase tracking-widest text-slate-500">
         Total: {fmt(total)}
       </p>
@@ -105,6 +122,7 @@ type Props = {
 
 export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props) {
   const [data, setData] = useState<RevenueBreakdownData | null>(null);
+  const [period, setPeriod] = useState<PeriodMode>("annual");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -115,6 +133,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
     setLoading(true);
     setError(null);
     setData(null);
+    setPeriod("annual");
 
     const base = process.env.NEXT_PUBLIC_BACKEND_URL;
     fetch(`${base}/revenue-breakdown/${encodeURIComponent(ticker.toUpperCase())}`)
@@ -148,11 +167,22 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
 
   if (!isOpen) return null;
 
-  const latest = data?.years?.[data.years.length - 1];
+  const hasQuarterly = (data?.quarters?.length ?? 0) > 0;
+  const activePeriod = hasQuarterly ? period : "annual";
+  const activeSegments = activePeriod === "quarterly" && data?.quarterly_segments?.length
+    ? data.quarterly_segments
+    : data?.segments ?? [];
+  const activeEntries = activePeriod === "quarterly" ? data?.quarters ?? [] : data?.years ?? [];
+  const latest = activeEntries[activeEntries.length - 1];
+  const latestLabel = periodEntryLabel(latest, activePeriod);
+  const activeSource = activePeriod === "quarterly"
+    ? data?.quarterly_source_name ?? data?.source_name
+    : data?.source_name;
+  const activeHasSegments = !(activeSegments.length === 1 && activeSegments[0].name === "Total Revenue");
 
-  const chartData = data?.years.map((y) => ({
-    year: y.year,
-    ...y.breakdown,
+  const chartData = activeEntries.map((entry) => ({
+    periodLabel: periodEntryLabel(entry, activePeriod),
+    ...entry.breakdown,
   })) ?? [];
 
   return (
@@ -192,7 +222,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
               <h2 className="text-base font-bold text-blue-50">Revenue Breakdown</h2>
             </div>
             <p className="mt-0.5 text-[10px] uppercase tracking-widest text-slate-600">
-              SEC 10-K XBRL Data Only
+              {activePeriod === "quarterly" ? "Quarterly reported data only" : "Annual reported data only"}
             </p>
           </div>
           <button
@@ -224,14 +254,38 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
 
           {data && (
             <>
-              {/* Latest year totals */}
+              {hasQuarterly && (
+                <div
+                  className="inline-flex rounded-lg p-1"
+                  style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
+                >
+                  {(["annual", "quarterly"] as PeriodMode[]).map((option) => {
+                    const active = activePeriod === option;
+                    return (
+                      <button
+                        key={option}
+                        onClick={() => setPeriod(option)}
+                        className="rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors"
+                        style={{
+                          color: active ? "#eff6ff" : "#64748b",
+                          backgroundColor: active ? "rgba(56,189,248,0.12)" : "transparent",
+                        }}
+                      >
+                        {option === "annual" ? "Annual" : "Quarterly"}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Latest period totals */}
               {latest && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div
                     className="rounded-xl p-3"
                     style={{ backgroundColor: "rgba(56,189,248,0.06)", border: "1px solid rgba(56,189,248,0.14)" }}
                   >
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">Latest Total (FY{latest.year})</p>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-600">Latest Total ({latestLabel})</p>
                     <p className="mt-1 text-xl font-bold tabular-nums text-blue-50">{fmt(latest.total)}</p>
                   </div>
                   <div
@@ -239,14 +293,14 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                     style={{ backgroundColor: "rgba(129,140,248,0.06)", border: "1px solid rgba(129,140,248,0.14)" }}
                   >
                     <p className="text-[10px] uppercase tracking-widest text-slate-600">Segments Reported</p>
-                    <p className="mt-1 text-xl font-bold tabular-nums text-blue-50">{data.segments.length}</p>
+                    <p className="mt-1 text-xl font-bold tabular-nums text-blue-50">{activeSegments.length}</p>
                   </div>
                   <div
                     className="rounded-xl p-3 col-span-2 sm:col-span-1"
                     style={{ backgroundColor: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.14)" }}
                   >
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">Years of Data</p>
-                    <p className="mt-1 text-xl font-bold tabular-nums text-blue-50">{data.years.length}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-600">{activePeriod === "quarterly" ? "Quarters of Data" : "Years of Data"}</p>
+                    <p className="mt-1 text-xl font-bold tabular-nums text-blue-50">{activeEntries.length}</p>
                   </div>
                 </div>
               )}
@@ -254,7 +308,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
               {/* Stacked bar chart */}
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
-                  {data.has_segments ? "Revenue by Segment" : "Total Revenue"} — Annual (FY)
+                  {activeHasSegments ? "Revenue by Segment" : "Total Revenue"} - {activePeriod === "quarterly" ? "Quarterly" : "Annual"}
                 </p>
                 <div className="h-[320px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -265,12 +319,12 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                         vertical={false}
                       />
                       <XAxis
-                        dataKey="year"
+                        dataKey="periodLabel"
                         stroke="#64748b"
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
-                        tickFormatter={(v) => `FY${v}`}
+                        tickFormatter={(v) => String(v)}
                       />
                       <YAxis
                         stroke="#64748b"
@@ -281,7 +335,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                         tickFormatter={(v: number) => fmtShort(v)}
                       />
                       <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(56,189,248,0.04)" }} />
-                      {data.segments.map((seg) => (
+                      {activeSegments.map((seg) => (
                         <Bar
                           key={seg.name}
                           dataKey={seg.name}
@@ -299,9 +353,9 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
               </div>
 
               {/* Segment legend */}
-              {data.has_segments && (
+              {activeHasSegments && (
                 <div className="flex flex-wrap gap-2">
-                  {data.segments.map((seg) => (
+                  {activeSegments.map((seg) => (
                     <span
                       key={seg.name}
                       className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium"
@@ -322,13 +376,13 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
               )}
 
               {/* Latest year breakdown rows */}
-              {latest && data.has_segments && (
+              {latest && activeHasSegments && (
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
-                    FY{latest.year} Breakdown
+                    {latestLabel} Breakdown
                   </p>
                   <div className="space-y-2">
-                    {data.segments.map((seg) => {
+                    {activeSegments.map((seg) => {
                       const val = latest.breakdown[seg.name] ?? 0;
                       const pct = latest.total > 0 ? (val / latest.total) * 100 : 0;
                       return (
@@ -371,7 +425,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Data Source</p>
                   <p className="mt-0.5 text-xs text-slate-500">
-                    {data.source_name ?? "SEC EDGAR XBRL"} · {data.concept_label ?? data.concept}
+                    {activeSource ?? "SEC EDGAR XBRL"} · {data.concept_label ?? data.concept}
                   </p>
                 </div>
                 <a
@@ -385,7 +439,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                 </a>
               </div>
               <DataSourceNote
-                label={data.source_name ?? "SEC EDGAR Company Facts XBRL API"}
+                label={activeSource ?? "SEC EDGAR Company Facts XBRL API"}
                 href={data.source_url}
               />
             </>

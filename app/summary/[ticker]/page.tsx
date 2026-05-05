@@ -313,7 +313,7 @@ export default function TickerPage() {
                 <div>
                   <p className="text-sm font-bold text-blue-50">AI Analyst Report</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Full investment thesis - rating, scorecard, price target, bull/bear cases, catalysts & risks
+                    AI-generated signal snapshot, scorecard, peer context, stock drivers, bull/bear cases, and risks
                   </p>
                 </div>
               </div>
@@ -321,7 +321,7 @@ export default function TickerPage() {
                 className="shrink-0 flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
                 style={{ backgroundColor: "rgba(129,140,248,0.12)", color: "#818cf8", border: "1px solid rgba(129,140,248,0.2)" }}
               >
-                Generate Report <ArrowUpRight className="w-3.5 h-3.5" />
+                Open Snapshot <ArrowUpRight className="w-3.5 h-3.5" />
               </div>
             </div>
           </Link>

@@ -57,6 +57,16 @@ type TooltipPayload = {
   color?: string;
 };
 
+type PeriodMode = "annual" | "quarterly";
+
+function periodEntryLabel(entry: { year: number; label?: string; fiscal_period?: string } | null | undefined, period: PeriodMode) {
+  if (!entry) return "N/A";
+  if (period === "quarterly") {
+    return entry.label ?? (entry.fiscal_period ? `FY${String(entry.year).slice(-2)} ${entry.fiscal_period}` : String(entry.year));
+  }
+  return `FY${entry.year}`;
+}
+
 function asNumber(value: string | number | undefined) {
   if (typeof value === "number") return value;
   if (typeof value === "string") {
@@ -96,7 +106,7 @@ function RevenueTooltip({
         boxShadow: "0 0 28px rgba(129,140,248,0.14)",
       }}
     >
-      <p className="font-bold text-blue-50">FY{label}</p>
+      <p className="font-bold text-blue-50">{label}</p>
       <p className="text-[10px] uppercase tracking-widest text-slate-500">
         Total: {formatCurrencyCompact(total)}
       </p>
@@ -125,6 +135,7 @@ function scrollToSection(id: string) {
 export default function BusinessEnginePage() {
   const { ticker } = useParams() as { ticker: string };
   const [data, setData] = useState<RevenueBreakdownData | null>(null);
+  const [period, setPeriod] = useState<PeriodMode>("annual");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -136,6 +147,7 @@ export default function BusinessEnginePage() {
     setLoading(true);
     setError(null);
     setData(null);
+    setPeriod("annual");
 
     cachedFetch<RevenueBreakdownData & { error?: string }>(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/revenue-breakdown/${encodeURIComponent(symbol)}`,
@@ -158,12 +170,32 @@ export default function BusinessEnginePage() {
     };
   }, [ticker]);
 
-  const latest = data?.years[data.years.length - 1] ?? null;
-  const prior = data && data.years.length > 1 ? data.years[data.years.length - 2] : null;
+  const hasQuarterly = (data?.quarters?.length ?? 0) > 0;
+  const activePeriod = hasQuarterly ? period : "annual";
+  const activeData = useMemo<RevenueBreakdownData | null>(() => {
+    if (!data) return null;
+    if (activePeriod === "quarterly") {
+      const segments = data.quarterly_segments?.length ? data.quarterly_segments : data.segments;
+      return {
+        ...data,
+        segments,
+        years: data.quarters ?? [],
+        concept: data.quarterly_concept ?? data.concept,
+        concept_label: data.quarterly_concept_label ?? data.concept_label,
+        dimension: data.quarterly_dimension ?? data.dimension,
+        source_name: data.quarterly_source_name ?? data.source_name,
+        has_segments: !(segments.length === 1 && segments[0].name === "Total Revenue"),
+      };
+    }
+    return data;
+  }, [activePeriod, data]);
+
+  const latest = activeData?.years[activeData.years.length - 1] ?? null;
+  const prior = activeData && activeData.years.length > 1 ? activeData.years[activeData.years.length - 2] : null;
 
   const segmentRows = useMemo(() => {
-    if (!data || !latest) return [];
-    return data.segments
+    if (!activeData || !latest) return [];
+    return activeData.segments
       .map((segment) => {
         const value = latest.breakdown[segment.name] ?? 0;
         const priorValue = prior?.breakdown[segment.name] ?? 0;
@@ -173,17 +205,20 @@ export default function BusinessEnginePage() {
       })
       .filter((segment) => segment.value > 0)
       .sort((a, b) => b.value - a.value);
-  }, [data, latest, prior]);
+  }, [activeData, latest, prior]);
 
   const chartData = useMemo(
-    () => data?.years.map((year) => ({ year: year.year, ...year.breakdown })) ?? [],
-    [data],
+    () => activeData?.years.map((entry) => ({
+      periodLabel: periodEntryLabel(entry, activePeriod),
+      ...entry.breakdown,
+    })) ?? [],
+    [activeData, activePeriod],
   );
 
   useSideNavSections(
     [
       { id: "revenue-engine", label: "Revenue Engine" },
-      { id: "annual-history", label: "Annual History" },
+      { id: "annual-history", label: activePeriod === "quarterly" ? "Quarterly History" : "Annual History" },
       { id: "latest-mix", label: "Latest Mix" },
       { id: "source", label: "Data Source" },
       { id: "summary-page", label: "Summary", href: `/summary/${ticker}` },
@@ -208,10 +243,17 @@ export default function BusinessEnginePage() {
   }
 
   const sectionNum = (n: number) => String(n).padStart(2, "0");
+  const viewData = activeData ?? data;
+  const latestLabel = periodEntryLabel(latest, activePeriod);
+  const changeLabel = activePeriod === "quarterly" ? "QoQ" : "YoY";
 
-  const isFmpSource = data.source_name?.toLowerCase().includes("fmp") ?? false;
+  const isFmpSource = viewData.source_name?.toLowerCase().includes("fmp") ?? false;
   const primarySourceLabel =
-    isFmpSource && data.source_url !== data.filing_url ? "FMP Source" : "SEC 10-K Filings";
+    isFmpSource && viewData.source_url !== viewData.filing_url
+      ? "FMP Source"
+      : activePeriod === "quarterly"
+        ? "SEC Filings"
+        : "SEC 10-K Filings";
 
   return (
     <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
@@ -225,13 +267,13 @@ export default function BusinessEnginePage() {
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
               <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-300">
-                {data.ticker} - {sourceKind(data)}
+                {viewData.ticker} - {sourceKind(viewData)}
               </p>
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tighter text-blue-50 leading-none">
                 Business Engine
               </h1>
               <p className="max-w-2xl text-sm leading-7 text-slate-500">
-                {data.company_name} revenue segmentation from {data.source_name ?? "SEC EDGAR company facts"}.
+                {viewData.company_name} revenue segmentation from {viewData.source_name ?? "SEC EDGAR company facts"}.
               </p>
             </div>
 
@@ -240,7 +282,7 @@ export default function BusinessEnginePage() {
                 className="self-start sm:self-auto rounded-xl px-4 py-3"
                 style={{ backgroundColor: "rgba(129,140,248,0.08)", border: "1px solid rgba(129,140,248,0.18)" }}
               >
-                <p className="text-[10px] uppercase tracking-widest text-slate-600">Latest Total - FY{latest.year}</p>
+                <p className="text-[10px] uppercase tracking-widest text-slate-600">Latest Total - {latestLabel}</p>
                 <p className="mt-1 text-xl font-bold tabular-nums text-blue-50">
                   {formatCurrencyCompact(latest.total)}
                 </p>
@@ -252,15 +294,16 @@ export default function BusinessEnginePage() {
         <section id="revenue-engine" className="scroll-mt-24">
           <SectionHeader num={sectionNum(1)} title="Revenue Engine" />
           <BusinessEngineCylinder
-            data={data}
+            data={viewData}
             loading={false}
             error={null}
             onOpenDeepDive={() => scrollToSection("annual-history")}
+            period={activePeriod}
           />
         </section>
 
         <section id="annual-history" className="scroll-mt-24">
-          <SectionHeader num={sectionNum(2)} title="Annual History" />
+          <SectionHeader num={sectionNum(2)} title={activePeriod === "quarterly" ? "Quarterly History" : "Annual History"} />
           <div className="bb-card p-3 space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
@@ -272,19 +315,44 @@ export default function BusinessEnginePage() {
                 </span>
                 <div>
                   <p className="text-sm font-bold text-blue-50">
-                    {data.has_segments ? "Revenue by Segment" : "Total Revenue"}
+                    {viewData.has_segments ? "Revenue by Segment" : "Total Revenue"}
                   </p>
                   <p className="text-[10px] uppercase tracking-widest text-slate-600">
-                    Annual fiscal years
+                    {activePeriod === "quarterly" ? "Quarterly fiscal periods" : "Annual fiscal years"}
                   </p>
                 </div>
               </div>
-              <span
-                className="self-start rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
-                style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
-              >
-                {data.years.length} years
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {hasQuarterly && (
+                  <div
+                    className="inline-flex rounded-lg p-1"
+                    style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
+                  >
+                    {(["annual", "quarterly"] as PeriodMode[]).map((option) => {
+                      const active = activePeriod === option;
+                      return (
+                        <button
+                          key={option}
+                          onClick={() => setPeriod(option)}
+                          className="rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors"
+                          style={{
+                            color: active ? "#eff6ff" : "#64748b",
+                            backgroundColor: active ? "rgba(56,189,248,0.12)" : "transparent",
+                          }}
+                        >
+                          {option === "annual" ? "Annual" : "Quarterly"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <span
+                  className="self-start rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
+                  style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
+                >
+                  {viewData.years.length} {activePeriod === "quarterly" ? "quarters" : "years"}
+                </span>
+              </div>
             </div>
 
             <div className="h-[360px] w-full">
@@ -292,12 +360,12 @@ export default function BusinessEnginePage() {
                 <BarChart data={chartData} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(56,189,248,0.07)" vertical={false} />
                   <XAxis
-                    dataKey="year"
+                    dataKey="periodLabel"
                     stroke="#64748b"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `FY${value}`}
+                    tickFormatter={(value) => String(value)}
                   />
                   <YAxis
                     stroke="#64748b"
@@ -308,7 +376,7 @@ export default function BusinessEnginePage() {
                     tickFormatter={(value: number) => formatCurrencyCompact(value)}
                   />
                   <Tooltip content={<RevenueTooltip />} cursor={{ fill: "rgba(129,140,248,0.05)" }} />
-                  {data.segments.map((segment) => (
+                  {viewData.segments.map((segment) => (
                     <Bar
                       key={segment.name}
                       dataKey={segment.name}
@@ -321,8 +389,8 @@ export default function BusinessEnginePage() {
               </ResponsiveContainer>
             </div>
             <DataSourceNote
-              label={data.source_name ?? "SEC EDGAR Company Facts XBRL API"}
-              href={data.source_url}
+              label={viewData.source_name ?? "SEC EDGAR Company Facts XBRL API"}
+              href={viewData.source_url}
             />
           </div>
         </section>
@@ -343,7 +411,7 @@ export default function BusinessEnginePage() {
                       <p className="truncate text-sm font-bold text-blue-50">{segment.name}</p>
                     </div>
                     <p className="mt-1 text-[10px] uppercase tracking-widest text-slate-600">
-                      {segment.share.toFixed(1)}% of FY{latest?.year} revenue
+                      {segment.share.toFixed(1)}% of {latestLabel} revenue
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-4">
@@ -354,7 +422,7 @@ export default function BusinessEnginePage() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-600">YoY</p>
+                      <p className="text-[10px] uppercase tracking-widest text-slate-600">{changeLabel}</p>
                       <p
                         className="text-sm font-bold tabular-nums"
                         style={{ color: segment.yoy === null ? "#94a3b8" : segment.yoy >= 0 ? "#34d399" : "#fb7185" }}
@@ -376,8 +444,8 @@ export default function BusinessEnginePage() {
               </div>
             ))}
             <DataSourceNote
-              label={data.source_name ?? "SEC EDGAR Company Facts XBRL API"}
-              href={data.source_url}
+              label={viewData.source_name ?? "SEC EDGAR Company Facts XBRL API"}
+              href={viewData.source_url}
             />
           </div>
         </section>
@@ -395,9 +463,9 @@ export default function BusinessEnginePage() {
                     <Database className="w-4 h-4 text-emerald-400" />
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-blue-50">{data.source_name ?? "SEC EDGAR Company Facts XBRL API"}</p>
+                    <p className="text-sm font-bold text-blue-50">{viewData.source_name ?? "SEC EDGAR Company Facts XBRL API"}</p>
                     <p className="text-[10px] uppercase tracking-widest text-slate-600">
-                      {data.concept_label ?? data.concept ?? "Revenue"}
+                      {viewData.concept_label ?? viewData.concept ?? "Revenue"}
                     </p>
                   </div>
                 </div>
@@ -405,13 +473,13 @@ export default function BusinessEnginePage() {
                   <div className="rounded-lg p-2.5" style={{ backgroundColor: "rgba(15,32,64,0.5)", border: "1px solid rgba(56,189,248,0.08)" }}>
                     <p className="text-[9px] uppercase tracking-widest text-slate-600">XBRL Dimension</p>
                     <p className="mt-1 truncate text-xs font-semibold text-slate-300">
-                      {data.dimension ?? "Total revenue only"}
+                      {viewData.dimension ?? "Total revenue only"}
                     </p>
                   </div>
                   <div className="rounded-lg p-2.5" style={{ backgroundColor: "rgba(15,32,64,0.5)", border: "1px solid rgba(56,189,248,0.08)" }}>
                     <p className="text-[9px] uppercase tracking-widest text-slate-600">Coverage</p>
                     <p className="mt-1 text-xs font-semibold text-slate-300">
-                      {data.years.length} fiscal years - {data.segments.length} reported lines
+                      {viewData.years.length} {activePeriod === "quarterly" ? "fiscal quarters" : "fiscal years"} - {viewData.segments.length} reported lines
                     </p>
                   </div>
                 </div>
@@ -419,7 +487,7 @@ export default function BusinessEnginePage() {
 
               <div className="flex flex-col gap-2 sm:flex-row md:flex-col">
                 <a
-                  href={data.source_url}
+                  href={viewData.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5"
@@ -432,9 +500,9 @@ export default function BusinessEnginePage() {
                   {primarySourceLabel}
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
-                {data.filing_url && data.filing_url !== data.source_url && (
+                {viewData.filing_url && viewData.filing_url !== viewData.source_url && (
                   <a
-                    href={data.filing_url}
+                    href={viewData.filing_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5"

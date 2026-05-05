@@ -21,7 +21,9 @@ export default function MetricDetailPage() {
   const { ticker, metric } = useParams() as { ticker: string; metric: string };
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [data, setData] = useState<{ year: number; value: number }[] | null>(null);
+  const [quarterlyData, setQuarterlyData] = useState<{ year: number; quarter?: number; date?: string; label?: string; value: number }[] | null>(null);
   const [source, setSource] = useState("Financial Modeling Prep income statements");
+  const [quarterlySource, setQuarterlySource] = useState<string | undefined>(undefined);
   const lastGoodData = useRef<{ year: number; value: number }[] | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [summaryLoading, setSummaryLoading] = useState(true);
@@ -35,6 +37,8 @@ export default function MetricDetailPage() {
     if (!ticker || !metric) return;
     const fetchData = async () => {
       setDataLoading(true);
+      setQuarterlyData(null);
+      setQuarterlySource(undefined);
       try {
         const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
         const normalizedMetric = metric.toLowerCase();
@@ -42,7 +46,12 @@ export default function MetricDetailPage() {
           ? `${baseURL}/metric/${ticker}/${metric}`
           : `${baseURL}/macrotrends/${ticker}`;
         type MetricRow = { year: number; value: number };
-        const json = await cachedFetch<{ data: MetricRow[] | Record<string, unknown>; source?: { historical?: string } }>(endpoint);
+        type QuarterlyMetricRow = MetricRow & { quarter?: number; date?: string; label?: string };
+        const json = await cachedFetch<{
+          data: MetricRow[] | Record<string, unknown>;
+          quarterly_data?: QuarterlyMetricRow[];
+          source?: { historical?: string; historical_quarterly?: string | null };
+        }>(endpoint);
         let extracted: MetricRow[] | null = null;
         if (FINANCIAL_METRICS.has(normalizedMetric)) {
           extracted = Array.isArray(json.data) ? json.data : null;
@@ -51,11 +60,21 @@ export default function MetricDetailPage() {
               ? "Yahoo Finance via yfinance income statements"
               : "Financial Modeling Prep income statements"
           );
+          setQuarterlyData(Array.isArray(json.quarterly_data) ? json.quarterly_data : null);
+          setQuarterlySource(
+            json.source?.historical_quarterly === "yfinance"
+              ? "Yahoo Finance via yfinance income statements"
+              : json.source?.historical_quarterly === "financialmodelingprep"
+                ? "Financial Modeling Prep income statements"
+                : undefined
+          );
         } else {
           const metricData = json.data as Record<string, unknown>;
           const key = Object.keys(metricData).find((k) => k.toLowerCase() === metric.toLowerCase());
           extracted = key && Array.isArray(metricData[key]) ? (metricData[key] as MetricRow[]) : null;
           setSource("Macrotrends historical fundamentals");
+          setQuarterlyData(null);
+          setQuarterlySource(undefined);
         }
         if (extracted) { lastGoodData.current = extracted; setData(extracted); }
         else setData(lastGoodData.current);
@@ -97,7 +116,13 @@ export default function MetricDetailPage() {
 
         {/* Chart */}
         <section>
-          <MetricChart data={data} title={metric} source={source} />
+          <MetricChart
+            data={data}
+            quarterlyData={quarterlyData}
+            title={metric}
+            source={source}
+            quarterlySource={quarterlySource}
+          />
         </section>
 
         {/* AI Interpretation */}

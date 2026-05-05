@@ -17,6 +17,9 @@ import DataSourceNote from "@/app/components/DataSourceNote";
 
 type MetricPoint = {
   year: number;
+  quarter?: number;
+  date?: string;
+  label?: string;
   value: number;
 };
 
@@ -26,6 +29,7 @@ type ExploreMetric = {
   unit: "currency" | "per-share" | string;
   accent: string;
   data: MetricPoint[];
+  quarterly_data?: MetricPoint[];
 };
 
 type SchwabSource = {
@@ -39,10 +43,14 @@ type MetricsResponse = {
   metrics?: ExploreMetric[];
   source?: {
     historical?: string;
+    historical_quarterly?: string | null;
     schwab?: SchwabSource;
   };
+  periods?: string[];
   error?: string;
 };
+
+type PeriodMode = "annual" | "quarterly";
 
 function compactCurrency(value: number) {
   const abs = Math.abs(value);
@@ -94,6 +102,13 @@ function formatYearTick(year: number, unit: string) {
   return String(year);
 }
 
+function formatPointLabel(point: MetricPoint, unit: string, period: PeriodMode) {
+  if (period === "quarterly") {
+    return point.label ?? (point.quarter ? `${point.year} Q${point.quarter}` : String(point.year));
+  }
+  return formatYearTick(point.year, unit);
+}
+
 function yoyPercent(current: number, previous: number): number | null {
   if (!Number.isFinite(current) || !Number.isFinite(previous)) return null;
   if (previous === 0) return null;
@@ -111,6 +126,7 @@ function generateInsight(
   data: MetricPoint[],
   unit: string,
   label: string,
+  period: PeriodMode,
 ): string | null {
   if (data.length < 3) return null;
 
@@ -122,10 +138,11 @@ function generateInsight(
   const multiple = last.value / first.value;
   if (!Number.isFinite(multiple) || multiple <= 0) return null;
 
-  const earliestYearLabel = formatYearTick(first.year, unit);
+  const earliestYearLabel = formatPointLabel(first, unit, period);
   const multipleText =
     multiple >= 2 ? `${multiple.toFixed(1)}x` : `${(multiple * 100 - 100).toFixed(0)}%`;
   const direction = multiple >= 1 ? "up" : "down";
+  const changeLabel = period === "quarterly" ? "QoQ" : "YoY";
 
   const firstYoy = yoyPercent(data[1].value, data[0].value);
   const lastYoy = yoyPercent(last.value, data[data.length - 2].value);
@@ -136,28 +153,29 @@ function generateInsight(
 
   if (firstYoy !== null && lastYoy !== null && Math.abs(firstYoy - lastYoy) >= 5) {
     const trend = lastYoy < firstYoy ? "slowed" : "accelerated";
-    return `${base}, though YoY growth has ${trend} from ${formatYoyLabel(firstYoy)} to ${formatYoyLabel(lastYoy)}.`;
+    return `${base}, though ${changeLabel} growth has ${trend} from ${formatYoyLabel(firstYoy)} to ${formatYoyLabel(lastYoy)}.`;
   }
 
   return `${base}.`;
 }
 
-function sourceLabel(source?: MetricsResponse["source"]) {
-  if (source?.historical === "financialmodelingprep") {
+function sourceLabel(source?: MetricsResponse["source"], period: PeriodMode = "annual") {
+  const sourceKey = period === "quarterly" ? source?.historical_quarterly : source?.historical;
+  if (sourceKey === "financialmodelingprep") {
     return "Financial Modeling Prep income statements";
   }
-  if (source?.historical === "yfinance") {
+  if (sourceKey === "yfinance") {
     return "Yahoo Finance via yfinance income statements";
   }
   return "Historical financial statements";
 }
 
 type CustomizedProps = {
-  xAxisMap?: Record<string, { scale?: (value: number) => number }>;
+  xAxisMap?: Record<string, { scale?: (value: number | string) => number }>;
   yAxisMap?: Record<string, { scale?: (value: number) => number }>;
 };
 
-type ChartPoint = MetricPoint & { yoy: number | null };
+type ChartPoint = MetricPoint & { change: number | null; displayLabel: string };
 
 function ValueAndYoyOverlay({
   xAxisMap,
@@ -180,7 +198,7 @@ function ValueAndYoyOverlay({
   return (
     <g pointerEvents="none">
       {data.map((point, idx) => {
-        const cx = xScale(point.year);
+        const cx = xScale(point.displayLabel);
         const cy = yScale(point.value);
         if (!Number.isFinite(cx) || !Number.isFinite(cy)) return null;
 
@@ -189,17 +207,17 @@ function ValueAndYoyOverlay({
         let yoyNode = null;
         if (idx > 0) {
           const prev = data[idx - 1];
-          const prevX = xScale(prev.year);
+          const prevX = xScale(prev.displayLabel);
           const prevY = yScale(prev.value);
           if (Number.isFinite(prevX) && Number.isFinite(prevY)) {
             const midX = (cx + prevX) / 2;
             const midY = (cy + prevY) / 2 - 14;
-            const label = formatYoyLabel(point.yoy);
+            const label = formatYoyLabel(point.change);
             if (label) {
-              const positive = (point.yoy ?? 0) >= 0;
+              const positive = (point.change ?? 0) >= 0;
               yoyNode = (
                 <text
-                  key={`yoy-${point.year}`}
+                  key={`change-${point.displayLabel}`}
                   x={midX}
                   y={midY}
                   textAnchor="middle"
@@ -216,7 +234,7 @@ function ValueAndYoyOverlay({
         }
 
         return (
-          <g key={`overlay-${point.year}`}>
+          <g key={`overlay-${point.displayLabel}`}>
             {yoyNode}
             <text
               x={cx}
@@ -247,19 +265,22 @@ function CompactTooltip({
   unit,
   label,
   accent,
+  period,
 }: {
   active?: boolean;
   payload?: TooltipPayload[];
   unit: string;
   label: string;
   accent: string;
+  period: PeriodMode;
 }) {
   if (!active || !payload || payload.length === 0) return null;
   const point = payload[0]?.payload;
   if (!point) return null;
 
-  const yoyLabel = formatYoyLabel(point.yoy ?? null);
-  const yoyPositive = (point.yoy ?? 0) >= 0;
+  const yoyLabel = formatYoyLabel(point.change ?? null);
+  const yoyPositive = (point.change ?? 0) >= 0;
+  const changeLabel = period === "quarterly" ? "QoQ" : "YoY";
 
   return (
     <div
@@ -271,7 +292,7 @@ function CompactTooltip({
       }}
     >
       <p className="text-[10px] uppercase tracking-widest text-slate-500">
-        {formatYearTick(point.year, unit)}
+        {point.displayLabel}
       </p>
       <p className="mt-0.5 text-sm font-bold tabular-nums text-blue-50">
         {formatValue(point.value, unit)}
@@ -281,7 +302,7 @@ function CompactTooltip({
           className="mt-0.5 text-[11px] font-semibold tabular-nums"
           style={{ color: yoyPositive ? "#34d399" : "#fb7185" }}
         >
-          YoY {yoyLabel}
+          {changeLabel} {yoyLabel}
         </p>
       )}
       <p className="mt-1 text-[10px] uppercase tracking-widest text-slate-600">{label}</p>
@@ -293,6 +314,7 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
   const [metrics, setMetrics] = useState<ExploreMetric[]>([]);
   const [source, setSource] = useState<MetricsResponse["source"]>(undefined);
   const [activeKey, setActiveKey] = useState("revenue");
+  const [period, setPeriod] = useState<PeriodMode>("annual");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -345,13 +367,30 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
     [activeKey, metrics],
   );
 
+  const hasQuarterly = (activeMetric?.quarterly_data?.length ?? 0) > 0;
+
+  useEffect(() => {
+    if (!hasQuarterly && period === "quarterly") {
+      setPeriod("annual");
+    }
+  }, [hasQuarterly, period]);
+
   const chartData = useMemo<ChartPoint[]>(() => {
-    const sorted = [...(activeMetric?.data ?? [])].sort((a, b) => a.year - b.year);
+    const rawData = period === "quarterly" && hasQuarterly
+      ? activeMetric?.quarterly_data ?? []
+      : activeMetric?.data ?? [];
+    const sorted = [...rawData].sort((a, b) => {
+      if (period === "quarterly") {
+        return String(a.date ?? a.label ?? a.year).localeCompare(String(b.date ?? b.label ?? b.year));
+      }
+      return a.year - b.year;
+    });
     return sorted.map((point, idx) => ({
       ...point,
-      yoy: idx === 0 ? null : yoyPercent(point.value, sorted[idx - 1].value),
+      displayLabel: formatPointLabel(point, activeMetric?.unit ?? "currency", period),
+      change: idx === 0 ? null : yoyPercent(point.value, sorted[idx - 1].value),
     }));
-  }, [activeMetric]);
+  }, [activeMetric, hasQuarterly, period]);
 
   const yDomain = useMemo<[number, number]>(() => {
     if (chartData.length === 0) return [0, 1];
@@ -392,8 +431,9 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
     ? "N/A"
     : `${delta >= 0 ? "+" : ""}${formatValue(delta, activeMetric.unit, true)}`;
 
-  const insight = generateInsight(chartData, activeMetric.unit, activeMetric.label);
+  const insight = generateInsight(chartData, activeMetric.unit, activeMetric.label, period);
   const singlePoint = chartData.length === 1;
+  const changeLabel = period === "quarterly" ? "QoQ" : "YoY";
 
   return (
     <div className="bb-card p-3 space-y-4 overflow-hidden">
@@ -422,8 +462,31 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
             style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
           >
             <Sparkles className="w-3 h-3 text-indigo-400" />
-            {sourceLabel(source)}
+            {sourceLabel(source, period)}
           </span>
+          {hasQuarterly && (
+            <div
+              className="inline-flex rounded-lg p-1"
+              style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
+            >
+              {(["annual", "quarterly"] as PeriodMode[]).map((option) => {
+                const active = period === option;
+                return (
+                  <button
+                    key={option}
+                    onClick={() => setPeriod(option)}
+                    className="rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors"
+                    style={{
+                      color: active ? "#eff6ff" : "#64748b",
+                      backgroundColor: active ? "rgba(56,189,248,0.12)" : "transparent",
+                    }}
+                  >
+                    {option === "annual" ? "Annual" : "Quarterly"}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <div className="rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)" }}>
             <p className="text-[10px] uppercase tracking-widest text-slate-600">Latest</p>
             <p className="text-sm font-bold tabular-nums text-blue-50">
@@ -431,7 +494,7 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
             </p>
           </div>
           <div className="rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(129,140,248,0.08)", border: "1px solid rgba(129,140,248,0.15)" }}>
-            <p className="text-[10px] uppercase tracking-widest text-slate-600">YoY</p>
+            <p className="text-[10px] uppercase tracking-widest text-slate-600">{changeLabel}</p>
             <p className={`text-sm font-bold tabular-nums ${delta !== null && delta < 0 ? "text-rose-400" : "text-emerald-400"}`}>
               {deltaText}
             </p>
@@ -479,12 +542,12 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(56,189,248,0.08)" vertical={false} />
             <XAxis
-              dataKey="year"
+              dataKey="displayLabel"
               stroke="#64748b"
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value: number) => formatYearTick(value, activeMetric.unit)}
+              tickFormatter={(value: string) => value}
               padding={{ left: 12, right: 12 }}
             />
             <YAxis
@@ -505,6 +568,7 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
                   unit={activeMetric.unit}
                   label={activeMetric.label}
                   accent={activeMetric.accent}
+                  period={period}
                 />
               )}
             />
@@ -535,7 +599,7 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
         </ResponsiveContainer>
       </div>
 
-      <DataSourceNote label={sourceLabel(source)} />
+      <DataSourceNote label={sourceLabel(source, period)} />
     </div>
   );
 }

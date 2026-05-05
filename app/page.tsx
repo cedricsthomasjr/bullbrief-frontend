@@ -908,22 +908,22 @@ export default function HomePage() {
                 >
                   <Cpu className="w-7 h-7 text-indigo-400/60" />
                 </div>
-                {/* Segment arcs as dots */}
+                {/* Segment arcs as dots — positions pre-computed to avoid SSR/client hydration mismatch */}
                 {[
-                  { deg: 0, color: "rgba(56,189,248,0.7)" },
-                  { deg: 60, color: "rgba(129,140,248,0.55)" },
-                  { deg: 120, color: "rgba(167,139,250,0.5)" },
-                  { deg: 180, color: "rgba(56,189,248,0.45)" },
-                  { deg: 240, color: "rgba(16,185,129,0.5)" },
-                  { deg: 300, color: "rgba(129,140,248,0.4)" },
-                ].map(({ deg, color }) => (
+                  { top:    0,     left:  64,    color: "rgba(56,189,248,0.7)"   },
+                  { top:  55.43,   left:  32,    color: "rgba(129,140,248,0.55)" },
+                  { top:  55.43,   left: -32,    color: "rgba(167,139,250,0.5)"  },
+                  { top:    0,     left: -64,    color: "rgba(56,189,248,0.45)"  },
+                  { top: -55.43,   left: -32,    color: "rgba(16,185,129,0.5)"   },
+                  { top: -55.43,   left:  32,    color: "rgba(129,140,248,0.4)"  },
+                ].map(({ top, left, color }) => (
                   <div
-                    key={deg}
+                    key={`${top}-${left}`}
                     className="absolute w-2 h-2 rounded-full"
                     style={{
                       backgroundColor: color,
-                      top: `calc(50% - 4px + ${Math.sin((deg * Math.PI) / 180) * 64}px)`,
-                      left: `calc(50% - 4px + ${Math.cos((deg * Math.PI) / 180) * 64}px)`,
+                      top: `calc(50% - 4px + ${top}px)`,
+                      left: `calc(50% - 4px + ${left}px)`,
                       boxShadow: `0 0 6px ${color}`,
                     }}
                   />

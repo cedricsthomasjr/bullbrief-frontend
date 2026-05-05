@@ -14,19 +14,26 @@ import {
 import DataSourceNote from "@/app/components/DataSourceNote";
 
 type EPSData = {
-  year: string;
+  label: string;
+  date?: string;
   eps: number;
 };
 
 type EPSResponse = {
   data?: { year: number; value: number }[];
-  source?: { historical?: string };
+  quarterly_data?: { year: number; quarter?: number; date?: string; label?: string; value: number }[];
+  source?: { historical?: string; historical_quarterly?: string | null };
   error?: string;
 };
 
+type PeriodMode = "annual" | "quarterly";
+
 export default function EPSChartCard({ ticker }: { ticker: string }) {
   const [data, setData] = useState<EPSData[]>([]);
+  const [quarterlyData, setQuarterlyData] = useState<EPSData[]>([]);
   const [source, setSource] = useState("Financial Modeling Prep income statements");
+  const [quarterlySource, setQuarterlySource] = useState<string | null>(null);
+  const [period, setPeriod] = useState<PeriodMode>("annual");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -40,15 +47,30 @@ export default function EPSChartCard({ ticker }: { ticker: string }) {
         if (json.error || !Array.isArray(json.data)) throw new Error(json.error ?? "EPS data unavailable");
 
         const sorted = json.data
-          .map((row) => ({ year: String(row.year), eps: row.value }))
-          .sort((a, b) => Number(a.year) - Number(b.year));
+          .map((row) => ({ label: String(row.year), eps: row.value }))
+          .sort((a, b) => Number(a.label) - Number(b.label));
+        const sortedQuarterly = (json.quarterly_data ?? [])
+          .map((row) => ({
+            label: row.label ?? (row.quarter ? `${row.year} Q${row.quarter}` : String(row.year)),
+            date: row.date,
+            eps: row.value,
+          }))
+          .sort((a, b) => String(a.date ?? a.label).localeCompare(String(b.date ?? b.label)));
         setData(sorted);
+        setQuarterlyData(sortedQuarterly);
         setSource(
           json.source?.historical === "financialmodelingprep"
             ? "Financial Modeling Prep income statements"
             : json.source?.historical === "yfinance"
               ? "Yahoo Finance via yfinance income statements"
             : "Historical income statements"
+        );
+        setQuarterlySource(
+          json.source?.historical_quarterly === "financialmodelingprep"
+            ? "Financial Modeling Prep income statements"
+            : json.source?.historical_quarterly === "yfinance"
+              ? "Yahoo Finance via yfinance income statements"
+              : null
         );
       } catch (err) {
         console.error("Failed to fetch EPS history", err);
@@ -73,15 +95,45 @@ export default function EPSChartCard({ ticker }: { ticker: string }) {
     return <div className="py-10 text-sm text-slate-500">{error || "No EPS data found."}</div>;
   }
 
+  const hasQuarterly = quarterlyData.length > 0;
+  const activePeriod = hasQuarterly ? period : "annual";
+  const activeData = activePeriod === "quarterly" ? quarterlyData : data;
+  const activeSource = activePeriod === "quarterly" ? quarterlySource ?? source : source;
+
   return (
     <div className="space-y-4">
-      <h2 className="text-white text-lg font-semibold mb-4">
-        EPS History ({ticker.toUpperCase()})
-      </h2>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-white text-lg font-semibold">
+          EPS History ({ticker.toUpperCase()})
+        </h2>
+        {hasQuarterly && (
+          <div
+            className="inline-flex self-start rounded-lg p-1"
+            style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
+          >
+            {(["annual", "quarterly"] as PeriodMode[]).map((option) => {
+              const active = activePeriod === option;
+              return (
+                <button
+                  key={option}
+                  onClick={() => setPeriod(option)}
+                  className="rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors"
+                  style={{
+                    color: active ? "#eff6ff" : "#64748b",
+                    backgroundColor: active ? "rgba(59,130,246,0.16)" : "transparent",
+                  }}
+                >
+                  {option === "annual" ? "Annual" : "Quarterly"}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
+        <BarChart data={activeData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-          <XAxis dataKey="year" stroke="#999" />
+          <XAxis dataKey="label" stroke="#999" />
           <YAxis stroke="#999" />
           <Tooltip
             contentStyle={{ backgroundColor: "#111", border: "none" }}
@@ -99,7 +151,7 @@ export default function EPSChartCard({ ticker }: { ticker: string }) {
           />
         </BarChart>
       </ResponsiveContainer>
-      <DataSourceNote label={source} />
+      <DataSourceNote label={activeSource} />
     </div>
   );
 }

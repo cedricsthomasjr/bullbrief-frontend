@@ -233,6 +233,50 @@
     z-index: 1;
   }
 
+  .bb-rotating-gradient-border {
+    position: relative;
+    isolation: isolate;
+    border: 1px solid transparent;
+    background:
+      linear-gradient(135deg, rgba(8, 18, 36, 0.96), rgba(15, 32, 64, 0.93)) padding-box,
+      conic-gradient(
+        from var(--bb-angle),
+        rgba(56, 189, 248, 0.9),
+        rgba(129, 140, 248, 0.88),
+        rgba(167, 139, 250, 0.9),
+        rgba(56, 189, 248, 0.9)
+      ) border-box;
+    box-shadow:
+      0 14px 34px rgba(0, 0, 0, 0.36),
+      0 0 18px rgba(56, 189, 248, 0.12),
+      0 0 28px rgba(129, 140, 248, 0.1);
+    animation: card-glow-rotate 7s linear infinite;
+  }
+
+  .bb-rotating-gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    border-radius: inherit;
+    background: conic-gradient(
+      from var(--bb-angle),
+      rgba(56, 189, 248, 0.44),
+      rgba(129, 140, 248, 0.36),
+      rgba(167, 139, 250, 0.42),
+      rgba(56, 189, 248, 0.44)
+    );
+    filter: blur(14px);
+    opacity: 0.34;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+    animation: card-glow-rotate 7s linear infinite;
+  }
+
+  .bb-rotating-gradient-border:hover::before {
+    filter: blur(18px);
+    opacity: 0.58;
+  }
+
   .example-card-glow::after {
     content: "";
     position: absolute;
@@ -413,6 +457,8 @@
     .example-card-glow,
     .example-card-glow::before,
     .example-card-glow::after,
+    .bb-rotating-gradient-border,
+    .bb-rotating-gradient-border::before,
     .btn-gradient {
       animation: none;
     }

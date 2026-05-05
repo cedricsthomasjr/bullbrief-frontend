@@ -5,9 +5,9 @@ import {
   ArrowUpRight,
   BarChart3,
   Building2,
+  ChartColumnStacked,
   CircleAlert,
   Gauge,
-  Layers,
   Loader2,
   Network,
 } from "lucide-react";
@@ -189,7 +189,7 @@ export default function StockDriversCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-4">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1.2fr_0.8fr]">
           {financialDrivers.length > 0 && (
             <div className="bb-card-soft p-3 space-y-3">
               <div className="flex items-center justify-between gap-3">
@@ -269,7 +269,7 @@ export default function StockDriversCard({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 content-start gap-3 self-start">
             <div className="group bb-card-soft p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-400/40">
               <Gauge className="mb-4 w-4 h-4 text-sky-400 transition group-hover:scale-110" />
               <p className="text-[10px] uppercase tracking-widest text-slate-600">
@@ -292,54 +292,49 @@ export default function StockDriversCard({
 
             <Link
               href={revenueHref ?? "#business-engine"}
-              className="group bb-card-soft col-span-2 p-3 text-left transition-all duration-300 hover:-translate-y-0.5"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(129,140,248,0.06) 50%, rgba(167,139,250,0.05) 100%)",
-                borderColor: "rgba(129,140,248,0.22)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(129,140,248,0.5)";
-                e.currentTarget.style.boxShadow =
-                  "0 0 28px rgba(129,140,248,0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(129,140,248,0.22)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
+              className="bb-rotating-gradient-border group relative col-span-2 rounded-xl p-3 text-left transition-transform duration-300 hover:-translate-y-0.5"
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span
-                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-                    style={{
-                      backgroundColor: "rgba(129,140,248,0.14)",
-                      border: "1px solid rgba(129,140,248,0.28)",
-                    }}
-                  >
-                    <Layers className="w-4 h-4 text-indigo-300" />
+              <div
+                className="pointer-events-none absolute inset-0 rounded-xl opacity-70 transition-opacity duration-300 group-hover:opacity-100"
+                style={{
+                  background:
+                    "radial-gradient(circle at 88% 22%, rgba(129,140,248,0.18), transparent 32%), radial-gradient(circle at 12% 88%, rgba(56,189,248,0.12), transparent 38%)",
+                }}
+              />
+              <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-sky-400/25 bg-sky-400/10 transition-transform duration-300 group-hover:scale-105 group-hover:border-sky-300/45">
+                    <ChartColumnStacked className="h-5 w-5 text-sky-300" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-blue-50">
-                      Open Business Engine
+                    <p className="truncate text-sm font-bold text-blue-50">
+                      See Revenue Breakdown
                     </p>
-                    <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5 truncate">
-                      Segment revenue, source detail, and year-over-year
-                      history.
+                    <p className="mt-0.5 text-[11px] leading-4 text-slate-500">
+                      Segment mix, reported totals, and fiscal-period history.
                     </p>
                   </div>
                 </div>
-                <span
-                  className="shrink-0 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-2 rounded-lg transition-colors"
-                  style={{
-                    color: "#a5b4fc",
-                    backgroundColor: "rgba(129,140,248,0.12)",
-                    border: "1px solid rgba(129,140,248,0.28)",
-                  }}
-                >
-                  View Page
-                  <ArrowUpRight className="w-3 h-3" />
-                </span>
+
+                <div className="flex shrink-0 items-center gap-2">
+                  <div className="hidden h-9 items-end gap-1.5 rounded-lg border border-sky-400/10 bg-slate-950/35 px-2 py-1.5 sm:flex">
+                    {[44, 66, 54, 78].map((height, idx) => (
+                      <span
+                        key={idx}
+                        className="w-1.5 rounded-t-full transition-all duration-300 group-hover:brightness-125"
+                        style={{
+                          height: `${height}%`,
+                          backgroundColor: ["#38bdf8", "#818cf8", "#a78bfa", "#38bdf8"][idx],
+                          opacity: 0.86,
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <span className="btn-gradient inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white">
+                    Open
+                    <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </span>
+                </div>
               </div>
             </Link>
           </div>

@@ -12,6 +12,10 @@ export type RevenueSegment = {
 
 export type RevenueYearEntry = {
   year: number;
+  label?: string;
+  fiscal_year?: number;
+  fiscal_period?: string;
+  end?: string;
   total: number;
   breakdown: Record<string, number>;
 };
@@ -22,9 +26,15 @@ export type RevenueBreakdownData = {
   concept: string;
   concept_label: string;
   dimension?: string | null;
+  quarterly_dimension?: string | null;
   source_name?: string;
+  quarterly_source_name?: string | null;
+  quarterly_concept?: string | null;
+  quarterly_concept_label?: string | null;
   segments: RevenueSegment[];
+  quarterly_segments?: RevenueSegment[];
   years: RevenueYearEntry[];
+  quarters?: RevenueYearEntry[];
   source_url: string;
   filing_url?: string | null;
   has_segments: boolean;
@@ -35,7 +45,10 @@ type Props = {
   loading?: boolean;
   error?: string | null;
   onOpenDeepDive?: () => void;
+  period?: PeriodMode;
 };
+
+type PeriodMode = "annual" | "quarterly";
 
 // Cohesive blue → indigo → violet → emerald palette (no rainbow)
 const PALETTE = [
@@ -80,6 +93,14 @@ function stackedRevenueLabel(data: RevenueBreakdownData): string {
   return data.has_segments ? "SEC segment revenue - stacked" : "SEC total revenue";
 }
 
+function periodEntryLabel(entry: RevenueYearEntry | undefined, period: PeriodMode): string {
+  if (!entry) return "N/A";
+  if (period === "quarterly") {
+    return entry.label ?? (entry.fiscal_period ? `FY${String(entry.year).slice(-2)} ${entry.fiscal_period}` : String(entry.year));
+  }
+  return `FY${entry.year}`;
+}
+
 function reportedLineLabel(data: RevenueBreakdownData): string {
   return isFmpSource(data) ? "FMP reported revenue line" : "SEC reported segment";
 }
@@ -113,6 +134,7 @@ export function getFastestGrowingSegment(segments: EnrichedSegment[]): EnrichedS
 export function generateBusinessEngineInsight(
   segments: EnrichedSegment[],
   companyName: string,
+  period: PeriodMode = "annual",
 ): string | null {
   if (segments.length === 0) return null;
   const largest = getLargestSegment(segments);
@@ -136,18 +158,23 @@ export function generateBusinessEngineInsight(
   }
 
   if (fastest && fastest.id !== largest.id && (fastest.yoy ?? 0) > 10) {
-    return `${opener}, while ${fastest.name} is accelerating (+${(fastest.yoy ?? 0).toFixed(0)}% YoY).`;
+    return `${opener}, while ${fastest.name} is accelerating (+${(fastest.yoy ?? 0).toFixed(0)}% ${period === "quarterly" ? "QoQ" : "YoY"}).`;
   }
 
   if (largest.yoy !== null) {
+    const cadence = period === "quarterly" ? "quarter-over-quarter" : "year-over-year";
     const trend = largest.yoy >= 0 ? `growing ${largest.yoy.toFixed(0)}%` : `down ${Math.abs(largest.yoy).toFixed(0)}%`;
-    return `${opener}, ${trend} year-over-year.`;
+    return `${opener}, ${trend} ${cadence}.`;
   }
 
   return `${opener}.`;
 }
 
-function describeSegmentRole(seg: EnrichedSegment, ranks: { largest: string | null; fastest: string | null }) {
+function describeSegmentRole(
+  seg: EnrichedSegment,
+  ranks: { largest: string | null; fastest: string | null },
+  period: PeriodMode,
+) {
   const lines: { label: string; body: string }[] = [];
 
   if (seg.id === ranks.largest) {
@@ -173,10 +200,11 @@ function describeSegmentRole(seg: EnrichedSegment, ranks: { largest: string | nu
   }
 
   if (seg.yoy !== null) {
+    const changeLabel = period === "quarterly" ? "QoQ" : "YoY";
     if (seg.yoy >= 25) {
       lines.push({
         label: "Investor watchpoint",
-        body: `Strong ${seg.yoy.toFixed(0)}% YoY growth — watch for sustained demand and pricing durability.`,
+        body: `Strong ${seg.yoy.toFixed(0)}% ${changeLabel} growth — watch for sustained demand and pricing durability.`,
       });
     } else if (seg.yoy >= 5) {
       lines.push({
@@ -191,13 +219,15 @@ function describeSegmentRole(seg: EnrichedSegment, ranks: { largest: string | nu
     } else {
       lines.push({
         label: "Investor watchpoint",
-        body: `Declined ${Math.abs(seg.yoy).toFixed(0)}% YoY — investors want to know whether it's cyclical or structural.`,
+        body: `Declined ${Math.abs(seg.yoy).toFixed(0)}% ${changeLabel} — investors want to know whether it's cyclical or structural.`,
       });
     }
   } else {
     lines.push({
       label: "Investor watchpoint",
-      body: "Prior-year comparison not available in SEC filings yet.",
+      body: period === "quarterly"
+        ? "Prior-quarter comparison not available in the reported data yet."
+        : "Prior-year comparison not available in the reported data yet.",
     });
   }
 
@@ -224,7 +254,7 @@ function describeSegmentRole(seg: EnrichedSegment, ranks: { largest: string | nu
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function BusinessEngineCylinder({ data, loading, error, onOpenDeepDive }: Props) {
+export default function BusinessEngineCylinder({ data, loading, error, onOpenDeepDive, period = "annual" }: Props) {
   const enriched = useMemo<EnrichedSegment[]>(() => {
     if (!data || data.years.length === 0) return [];
     const latest = data.years[data.years.length - 1];
@@ -303,7 +333,7 @@ export default function BusinessEngineCylinder({ data, loading, error, onOpenDee
     );
   }
 
-  const insight = generateBusinessEngineInsight(enriched, data.company_name);
+  const insight = generateBusinessEngineInsight(enriched, data.company_name, period);
   const largestSeg = enriched.find((s) => s.id === ranks.largest);
   const fastestSeg = enriched.find((s) => s.id === ranks.fastest);
   const concentration = largestSeg?.share ?? 0;
@@ -337,7 +367,7 @@ export default function BusinessEngineCylinder({ data, loading, error, onOpenDee
               border: "1px solid rgba(56,189,248,0.18)",
             }}
           >
-            Year-over-year history
+            {period === "quarterly" ? "Quarterly history" : "Year-over-year history"}
             <ArrowUpRight className="inline-block w-3 h-3 ml-1" />
           </button>
         )}
@@ -387,7 +417,7 @@ export default function BusinessEngineCylinder({ data, loading, error, onOpenDee
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <p className="text-base font-bold tabular-nums text-blue-50">{formatCurrencyCompact(total)}</p>
               <p className="text-[9px] uppercase tracking-widest text-slate-500 mt-0.5">
-                FY{data.years[data.years.length - 1]?.year}
+                {periodEntryLabel(data.years[data.years.length - 1], period)}
               </p>
             </div>
           </div>
@@ -429,6 +459,7 @@ export default function BusinessEngineCylinder({ data, loading, error, onOpenDee
               segment={displaySeg}
               ranks={ranks}
               sourceLabel={reportedLineLabel(data)}
+              period={period}
             />
           )}
         </div>
@@ -449,8 +480,8 @@ export default function BusinessEngineCylinder({ data, loading, error, onOpenDee
           accent={fastestSeg?.color.base ?? "#10b981"}
           subtle={
             fastestSeg && fastestSeg.yoy !== null
-              ? `${fastestSeg.yoy >= 0 ? "+" : ""}${fastestSeg.yoy.toFixed(0)}% YoY`
-              : "YoY data unavailable"
+              ? `${fastestSeg.yoy >= 0 ? "+" : ""}${fastestSeg.yoy.toFixed(0)}% ${period === "quarterly" ? "QoQ" : "YoY"}`
+              : `${period === "quarterly" ? "QoQ" : "YoY"} data unavailable`
           }
           icon={<TrendingUp className="w-3.5 h-3.5" />}
         />
@@ -477,12 +508,14 @@ function SegmentDetail({
   segment,
   ranks,
   sourceLabel,
+  period,
 }: {
   segment: EnrichedSegment;
   ranks: { largest: string | null; fastest: string | null };
   sourceLabel: string;
+  period: PeriodMode;
 }) {
-  const lines = describeSegmentRole(segment, ranks);
+  const lines = describeSegmentRole(segment, ranks, period);
 
   return (
     <div
@@ -515,7 +548,7 @@ function SegmentDetail({
       <div className="grid grid-cols-3 gap-2">
         <DetailStat label="Share" value={`${segment.share.toFixed(1)}%`} />
         <DetailStat
-          label="YoY"
+          label={period === "quarterly" ? "QoQ" : "YoY"}
           value={
             segment.yoy === null
               ? "N/A"
@@ -524,7 +557,7 @@ function SegmentDetail({
           tone={segment.yoy === null ? "neutral" : segment.yoy >= 0 ? "up" : "down"}
         />
         <DetailStat
-          label="Prior FY"
+          label={period === "quarterly" ? "Prior Q" : "Prior FY"}
           value={segment.prev !== null ? formatCurrencyCompact(segment.prev) : "N/A"}
         />
       </div>
