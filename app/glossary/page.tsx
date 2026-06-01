@@ -216,8 +216,7 @@ export default function GlossaryPage() {
               Term Glossary
             </h1>
             <p className="text-slate-500 text-sm max-w-xl leading-relaxed">
-              Plain-English definitions for every financial metric - so you can
-              read any stock&apos;s fundamentals with confidence.
+              Plain-English definitions for essential financial terms and metrics &mdash; understand what you&apos;re reading before you act on it.
             </p>
           </div>
         </div>

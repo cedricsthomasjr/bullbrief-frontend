@@ -210,7 +210,7 @@ export default function TickerPage() {
   if (error) return (
     <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#060c1a" }}>
       <div className="text-center space-y-3">
-        <p className="text-rose-400 text-sm font-medium">Failed to load data</p>
+        <p className="text-rose-400 text-sm font-medium">Failed to load stock data</p>
         <p className="text-slate-600 text-xs">{error}</p>
         <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-sky-400 transition-colors mt-2">
           <ArrowLeft className="w-3 h-3" /> Back to Home
@@ -267,7 +267,7 @@ export default function TickerPage() {
               }
             >
               {isBearish ? <TrendingDown className="w-3.5 h-3.5" /> : <TrendingUp className="w-3.5 h-3.5" />}
-              {isBearish ? "Bearish Signal" : "Bullish Trend"}
+              {isBearish ? "Watch Valuation" : "Constructive Setup"}
             </div>
           </div>
 

@@ -232,7 +232,7 @@ export default function BusinessEnginePage() {
     return (
       <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#060c1a" }}>
         <div className="text-center space-y-3">
-          <p className="text-rose-400 text-sm font-medium">Could not load business engine</p>
+          <p className="text-rose-400 text-sm font-medium">Revenue data unavailable for this ticker</p>
           <p className="text-slate-600 text-xs">{error}</p>
           <Link href={`/summary/${ticker}`} className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-sky-400 transition-colors mt-2">
             <ArrowLeft className="w-3 h-3" /> Back to Summary
@@ -273,7 +273,7 @@ export default function BusinessEnginePage() {
                 Business Engine
               </h1>
               <p className="max-w-2xl text-sm leading-7 text-slate-500">
-                {viewData.company_name} revenue segmentation from {viewData.source_name ?? "SEC EDGAR company facts"}.
+                How {viewData.company_name} generates revenue — broken down by segment{viewData.has_segments ? ", with fiscal-period history and year-over-year changes" : " and fiscal period"}.
               </p>
             </div>
 

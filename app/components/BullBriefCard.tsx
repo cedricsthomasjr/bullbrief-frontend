@@ -221,10 +221,10 @@ export default function BullBriefCard({
           >
             <div className="flex items-center gap-2 mb-2">
               <Activity className="w-3.5 h-3.5 text-indigo-400" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Read First</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Research Guidance</p>
             </div>
             <p className="text-xs leading-6 text-slate-500">
-              Start with business quality, then compare valuation and growth in the sections below.
+              Assess business quality first. Then evaluate valuation, growth trajectory, and risk in the sections below.
             </p>
           </div>
           <DataSourceNote

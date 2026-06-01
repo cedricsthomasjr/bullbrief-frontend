@@ -45,7 +45,7 @@ function SWOTSection({ title, points }: { title: keyof typeof SWOT_CONFIG; point
           ))}
         </ul>
       ) : (
-        <p className="text-slate-700 text-xs italic">No data available.</p>
+        <p className="text-slate-700 text-xs">No data returned for this category.</p>
       )}
     </div>
   );

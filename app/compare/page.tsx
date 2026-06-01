@@ -19,10 +19,10 @@ export default function ComparePage() {
       <div className="max-w-6xl mx-auto px-6 py-12 space-y-10">
         {/* Header */}
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Tool</p>
-          <h1 className="text-4xl font-bold tracking-tighter text-blue-50">Deep Compare</h1>
+          <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Deep Compare</p>
+          <h1 className="text-4xl font-bold tracking-tighter text-blue-50">Side-by-Side Analysis</h1>
           <p className="text-sm text-slate-500 max-w-lg leading-relaxed">
-            Enter up to three stock tickers for a side-by-side breakdown of fundamentals, valuation, and strategic outlook. For cleaner signals, compare companies in the same sector or industry.
+            Compare up to three companies across fundamentals, valuation, and market positioning. Sector-aligned comparisons yield the clearest signals — try peers, direct competitors, or companies with similar business models.
           </p>
         </div>
 

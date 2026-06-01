@@ -28,8 +28,8 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "BullBrief - AI Stock Intelligence",
-  description: "AI-powered stock breakdowns for modern investors.",
+  title: "BullBrief — AI-Powered Stock Research",
+  description: "Instant stock research briefs covering earnings, fundamentals, SWOT analysis, valuation, and business drivers. Free. No paywall.",
 };
 
 export default function RootLayout({

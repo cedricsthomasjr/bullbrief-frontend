@@ -22,7 +22,7 @@ export default function Footer() {
             </span>
           </div>
           <p className="text-xs text-slate-600">
-            AI-powered stock intelligence for modern investors.
+            AI-powered stock research for individual investors.
           </p>
           <p className="max-w-sm text-xs leading-6 text-slate-700">
             Educational research only. BullBrief is not investment advice and is not a registered investment adviser or broker-dealer.
@@ -57,7 +57,7 @@ export default function Footer() {
         style={{ borderTop: "1px solid rgba(56, 189, 248, 0.04)" }}
       >
         <p className="text-xs text-slate-700">
-          (c) {new Date().getFullYear()} BullBrief - Built by CJ Thomas
+          &copy; {new Date().getFullYear()} BullBrief &mdash; Built by CJ Thomas
         </p>
         <Link href="/disclaimer" className="text-[10px] text-slate-800 hover:text-sky-500 transition-colors font-mono">
           Not investment advice

@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Activity,
+  AlertTriangle,
   ArrowUpRight,
   BarChart3,
-  Loader2,
   Search,
   TrendingDown,
   TrendingUp,
@@ -324,7 +324,7 @@ export default function MoversPage() {
                 style={{ backgroundColor: "rgba(129,140,248,0.08)", border: "1px solid rgba(129,140,248,0.16)" }}
               >
                 <Activity className="h-3.5 w-3.5 text-indigo-300" />
-                See what moved
+                Live Market Data
               </span>
             </div>
           </div>
@@ -343,7 +343,7 @@ export default function MoversPage() {
                       onClick={() => {
                         if (!disabled && isSupportedFilter(filter.id)) setActiveFilter(filter.id);
                       }}
-                      title={disabled ? "Market cap categories are not supported by the current mover source." : undefined}
+                      title={disabled ? "Market-cap filters require data not available in the current feed. Use Gainers, Losers, or Most Active to explore today's movers." : undefined}
                       className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all ${disabled ? "cursor-not-allowed opacity-35" : "hover:-translate-y-0.5"}`}
                       style={
                         active
@@ -357,7 +357,7 @@ export default function MoversPage() {
                 })}
               </div>
               <p className="mt-3 text-[11px] leading-5 text-slate-700">
-                Market-cap filters are disabled until the mover source includes market cap for each row.
+                Market-cap filters are not yet supported by the current data feed. Use Gainers, Losers, or Most Active to explore today&apos;s moves.
               </p>
             </div>
 
@@ -397,11 +397,11 @@ export default function MoversPage() {
         {!loading && error && (
           <section className="bb-card-danger p-5 text-center">
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-rose-400/10 text-rose-400">
-              <Loader2 className="h-4 w-4" />
+              <AlertTriangle className="h-4 w-4" />
             </div>
-            <p className="mt-3 text-sm font-bold text-rose-400">Market mover data is not available right now.</p>
+            <p className="mt-3 text-sm font-bold text-rose-400">Market data temporarily unavailable.</p>
             <p className="mt-1 text-xs leading-6 text-slate-600">
-              Try searching a ticker to open a BullBrief.
+              The mover feed may be rate-limited or down. Try refreshing, or search a specific ticker to open a BullBrief.
             </p>
             <p className="mt-2 text-[10px] uppercase tracking-widest text-slate-700">{error}</p>
           </section>
@@ -412,9 +412,9 @@ export default function MoversPage() {
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-sky-400/10 text-sky-400">
               <Search className="h-4 w-4" />
             </div>
-            <p className="mt-3 text-sm font-bold text-blue-50">Market mover data is not available right now.</p>
+            <p className="mt-3 text-sm font-bold text-blue-50">No movers found for this filter.</p>
             <p className="mt-1 text-xs leading-6 text-slate-600">
-              Try searching a ticker to open a BullBrief.
+              Switch to Gainers, Losers, or Most Active to see today&apos;s market activity — or search a ticker directly.
             </p>
           </section>
         )}

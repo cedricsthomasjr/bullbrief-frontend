@@ -162,14 +162,14 @@ export default function StockDriversCard({
 
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className="rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
+              className="rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500 cursor-help"
               title={data.summary}
               style={{
                 backgroundColor: "rgba(15,32,64,0.58)",
                 border: "1px solid rgba(56,189,248,0.1)",
               }}
             >
-              Hover For Filing Context
+              Filing Context
             </span>
             {data.source?.url && (
               <a
