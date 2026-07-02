@@ -8,6 +8,8 @@ import CompareCharts from "@/app/components/CompareCharts";
 import { cachedFetch } from "@/app/lib/summaryCache";
 import type { SingleSummaryData, InsightSection } from "@/app/types/stock";
 import { ArrowRight, Lightbulb, Layers3, Scale } from "lucide-react";
+import { Eyebrow, Tag } from "@/app/ui/eyebrow";
+import { TONE } from "@/app/lib/tone";
 
 type CompareSummaryResponse = {
   tickers?: SingleSummaryData[];
@@ -67,17 +69,12 @@ export default function TripleTickerCompare() {
       >
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Enter up to 3 tickers</p>
+            <Eyebrow tone="sky">Enter up to 3 tickers</Eyebrow>
             <p className="mt-1 text-xs leading-6 text-slate-600">
               Deep Compare works best when the companies share a sector, industry, or business model.
             </p>
           </div>
-          <div
-            className="rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
-            style={{ backgroundColor: "rgba(129,140,248,0.07)", border: "1px solid rgba(129,140,248,0.14)" }}
-          >
-            Try AAPL MSFT GOOGL
-          </div>
+          <Tag tone="indigo">Try AAPL MSFT GOOGL</Tag>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -88,12 +85,11 @@ export default function TripleTickerCompare() {
           ].map((tip) => (
             <div
               key={tip.title}
-              className="rounded-lg p-3"
-              style={{ backgroundColor: "rgba(15,32,64,0.36)", border: "1px solid rgba(56,189,248,0.08)" }}
+              className="rounded-lg border border-white/[0.05] bg-[#0f2040]/40 p-3"
             >
               <div className="flex items-center gap-2 text-sky-400">
                 {tip.icon}
-                <p className="text-[10px] font-bold uppercase tracking-widest">{tip.title}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide">{tip.title}</p>
               </div>
               <p className="mt-2 text-xs leading-5 text-slate-600">{tip.text}</p>
             </div>
@@ -123,10 +119,7 @@ export default function TripleTickerCompare() {
 
           {loading && (
             <div className="flex items-center gap-2.5">
-              <div
-                className="w-4 h-4 rounded-full animate-spin"
-                style={{ borderTop: "2px solid #38bdf8", borderRight: "2px solid transparent", borderBottom: "2px solid transparent", borderLeft: "2px solid transparent" }}
-              />
+              <div className={`w-4 h-4 rounded-full border-2 border-transparent animate-spin ${TONE.sky.spinnerBorder}`} />
               <p className="text-xs text-slate-600">BullBrief is analyzing...</p>
             </div>
           )}
@@ -153,14 +146,14 @@ export default function TripleTickerCompare() {
         <div
           className="bb-card p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
           style={{
-            borderColor: sectorAligned ? "rgba(16,185,129,0.18)" : "rgba(245,158,11,0.18)",
+            borderColor: sectorAligned ? `${TONE.emerald.hex}2e` : `${TONE.amber.hex}2e`,
             background: sectorAligned
-              ? "linear-gradient(135deg, rgba(16,185,129,0.06), rgba(56,189,248,0.04))"
-              : "linear-gradient(135deg, rgba(245,158,11,0.055), rgba(56,189,248,0.035))",
+              ? `linear-gradient(135deg, ${TONE.emerald.hex}0f, ${TONE.sky.hex}0a)`
+              : `linear-gradient(135deg, ${TONE.amber.hex}0e, ${TONE.sky.hex}09)`,
           }}
         >
           <div>
-            <p className={`text-[10px] font-bold uppercase tracking-widest ${sectorAligned ? "text-emerald-400" : "text-amber-400"}`}>
+            <p className={`text-xs font-semibold uppercase tracking-wide ${sectorAligned ? "text-emerald-400" : "text-amber-400"}`}>
               {sectorAligned ? "Strong comparison set" : "Mixed comparison set"}
             </p>
             <p className="mt-1 text-xs leading-6 text-slate-500">
@@ -170,7 +163,7 @@ export default function TripleTickerCompare() {
             </p>
           </div>
           {industries.length > 0 && (
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-600">
+            <p className="text-xs font-mono uppercase tracking-wide text-slate-600">
               {industries.slice(0, 3).join(" / ")}
             </p>
           )}

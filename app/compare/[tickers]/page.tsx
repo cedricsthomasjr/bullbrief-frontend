@@ -8,6 +8,9 @@ import LoadingScreen from "@/app/components/LoadingScreen";
 import { cachedFetch } from "@/app/lib/summaryCache";
 import Link from "next/link";
 import { ArrowLeft, Lightbulb, Layers3, Scale } from "lucide-react";
+import { TONE, type Tone } from "@/app/lib/tone";
+
+const COMPANY_TONES: Tone[] = ["sky", "indigo", "emerald"];
 
 type TickerData = {
   ticker: string;
@@ -49,7 +52,7 @@ export default function ComparePage() {
   const sectorAligned = (data?.tickers?.length ?? 0) > 1 && sectors.length === 1;
 
   return (
-    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px] bg-[#060c1a]">
       {/* Background orb */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div
@@ -76,16 +79,11 @@ export default function ComparePage() {
             </h1>
             <div className="flex gap-2 pb-1">
               {tickerList.map((t, i) => {
-                const colors = ["#38bdf8", "#818cf8", "#10b981"];
+                const tone = COMPANY_TONES[i % COMPANY_TONES.length];
                 return (
                   <span
                     key={t}
-                    className="text-[10px] font-black font-mono px-2 py-0.5 rounded-md"
-                    style={{
-                      color: colors[i % colors.length],
-                      backgroundColor: `${colors[i % colors.length]}12`,
-                      border: `1px solid ${colors[i % colors.length]}25`,
-                    }}
+                    className={`rounded-md border px-2 py-0.5 text-xs font-bold font-mono ${TONE[tone].soft}`}
                   >
                     {t}
                   </span>
@@ -106,12 +104,11 @@ export default function ComparePage() {
           ].map((tip) => (
             <div
               key={tip.title}
-              className="bb-card p-3"
-              style={{ backgroundColor: "rgba(15,32,64,0.36)", borderColor: "rgba(56,189,248,0.08)" }}
+              className="rounded-lg border border-white/[0.05] bg-[#0f2040]/40 p-3"
             >
               <div className="flex items-center gap-2 text-sky-400">
                 {tip.icon}
-                <p className="text-[10px] font-bold uppercase tracking-widest">{tip.title}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide">{tip.title}</p>
               </div>
               <p className="mt-2 text-xs leading-5 text-slate-600">{tip.text}</p>
             </div>
@@ -122,14 +119,14 @@ export default function ComparePage() {
           <div
             className="bb-card p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
             style={{
-              borderColor: sectorAligned ? "rgba(16,185,129,0.18)" : "rgba(245,158,11,0.18)",
+              borderColor: sectorAligned ? `${TONE.emerald.hex}2e` : `${TONE.amber.hex}2e`,
               background: sectorAligned
-                ? "linear-gradient(135deg, rgba(16,185,129,0.06), rgba(56,189,248,0.04))"
-                : "linear-gradient(135deg, rgba(245,158,11,0.055), rgba(56,189,248,0.035))",
+                ? `linear-gradient(135deg, ${TONE.emerald.hex}0f, ${TONE.sky.hex}0a)`
+                : `linear-gradient(135deg, ${TONE.amber.hex}0e, ${TONE.sky.hex}09)`,
             }}
           >
             <div>
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${sectorAligned ? "text-emerald-400" : "text-amber-400"}`}>
+              <p className={`text-xs font-semibold uppercase tracking-wide ${sectorAligned ? "text-emerald-400" : "text-amber-400"}`}>
                 {sectorAligned ? "Strong comparison set" : "Mixed comparison set"}
               </p>
               <p className="mt-1 text-xs leading-6 text-slate-500">
@@ -139,7 +136,7 @@ export default function ComparePage() {
               </p>
             </div>
             {industries.length > 0 && (
-              <p className="text-[10px] font-mono uppercase tracking-widest text-slate-600">
+              <p className="text-xs font-mono uppercase tracking-wide text-slate-600">
                 {industries.slice(0, 3).join(" / ")}
               </p>
             )}
