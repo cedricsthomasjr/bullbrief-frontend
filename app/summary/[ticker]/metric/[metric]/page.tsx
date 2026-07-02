@@ -7,6 +7,7 @@ import MetricChart from "@/app/components/MetricChart";
 import LoadingScreen from "@/app/components/LoadingScreen";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { TONE } from "@/app/lib/tone";
 
 const FINANCIAL_METRICS = new Set([
   "revenue",
@@ -101,7 +102,7 @@ export default function MetricDetailPage() {
   if (dataLoading) return <LoadingScreen />;
 
   return (
-    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px] bg-[#060c1a]">
       <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
         {/* Header */}
         <div className="space-y-3 pt-2">
@@ -109,7 +110,7 @@ export default function MetricDetailPage() {
             <ArrowLeft className="w-3 h-3" /> Back to {ticker}
           </Link>
           <div>
-            <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-1">{ticker}</p>
+            <p className="text-xs font-bold text-sky-400 uppercase tracking-wide mb-1">{ticker}</p>
             <h1 className="text-4xl font-bold tracking-tighter text-blue-50 capitalize">{metric}</h1>
           </div>
         </div>
@@ -128,22 +129,16 @@ export default function MetricDetailPage() {
         {/* AI Interpretation */}
         <section className="space-y-5">
           <div className="flex items-center gap-3">
-            <span
-              className="text-[10px] font-mono font-bold tabular-nums px-2 py-0.5 rounded"
-              style={{ color: "#818cf8", backgroundColor: "rgba(129,140,248,0.08)", border: "1px solid rgba(129,140,248,0.2)" }}
-            >
+            <span className="text-xs font-mono font-bold tabular-nums px-2 py-0.5 rounded border border-indigo-400/20 bg-indigo-400/10 text-indigo-400">
               AI
             </span>
             <h2 className="text-lg font-bold text-blue-50">AI Interpretation</h2>
-            <div className="flex-1 h-px" style={{ background: "rgba(56,189,248,0.07)" }} />
+            <div className="flex-1 h-px bg-sky-400/[0.07]" />
           </div>
 
           {summaryLoading ? (
             <div className="flex items-center gap-3">
-              <div
-                className="w-4 h-4 rounded-full animate-spin"
-                style={{ borderTop: "2px solid #818cf8", borderRight: "2px solid transparent", borderBottom: "2px solid transparent", borderLeft: "2px solid transparent" }}
-              />
+              <div className={`w-4 h-4 rounded-full border-2 border-transparent animate-spin ${TONE.indigo.spinnerBorder}`} />
               <p className="text-xs text-slate-600">Generating analysis...</p>
             </div>
           ) : bulletPoints && bulletPoints.length > 0 ? (
@@ -154,7 +149,7 @@ export default function MetricDetailPage() {
                   <div
                     key={idx}
                     className="bb-card bb-card-hover p-3 space-y-1.5"
-                    style={{ borderColor: "rgba(129,140,248,0.15)" }}
+                    style={{ borderColor: `${TONE.indigo.hex}26` }}
                   >
                     <p className="text-xs font-bold text-indigo-400">{title}</p>
                     <p className="text-sm text-slate-400 leading-relaxed">{rest.join(":").trim()}</p>

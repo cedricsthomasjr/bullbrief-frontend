@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Cell, Pie, PieChart } from "recharts";
 import { Activity, ArrowUpRight, Layers, Loader2, TrendingUp } from "lucide-react";
 import DataSourceNote from "@/app/components/DataSourceNote";
+import { TONE } from "@/app/lib/tone";
 
 export type RevenueSegment = {
   name: string;
@@ -341,18 +342,15 @@ export default function BusinessEngineCylinder({ data, loading, error, onOpenDee
   // ── Cylinder ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bb-card p-3 space-y-4" style={{ borderColor: "rgba(56,189,248,0.14)" }}>
+    <div className="bb-card p-3 space-y-4" style={{ borderColor: `${TONE.sky.hex}24` }}>
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: "rgba(129,140,248,0.1)", border: "1px solid rgba(129,140,248,0.25)" }}
-          >
+          <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-400/10 border border-indigo-400/25">
             <Layers className="w-4 h-4 text-indigo-300" />
           </span>
           <div>
             <p className="text-sm font-bold text-blue-50">Business Engine</p>
-            <p className="text-[10px] uppercase tracking-widest text-slate-600">
+            <p className="text-xs uppercase tracking-wide text-slate-600">
               {stackedRevenueLabel(data)}
             </p>
           </div>
@@ -360,12 +358,7 @@ export default function BusinessEngineCylinder({ data, loading, error, onOpenDee
         {onOpenDeepDive && (
           <button
             onClick={onOpenDeepDive}
-            className="self-start text-[10px] font-semibold uppercase tracking-widest px-3 py-2 rounded-lg transition hover:-translate-y-0.5"
-            style={{
-              color: "#38bdf8",
-              backgroundColor: "rgba(56,189,248,0.07)",
-              border: "1px solid rgba(56,189,248,0.18)",
-            }}
+            className="self-start text-xs font-semibold uppercase tracking-wide px-3 py-2 rounded-lg transition hover:-translate-y-0.5 text-sky-400 bg-sky-400/[0.07] border border-sky-400/20 hover:bg-sky-400/10"
           >
             {period === "quarterly" ? "Quarterly history" : "Year-over-year history"}
             <ArrowUpRight className="inline-block w-3 h-3 ml-1" />
@@ -416,7 +409,7 @@ export default function BusinessEngineCylinder({ data, loading, error, onOpenDee
             </PieChart>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <p className="text-base font-bold tabular-nums text-blue-50">{formatCurrencyCompact(total)}</p>
-              <p className="text-[9px] uppercase tracking-widest text-slate-500 mt-0.5">
+              <p className="text-xs uppercase tracking-wide text-slate-500 mt-0.5">
                 {periodEntryLabel(data.years[data.years.length - 1], period)}
               </p>
             </div>
@@ -436,7 +429,7 @@ export default function BusinessEngineCylinder({ data, loading, error, onOpenDee
                   onClick={() => setLockedId((cur) => (cur === seg.id ? null : seg.id))}
                   onMouseEnter={() => setHoveredId(seg.id)}
                   onMouseLeave={() => setHoveredId((cur) => (cur === seg.id ? null : cur))}
-                  className="group flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-all"
+                  className="group flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-all"
                   style={{
                     color: isActive ? "#eff6ff" : "#94a3b8",
                     backgroundColor: isActive ? `${seg.color.base}22` : "rgba(15,32,64,0.42)",
@@ -531,7 +524,7 @@ function SegmentDetail({
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: segment.color.base }} />
             <p className="text-sm font-bold text-blue-50 truncate">{segment.name}</p>
           </div>
-          <p className="mt-1 text-[10px] uppercase tracking-widest text-slate-600">
+          <p className="mt-1 text-xs uppercase tracking-wide text-slate-600">
             {sourceLabel}
           </p>
         </div>
@@ -539,7 +532,7 @@ function SegmentDetail({
           <p className="text-base font-bold tabular-nums" style={{ color: segment.color.light }}>
             {formatCurrencyCompact(segment.value)}
           </p>
-          <p className="text-[10px] text-slate-500 tabular-nums">
+          <p className="text-xs text-slate-500 tabular-nums">
             {segment.share.toFixed(1)}% of revenue
           </p>
         </div>
@@ -566,7 +559,7 @@ function SegmentDetail({
         {lines.map((line) => (
           <div key={line.label} className="space-y-0.5">
             <p
-              className="text-[9px] font-bold uppercase tracking-widest"
+              className="text-xs font-bold uppercase tracking-wide"
               style={{ color: segment.color.light }}
             >
               {line.label}
@@ -588,14 +581,11 @@ function DetailStat({
   value: string;
   tone?: "up" | "down" | "neutral";
 }) {
-  const toneColor = tone === "up" ? "#34d399" : tone === "down" ? "#fb7185" : "#eff6ff";
+  const toneClass = tone === "up" ? "text-emerald-400" : tone === "down" ? "text-rose-400" : "text-blue-50";
   return (
-    <div
-      className="rounded-md px-2 py-1.5"
-      style={{ backgroundColor: "rgba(8,18,36,0.6)", border: "1px solid rgba(56,189,248,0.08)" }}
-    >
-      <p className="text-[9px] uppercase tracking-widest text-slate-600">{label}</p>
-      <p className="mt-0.5 text-xs font-bold tabular-nums" style={{ color: toneColor }}>
+    <div className="rounded-md border border-sky-400/8 bg-[#081224]/60 px-2 py-1.5">
+      <p className="text-xs uppercase tracking-wide text-slate-600">{label}</p>
+      <p className={`mt-0.5 text-xs font-bold tabular-nums ${toneClass}`}>
         {value}
       </p>
     </div>
@@ -625,11 +615,11 @@ function MiniMetric({
     >
       <div className="flex items-center gap-1.5" style={{ color: accent }}>
         {icon}
-        <p className="text-[9px] font-bold uppercase tracking-widest">{label}</p>
+        <p className="text-xs font-bold uppercase tracking-wide">{label}</p>
       </div>
       <p className="mt-1 text-xs font-bold text-blue-50 truncate">{value}</p>
       {subtle && (
-        <p className="text-[10px] text-slate-500 tabular-nums truncate">{subtle}</p>
+        <p className="text-xs text-slate-500 tabular-nums truncate">{subtle}</p>
       )}
     </div>
   );
@@ -643,10 +633,10 @@ function concentrationLabel(pct: number): string {
 }
 
 function concentrationAccent(pct: number): string {
-  if (pct >= 70) return "#fb7185";
-  if (pct >= 50) return "#f59e0b";
-  if (pct >= 35) return "#38bdf8";
-  return "#34d399";
+  if (pct >= 70) return TONE.rose.hex;
+  if (pct >= 50) return TONE.amber.hex;
+  if (pct >= 35) return TONE.sky.hex;
+  return TONE.emerald.hex;
 }
 
 export type { Props as BusinessEngineCylinderProps };

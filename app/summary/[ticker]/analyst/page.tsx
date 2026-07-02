@@ -28,6 +28,7 @@ import { cachedFetch } from "@/app/lib/summaryCache";
 import LoadingScreen from "@/app/components/LoadingScreen";
 import DataSourceNote from "@/app/components/DataSourceNote";
 import { useSideNavSections } from "@/app/hooks/useSideNavSections";
+import { TONE, type Tone } from "@/app/lib/tone";
 
 type OverallSignal = "Bullish" | "Neutral" | "Bearish";
 type Confidence = "Low" | "Medium" | "High";
@@ -126,48 +127,56 @@ type AnalystReport = {
 
 type DeepDiveTab = "bullBear" | "competition" | "drivers" | "change" | "risks";
 
-const SIGNAL_CONFIG: Record<OverallSignal, { color: string; bg: string; border: string; glow: string; icon: React.ReactNode }> = {
-  Bullish: {
-    color: "#10b981",
-    bg: "rgba(16,185,129,0.1)",
-    border: "rgba(16,185,129,0.34)",
-    glow: "0 0 40px rgba(16,185,129,0.16)",
-    icon: <TrendingUp className="w-4 h-4" />,
-  },
-  Neutral: {
-    color: "#f59e0b",
-    bg: "rgba(245,158,11,0.09)",
-    border: "rgba(245,158,11,0.3)",
-    glow: "0 0 36px rgba(245,158,11,0.12)",
-    icon: <Scale className="w-4 h-4" />,
-  },
-  Bearish: {
-    color: "#f43f5e",
-    bg: "rgba(244,63,94,0.09)",
-    border: "rgba(244,63,94,0.32)",
-    glow: "0 0 38px rgba(244,63,94,0.14)",
-    icon: <TrendingDown className="w-4 h-4" />,
-  },
+const SIGNAL_TONE: Record<OverallSignal, Tone> = {
+  Bullish: "emerald",
+  Neutral: "amber",
+  Bearish: "rose",
 };
 
-const CONFIDENCE_CONFIG: Record<Confidence, { color: string; width: string }> = {
-  Low: { color: "#94a3b8", width: "34%" },
-  Medium: { color: "#38bdf8", width: "66%" },
-  High: { color: "#10b981", width: "100%" },
+const SIGNAL_ICON: Record<OverallSignal, React.ReactNode> = {
+  Bullish: <TrendingUp className="w-4 h-4" />,
+  Neutral: <Scale className="w-4 h-4" />,
+  Bearish: <TrendingDown className="w-4 h-4" />,
 };
 
-const GRADE_CONFIG: Record<string, { color: string; width: string }> = {
-  Strong: { color: "#10b981", width: "92%" },
-  Improving: { color: "#38bdf8", width: "74%" },
-  Mixed: { color: "#f59e0b", width: "54%" },
-  Weak: { color: "#fb7185", width: "34%" },
-  Concerning: { color: "#f43f5e", width: "22%" },
-  Cheap: { color: "#10b981", width: "84%" },
-  Reasonable: { color: "#38bdf8", width: "66%" },
-  Expensive: { color: "#f59e0b", width: "42%" },
-  Low: { color: "#10b981", width: "78%" },
-  Moderate: { color: "#f59e0b", width: "55%" },
-  High: { color: "#f43f5e", width: "30%" },
+const CONFIDENCE_TONE: Record<Confidence, Tone> = {
+  Low: "slate",
+  Medium: "sky",
+  High: "emerald",
+};
+
+const CONFIDENCE_WIDTH: Record<Confidence, string> = {
+  Low: "34%",
+  Medium: "66%",
+  High: "100%",
+};
+
+const GRADE_TONE: Record<string, Tone> = {
+  Strong: "emerald",
+  Improving: "sky",
+  Mixed: "amber",
+  Weak: "rose",
+  Concerning: "rose",
+  Cheap: "emerald",
+  Reasonable: "sky",
+  Expensive: "amber",
+  Low: "emerald",
+  Moderate: "amber",
+  High: "rose",
+};
+
+const GRADE_WIDTH: Record<string, string> = {
+  Strong: "92%",
+  Improving: "74%",
+  Mixed: "54%",
+  Weak: "34%",
+  Concerning: "22%",
+  Cheap: "84%",
+  Reasonable: "66%",
+  Expensive: "42%",
+  Low: "78%",
+  Moderate: "55%",
+  High: "30%",
 };
 
 const SCORECARD_META: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -479,7 +488,7 @@ function normalizeList(items?: string[], fallback = "Data unavailable.") {
 }
 
 function gradeStyle(grade: string) {
-  return GRADE_CONFIG[grade] ?? { color: "#94a3b8", width: "50%" };
+  return { tone: GRADE_TONE[grade] ?? "slate", width: GRADE_WIDTH[grade] ?? "50%" };
 }
 
 function PanelShell({ children }: { children: React.ReactNode }) {
@@ -498,12 +507,12 @@ function PanelShell({ children }: { children: React.ReactNode }) {
 
 function SectionTitle({ icon, title, kicker }: { icon: React.ReactNode; title: string; kicker?: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 px-3 py-3" style={{ borderBottom: "1px solid rgba(56,189,248,0.08)" }}>
+    <div className="flex items-center justify-between gap-3 border-b border-sky-400/10 px-3 py-3">
       <div className="flex items-center gap-2 min-w-0">
         <span className="text-sky-400 shrink-0">{icon}</span>
         <p className="text-sm font-bold text-blue-50 truncate">{title}</p>
       </div>
-      {kicker && <p className="text-[10px] uppercase tracking-widest text-slate-600 shrink-0">{kicker}</p>}
+      {kicker && <p className="text-xs uppercase tracking-wide text-slate-600 shrink-0">{kicker}</p>}
     </div>
   );
 }
@@ -516,15 +525,12 @@ function SignalBadge({
   label?: string | null;
 }) {
   const normalizedSignal = normalizeOverallSignal(signal);
-  const cfg = SIGNAL_CONFIG[normalizedSignal];
+  const tone = SIGNAL_TONE[normalizedSignal];
   const displayLabel = label?.trim() || signalFallbackLabel(normalizedSignal);
 
   return (
-    <span
-      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest"
-      style={{ color: cfg.color, backgroundColor: cfg.bg, border: `1px solid ${cfg.border}` }}
-    >
-      {cfg.icon}
+    <span className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-wide ${TONE[tone].soft}`}>
+      {SIGNAL_ICON[normalizedSignal]}
       {displayLabel}
     </span>
   );
@@ -532,53 +538,51 @@ function SignalBadge({
 
 function ScorecardTile({ itemKey, item }: { itemKey: string; item: ScorecardItem }) {
   const meta = SCORECARD_META[itemKey] ?? { label: itemKey.replaceAll("_", " "), icon: <CircleHelp className="w-4 h-4" /> };
-  const style = gradeStyle(item.grade);
+  const { tone, width } = gradeStyle(item.grade);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg border p-3"
-      style={{ backgroundColor: "rgba(15,32,64,0.46)", borderColor: "rgba(56,189,248,0.1)" }}
+      className="bb-card-soft p-3"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <span style={{ color: style.color }}>{meta.icon}</span>
+          <span className={TONE[tone].text}>{meta.icon}</span>
           <p className="truncate text-xs font-bold text-blue-50">{meta.label}</p>
         </div>
-        <span
-          className="shrink-0 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-widest"
-          style={{ color: style.color, backgroundColor: `${style.color}14`, border: `1px solid ${style.color}28` }}
-        >
+        <span className={`shrink-0 rounded-md border px-2 py-1 text-xs font-bold uppercase tracking-wide ${TONE[tone].soft}`}>
           {item.grade}
         </span>
       </div>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-950/70">
         <motion.div
-          className="h-full rounded-full"
+          className={`h-full rounded-full ${TONE[tone].bar}`}
           initial={{ width: 0 }}
-          animate={{ width: style.width }}
+          animate={{ width }}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          style={{ backgroundColor: style.color, boxShadow: `0 0 14px ${style.color}55` }}
         />
       </div>
-      <p className="mt-3 text-[11px] leading-5 text-slate-500">{item.rationale || "Data unavailable."}</p>
+      <p className="mt-3 text-xs leading-5 text-slate-500">{item.rationale || "Data unavailable."}</p>
     </motion.div>
   );
 }
 
+const BULLET_TONE: Record<"bull" | "bear" | "neutral", Tone> = {
+  bull: "emerald",
+  bear: "rose",
+  neutral: "sky",
+};
+
 function BulletPanel({ title, tone, items }: { title: string; tone: "bull" | "bear" | "neutral"; items: string[] }) {
-  const color = tone === "bull" ? "#10b981" : tone === "bear" ? "#f43f5e" : "#38bdf8";
+  const toneKey = BULLET_TONE[tone];
   return (
-    <div className="rounded-lg border p-3" style={{ backgroundColor: `${color}08`, borderColor: `${color}24` }}>
-      <p className="mb-3 text-sm font-bold" style={{ color }}>{title}</p>
+    <div className={`rounded-lg border p-3 ${TONE[toneKey].soft}`}>
+      <p className={`mb-3 text-sm font-bold ${TONE[toneKey].text}`}>{title}</p>
       <div className="space-y-3">
         {normalizeList(items).map((item, idx) => (
           <div key={idx} className="flex gap-3">
-            <span
-              className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
-              style={{ color, backgroundColor: `${color}18` }}
-            >
+            <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${TONE[toneKey].soft}`}>
               {idx + 1}
             </span>
             <p className="text-xs leading-6 text-slate-400">{item}</p>
@@ -589,17 +593,13 @@ function BulletPanel({ title, tone, items }: { title: string; tone: "bull" | "be
   );
 }
 
-function CompactList({ items, color = "#38bdf8" }: { items: string[]; color?: string }) {
+function CompactList({ items, tone = "sky" }: { items: string[]; tone?: Tone }) {
   return (
     <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
       {normalizeList(items).map((item, idx) => (
-        <div
-          key={idx}
-          className="rounded-lg border px-3 py-2.5"
-          style={{ backgroundColor: "rgba(15,32,64,0.42)", borderColor: "rgba(56,189,248,0.09)" }}
-        >
+        <div key={idx} className="bb-card-soft px-3 py-2.5">
           <div className="flex gap-2">
-            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+            <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${TONE[tone].dot}`} />
             <p className="text-xs leading-5 text-slate-400">{item}</p>
           </div>
         </div>
@@ -612,17 +612,17 @@ function CompetitionTable({ report }: { report: AnalystReport }) {
   const peers = report.competitive_analysis?.peers ?? [];
   if (peers.length === 0) {
     return (
-      <div className="rounded-lg border p-4" style={{ backgroundColor: "rgba(15,32,64,0.42)", borderColor: "rgba(56,189,248,0.09)" }}>
+      <div className="bb-card-soft p-4">
         <p className="text-sm text-slate-500">Competitive peer data is unavailable for this ticker.</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border" style={{ borderColor: "rgba(56,189,248,0.1)" }}>
+    <div className="overflow-x-auto rounded-lg border border-sky-400/10">
       <table className="min-w-[980px] w-full text-left text-xs">
-        <thead style={{ backgroundColor: "rgba(15,32,64,0.7)" }}>
-          <tr className="text-[10px] uppercase tracking-widest text-slate-600">
+        <thead className="bg-[#0f2040]/70">
+          <tr className="text-xs uppercase tracking-wide text-slate-600">
             <th className="px-3 py-3">Company</th>
             <th className="px-3 py-3">Ticker</th>
             <th className="px-3 py-3">Positioning</th>
@@ -635,7 +635,7 @@ function CompetitionTable({ report }: { report: AnalystReport }) {
         </thead>
         <tbody>
           {peers.map((peer, idx) => (
-            <tr key={`${peer.ticker}-${idx}`} style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}>
+            <tr key={`${peer.ticker}-${idx}`} className="border-t border-sky-400/10">
               <td className="px-3 py-3 font-semibold text-blue-50">{peer.company || "N/A"}</td>
               <td className="px-3 py-3 font-mono text-sky-400">{peer.ticker || "N/A"}</td>
               <td className="px-3 py-3 text-slate-400">{peer.positioning || "N/A"}</td>
@@ -658,17 +658,16 @@ function DriverGrid({ drivers }: { drivers: StockDriver[] }) {
       {(drivers.length ? drivers : [{ driver: "Business drivers", why_it_matters: "Driver data is unavailable.", evidence: "N/A", trend: "unknown" }]).map((driver, idx) => (
         <div
           key={`${driver.driver}-${idx}`}
-          className="rounded-lg border p-3"
-          style={{ backgroundColor: "rgba(15,32,64,0.42)", borderColor: "rgba(56,189,248,0.1)" }}
+          className="bb-card-soft p-3"
         >
           <div className="flex items-start justify-between gap-3">
             <p className="text-sm font-bold text-blue-50">{driver.driver}</p>
-            <span className="rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-500" style={{ backgroundColor: "rgba(15,23,42,0.75)" }}>
+            <span className="rounded-md bg-slate-950/70 px-2 py-1 text-xs font-bold uppercase tracking-wide text-slate-500">
               {driver.trend || "unknown"}
             </span>
           </div>
           <p className="mt-2 text-xs leading-6 text-slate-400">{driver.why_it_matters}</p>
-          <p className="mt-3 text-[10px] uppercase tracking-widest text-slate-600">{driver.evidence || "N/A"}</p>
+          <p className="mt-3 text-xs uppercase tracking-wide text-slate-600">{driver.evidence || "N/A"}</p>
         </div>
       ))}
     </div>
@@ -703,7 +702,7 @@ export default function AnalystReportPage() {
   }, [ticker]);
 
   const signal = normalizeOverallSignal(report?.overall_signal ?? legacyRating(report));
-  const signalCfg = SIGNAL_CONFIG[signal];
+  const signalTone = SIGNAL_TONE[signal];
 
   useSideNavSections(
     [
@@ -713,7 +712,7 @@ export default function AnalystReportPage() {
       { id: "competition", label: "Competition" },
       { id: "uncertainty", label: "Uncertainty" },
     ],
-    signalCfg.color,
+    TONE[signalTone].hex,
   );
 
   const scorecardItems = useMemo(() => {
@@ -727,7 +726,7 @@ export default function AnalystReportPage() {
 
   if (error || !report) {
     return (
-      <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#060c1a" }}>
+      <main className="min-h-screen flex items-center justify-center bg-[#060c1a]">
         <div className="bb-card-danger max-w-md p-5 text-center">
           <p className="text-sm font-semibold text-rose-400">AI research snapshot unavailable</p>
           <p className="mt-2 text-xs leading-6 text-slate-500">{error ?? "No report returned."}</p>
@@ -740,10 +739,11 @@ export default function AnalystReportPage() {
   }
 
   const confidenceLevel = normalizeConfidence(report.confidence);
-  const confidence = CONFIDENCE_CONFIG[confidenceLevel];
+  const confidenceTone = CONFIDENCE_TONE[confidenceLevel];
+  const confidenceWidth = CONFIDENCE_WIDTH[confidenceLevel];
 
   return (
-    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px] bg-[#060c1a]">
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
         <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <Link href={`/summary/${ticker}`} className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-sky-400 transition-colors">
@@ -762,31 +762,28 @@ export default function AnalystReportPage() {
           transition={{ duration: 0.45 }}
           className="scroll-mt-24"
         >
-          <div className="bb-card overflow-hidden" style={{ borderColor: signalCfg.border, boxShadow: signalCfg.glow }}>
+          <div className="bb-card overflow-hidden" style={{ borderColor: `${TONE[signalTone].hex}33` }}>
             <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.6fr]">
-              <div className="p-4" style={{ background: `linear-gradient(135deg, ${signalCfg.bg}, rgba(15,32,64,0.32))` }}>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{report.sector} / {report.industry}</p>
+              <div className="p-4" style={{ background: `linear-gradient(135deg, ${TONE[signalTone].hex}1a, rgba(15,32,64,0.32))` }}>
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{report.sector} / {report.industry}</p>
                 <h1 className="mt-2 text-4xl font-bold tracking-tighter text-blue-50 sm:text-5xl">{report.company_name}</h1>
                 <p className="mt-2 font-mono text-sm text-slate-500">{report.ticker} / {fmtMoney(report.market_cap)}</p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
                   <SignalBadge signal={report.overall_signal ?? legacyRating(report)} label={report.signal_label} />
-                  <span
-                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest"
-                    style={{ color: confidence.color, backgroundColor: `${confidence.color}12`, border: `1px solid ${confidence.color}28` }}
-                  >
+                  <span className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-wide ${TONE[confidenceTone].soft}`}>
                     <Gauge className="w-4 h-4" />
                     {confidenceLevel} Confidence
                   </span>
                 </div>
 
                 <div className="mt-5 grid grid-cols-2 gap-2">
-                  <div className="rounded-lg border px-3 py-2" style={{ backgroundColor: "rgba(8,18,36,0.5)", borderColor: "rgba(56,189,248,0.08)" }}>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">Current</p>
+                  <div className="rounded-lg border border-sky-400/10 bg-[#081224]/50 px-3 py-2">
+                    <p className="text-xs uppercase tracking-wide text-slate-600">Current</p>
                     <p className="mt-1 text-sm font-bold tabular-nums text-blue-50">{fmtPrice(report.current_price)}</p>
                   </div>
-                  <div className="rounded-lg border px-3 py-2" style={{ backgroundColor: "rgba(8,18,36,0.5)", borderColor: "rgba(56,189,248,0.08)" }}>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">52W Range</p>
+                  <div className="rounded-lg border border-sky-400/10 bg-[#081224]/50 px-3 py-2">
+                    <p className="text-xs uppercase tracking-wide text-slate-600">52W Range</p>
                     <p className="mt-1 text-sm font-bold tabular-nums text-blue-50">{fmtPrice(report.wk52_low)} - {fmtPrice(report.wk52_high)}</p>
                   </div>
                 </div>
@@ -794,30 +791,29 @@ export default function AnalystReportPage() {
 
               <div className="p-4 space-y-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">Market Signal Summary</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-sky-400">Market Signal Summary</p>
                   <p className="mt-3 text-sm leading-8 text-slate-300">
                     {report.summary || legacySummary(report) || "Research summary is unavailable."}
                   </p>
                 </div>
 
                 <div>
-                  <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-600">
+                  <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-wide text-slate-600">
                     <span>Signal Conviction</span>
-                    <span style={{ color: confidence.color }}>{confidenceLevel}</span>
+                    <span className={TONE[confidenceTone].text}>{confidenceLevel}</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-slate-950/80">
                     <motion.div
-                      className="h-full rounded-full"
+                      className={`h-full rounded-full ${TONE[confidenceTone].bar}`}
                       initial={{ width: 0 }}
-                      animate={{ width: confidence.width }}
+                      animate={{ width: confidenceWidth }}
                       transition={{ duration: 0.8, ease: "easeOut" }}
-                      style={{ backgroundColor: confidence.color, boxShadow: `0 0 18px ${confidence.color}55` }}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                  <CompactList items={report.why_signal_appears} color={signalCfg.color} />
+                  <CompactList items={report.why_signal_appears} tone={signalTone} />
                 </div>
 
                 <DataSourceNote
@@ -851,19 +847,18 @@ export default function AnalystReportPage() {
           className="bb-card scroll-mt-24 overflow-hidden"
         >
           <SectionTitle icon={<Sparkles className="w-4 h-4" />} title="Deep Dive" />
-          <div className="flex gap-2 overflow-x-auto p-3" style={{ borderBottom: "1px solid rgba(56,189,248,0.08)" }}>
+          <div className="flex gap-2 overflow-x-auto border-b border-sky-400/10 p-3">
             {TABS.map((tab) => {
               const active = activeTab === tab.key;
               return (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition"
-                  style={{
-                    color: active ? "#eff6ff" : "#64748b",
-                    backgroundColor: active ? "rgba(56,189,248,0.12)" : "rgba(15,32,64,0.34)",
-                    border: `1px solid ${active ? "rgba(56,189,248,0.28)" : "rgba(56,189,248,0.08)"}`,
-                  }}
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition ${
+                    active
+                      ? "border-sky-400/28 bg-sky-400/12 text-blue-50"
+                      : "border-sky-400/8 bg-[#0f2040]/34 text-slate-500"
+                  }`}
                 >
                   {tab.icon}
                   {tab.label}
@@ -906,13 +901,13 @@ export default function AnalystReportPage() {
 
               {activeTab === "change" && (
                 <PanelShell key="change">
-                  <CompactList items={report.what_could_change_signal} color="#a78bfa" />
+                  <CompactList items={report.what_could_change_signal} tone="violet" />
                 </PanelShell>
               )}
 
               {activeTab === "risks" && (
                 <PanelShell key="risks">
-                  <CompactList items={report.key_downside_risks} color="#f43f5e" />
+                  <CompactList items={report.key_downside_risks} tone="rose" />
                 </PanelShell>
               )}
             </AnimatePresence>
@@ -929,8 +924,7 @@ export default function AnalystReportPage() {
           <button
             type="button"
             onClick={() => setExpanded((current) => ({ ...current, uncertainty: !current.uncertainty }))}
-            className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left"
-            style={{ borderBottom: expanded.uncertainty ? "1px solid rgba(56,189,248,0.08)" : "none" }}
+            className={`flex w-full items-center justify-between gap-3 px-3 py-3 text-left ${expanded.uncertainty ? "border-b border-sky-400/10" : ""}`}
           >
             <div className="flex items-center gap-2">
               <CircleHelp className="w-4 h-4 text-sky-400" />
@@ -947,7 +941,7 @@ export default function AnalystReportPage() {
                 className="overflow-hidden"
               >
                 <div className="p-3">
-                  <CompactList items={report.uncertainty} color="#94a3b8" />
+                  <CompactList items={report.uncertainty} tone="slate" />
                 </div>
               </motion.div>
             )}
@@ -955,7 +949,7 @@ export default function AnalystReportPage() {
         </motion.section>
 
         <div className="pb-10">
-          <p className="mx-auto max-w-2xl text-center text-[11px] leading-6 text-slate-700">
+          <p className="mx-auto max-w-2xl text-center text-xs leading-6 text-slate-700">
             {report.disclaimer || "This is an AI-generated research summary for educational purposes only. It is not financial advice."}
           </p>
         </div>

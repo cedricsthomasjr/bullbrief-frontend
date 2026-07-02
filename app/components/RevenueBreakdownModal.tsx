@@ -84,16 +84,9 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   const total = payload.reduce((sum, p) => sum + (p.value || 0), 0);
 
   return (
-    <div
-      className="rounded-xl p-3 space-y-2 text-xs min-w-[160px]"
-      style={{
-        backgroundColor: "#060c1a",
-        border: "1px solid rgba(56,189,248,0.2)",
-        boxShadow: "0 0 28px rgba(56,189,248,0.12)",
-      }}
-    >
+    <div className="rounded-xl border border-sky-400/20 bg-[#060c1a] p-3 space-y-2 text-xs min-w-[160px]">
       <p className="font-bold text-blue-50">{label}</p>
-      <p className="text-[10px] uppercase tracking-widest text-slate-500">
+      <p className="text-xs uppercase tracking-wide text-slate-500">
         Total: {fmt(total)}
       </p>
       {[...payload].reverse().map((p) => (
@@ -187,48 +180,26 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: "rgba(0,0,0,0.85)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div
-        className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl"
-        style={{
-          backgroundColor: "#060c1a",
-          border: "1px solid rgba(56,189,248,0.12)",
-          boxShadow: "0 0 80px rgba(56,189,248,0.08)",
-        }}
-      >
+      <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-sky-400/12 bg-[#060c1a]">
         {/* Header */}
-        <div
-          className="sticky top-0 z-10 flex items-center justify-between px-5 py-4"
-          style={{
-            backgroundColor: "#060c1a",
-            borderBottom: "1px solid rgba(56,189,248,0.08)",
-          }}
-        >
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-sky-400/8 bg-[#060c1a] px-5 py-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span
-                className="text-[10px] font-mono font-bold px-2 py-0.5 rounded tabular-nums"
-                style={{
-                  color: "#38bdf8",
-                  backgroundColor: "rgba(56,189,248,0.08)",
-                  border: "1px solid rgba(56,189,248,0.15)",
-                }}
-              >
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded tabular-nums text-sky-400 bg-sky-400/8 border border-sky-400/15">
                 {ticker.toUpperCase()}
               </span>
               <h2 className="text-base font-bold text-blue-50">Revenue Breakdown</h2>
             </div>
-            <p className="mt-0.5 text-[10px] uppercase tracking-widest text-slate-600">
+            <p className="mt-0.5 text-xs uppercase tracking-wide text-slate-600">
               {activePeriod === "quarterly" ? "Quarterly reported data only" : "Annual reported data only"}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors shrink-0"
-            style={{ border: "1px solid rgba(255,255,255,0.08)", color: "#64748b" }}
+            className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/[0.08] text-slate-500 transition-colors shrink-0 hover:text-sky-400"
           >
             <X className="w-4 h-4" />
           </button>

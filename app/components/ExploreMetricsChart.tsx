@@ -284,28 +284,21 @@ function CompactTooltip({
 
   return (
     <div
-      className="rounded-lg px-3 py-2 text-xs"
-      style={{
-        backgroundColor: "rgba(8, 18, 36, 0.96)",
-        border: `1px solid ${accent}55`,
-        boxShadow: `0 0 24px ${accent}22`,
-      }}
+      className="rounded-lg bg-[#081224]/96 px-3 py-2 text-xs"
+      style={{ border: `1px solid ${accent}55` }}
     >
-      <p className="text-[10px] uppercase tracking-widest text-slate-500">
+      <p className="text-xs uppercase tracking-wide text-slate-500">
         {point.displayLabel}
       </p>
       <p className="mt-0.5 text-sm font-bold tabular-nums text-blue-50">
         {formatValue(point.value, unit)}
       </p>
       {yoyLabel && (
-        <p
-          className="mt-0.5 text-[11px] font-semibold tabular-nums"
-          style={{ color: yoyPositive ? "#34d399" : "#fb7185" }}
-        >
+        <p className={`mt-0.5 text-xs font-semibold tabular-nums ${yoyPositive ? "text-emerald-400" : "text-rose-400"}`}>
           {changeLabel} {yoyLabel}
         </p>
       )}
-      <p className="mt-1 text-[10px] uppercase tracking-widest text-slate-600">{label}</p>
+      <p className="mt-1 text-xs uppercase tracking-wide text-slate-600">{label}</p>
     </div>
   );
 }
@@ -440,15 +433,12 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.2)" }}
-            >
+            <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-sky-400/8 border border-sky-400/20">
               <BarChart3 className="w-4 h-4 text-sky-400" />
             </span>
             <div>
               <p className="text-sm font-bold text-blue-50">{activeMetric.label}</p>
-              <p className="text-[10px] uppercase tracking-widest text-slate-600">
+              <p className="text-xs uppercase tracking-wide text-slate-600">
                 {ticker.toUpperCase()} metric history
               </p>
             </div>
@@ -457,29 +447,23 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
 
         <div className="flex flex-wrap items-center gap-2">
           <span
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-sky-400/10 bg-[#0f2040]/58 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
             title={source?.schwab?.available ? `Schwab fundamentals available: ${source.schwab.status}` : source?.schwab?.message ?? source?.schwab?.status}
-            style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
           >
             <Sparkles className="w-3 h-3 text-indigo-400" />
             {sourceLabel(source, period)}
           </span>
           {hasQuarterly && (
-            <div
-              className="inline-flex rounded-lg p-1"
-              style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
-            >
+            <div className="inline-flex rounded-lg border border-sky-400/10 bg-[#0f2040]/58 p-1">
               {(["annual", "quarterly"] as PeriodMode[]).map((option) => {
                 const active = period === option;
                 return (
                   <button
                     key={option}
                     onClick={() => setPeriod(option)}
-                    className="rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors"
-                    style={{
-                      color: active ? "#eff6ff" : "#64748b",
-                      backgroundColor: active ? "rgba(56,189,248,0.12)" : "transparent",
-                    }}
+                    className={`rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                      active ? "bg-sky-400/12 text-blue-50" : "text-slate-500"
+                    }`}
                   >
                     {option === "annual" ? "Annual" : "Quarterly"}
                   </button>
@@ -487,14 +471,14 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
               })}
             </div>
           )}
-          <div className="rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)" }}>
-            <p className="text-[10px] uppercase tracking-widest text-slate-600">Latest</p>
+          <div className="rounded-lg border border-emerald-400/15 bg-emerald-400/8 px-3 py-2">
+            <p className="text-xs uppercase tracking-wide text-slate-600">Latest</p>
             <p className="text-sm font-bold tabular-nums text-blue-50">
               {formatValue(latest.value, activeMetric.unit, true)}
             </p>
           </div>
-          <div className="rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(129,140,248,0.08)", border: "1px solid rgba(129,140,248,0.15)" }}>
-            <p className="text-[10px] uppercase tracking-widest text-slate-600">{changeLabel}</p>
+          <div className="rounded-lg border border-indigo-400/15 bg-indigo-400/8 px-3 py-2">
+            <p className="text-xs uppercase tracking-wide text-slate-600">{changeLabel}</p>
             <p className={`text-sm font-bold tabular-nums ${delta !== null && delta < 0 ? "text-rose-400" : "text-emerald-400"}`}>
               {deltaText}
             </p>
@@ -515,7 +499,6 @@ export default function ExploreMetricsChart({ ticker }: { ticker: string }) {
                 color: active ? "#eff6ff" : "#94a3b8",
                 backgroundColor: active ? `${metric.accent}26` : "rgba(15, 32, 64, 0.42)",
                 border: `1px solid ${active ? metric.accent : "rgba(56,189,248,0.1)"}`,
-                boxShadow: active ? `0 0 24px ${metric.accent}33` : "none",
               }}
             >
               {metric.label}
