@@ -1,3 +1,5 @@
+import type { Tone } from "@/app/lib/tone";
+
 export type GlossaryCategory =
   | "Valuation"
   | "Profitability"
@@ -481,13 +483,13 @@ export const CATEGORIES: GlossaryCategory[] = [
   "Market Concepts",
 ];
 
-export const CATEGORY_COLOR: Record<GlossaryCategory, { text: string; bg: string; border: string }> = {
-  "Valuation":        { text: "#38bdf8", bg: "rgba(56,189,248,0.08)",   border: "rgba(56,189,248,0.2)" },
-  "Profitability":    { text: "#10b981", bg: "rgba(16,185,129,0.08)",   border: "rgba(16,185,129,0.2)" },
-  "Risk & Ownership": { text: "#f59e0b", bg: "rgba(245,158,11,0.08)",   border: "rgba(245,158,11,0.2)" },
-  "Growth":           { text: "#818cf8", bg: "rgba(129,140,248,0.08)",  border: "rgba(129,140,248,0.2)" },
-  "Income":           { text: "#a78bfa", bg: "rgba(167,139,250,0.08)",  border: "rgba(167,139,250,0.2)" },
-  "Market Concepts":  { text: "#94a3b8", bg: "rgba(148,163,184,0.08)",  border: "rgba(148,163,184,0.2)" },
+export const CATEGORY_TONE: Record<GlossaryCategory, Tone> = {
+  "Valuation": "sky",
+  "Profitability": "emerald",
+  "Risk & Ownership": "amber",
+  "Growth": "indigo",
+  "Income": "violet",
+  "Market Concepts": "slate",
 };
 
 export function searchGlossary(query: string, category?: GlossaryCategory): GlossaryTerm[] {

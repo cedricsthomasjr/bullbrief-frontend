@@ -6,11 +6,12 @@ import { ArrowLeft, Search, X, ChevronDown, ChevronUp } from "lucide-react";
 import {
   GLOSSARY,
   CATEGORIES,
-  CATEGORY_COLOR,
+  CATEGORY_TONE,
   searchGlossary,
   type GlossaryCategory,
   type GlossaryTerm,
 } from "@/app/lib/glossary";
+import { TONE } from "@/app/lib/tone";
 
 function TermCard({
   term,
@@ -21,28 +22,19 @@ function TermCard({
   isExpanded: boolean;
   onToggle: () => void;
 }) {
-  const color = CATEGORY_COLOR[term.category];
+  const tone = TONE[CATEGORY_TONE[term.category]];
 
   return (
     <div
       id={term.id}
       className="bb-card bb-card-hover cursor-pointer"
-      style={{
-        borderColor: isExpanded ? color.border : "rgba(56,189,248,0.12)",
-      }}
+      style={{ borderColor: isExpanded ? `${tone.hex}4d` : undefined }}
       onClick={onToggle}
     >
       {/* Always-visible header */}
       <div className="p-3">
         <div className="flex items-center justify-between mb-3">
-          <span
-            className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-            style={{
-              color: color.text,
-              backgroundColor: color.bg,
-              border: `1px solid ${color.border}`,
-            }}
-          >
+          <span className={`text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border ${tone.soft}`}>
             {term.category}
           </span>
           {isExpanded ? (
@@ -55,7 +47,7 @@ function TermCard({
         <div className="flex items-baseline gap-2 mb-1.5">
           <h3 className="text-base font-bold text-blue-50">{term.name}</h3>
           {term.abbreviation && term.abbreviation !== term.name && (
-            <span className="text-[10px] font-mono text-slate-600">
+            <span className="text-xs font-mono text-slate-600">
               {term.abbreviation}
             </span>
           )}
@@ -66,23 +58,14 @@ function TermCard({
         </p>
 
         {term.formula && (
-          <div
-            className="rounded-lg px-2.5 py-1.5 text-[10px] font-mono text-slate-400 mb-3 leading-relaxed"
-            style={{
-              backgroundColor: "rgba(56,189,248,0.04)",
-              border: "1px solid rgba(56,189,248,0.08)",
-            }}
-          >
+          <div className="rounded-lg border border-sky-400/10 bg-sky-400/[0.04] px-2.5 py-1.5 text-xs font-mono text-slate-400 mb-3 leading-relaxed">
             {term.formula}
           </div>
         )}
 
         <div className="flex items-start gap-2">
-          <span
-            className="w-1 h-1 rounded-full mt-1.5 shrink-0"
-            style={{ backgroundColor: color.text }}
-          />
-          <p className="text-[11px] text-slate-500 leading-relaxed italic">
+          <span className={`w-1 h-1 rounded-full mt-1.5 shrink-0 ${tone.dot}`} />
+          <p className="text-xs text-slate-500 leading-relaxed italic">
             {term.keyTakeaway}
           </p>
         </div>
@@ -91,12 +74,11 @@ function TermCard({
       {/* Expanded detail section */}
       {isExpanded && (
         <div
-          className="px-3 pb-3 space-y-3"
-          style={{ borderTop: "1px solid rgba(56,189,248,0.08)" }}
+          className="px-3 pb-3 space-y-3 border-t border-sky-400/10"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="pt-4">
-            <p className="text-[9px] uppercase tracking-widest font-bold text-slate-600 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2">
               Definition
             </p>
             <p className="text-sm text-slate-400 leading-relaxed">
@@ -106,16 +88,10 @@ function TermCard({
 
           {term.example && (
             <div>
-              <p className="text-[9px] uppercase tracking-widest font-bold text-slate-600 mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2">
                 Example
               </p>
-              <p
-                className="bb-card-soft text-xs text-slate-400 leading-relaxed p-3"
-                style={{
-                  backgroundColor: "rgba(16,185,129,0.04)",
-                  border: "1px solid rgba(16,185,129,0.1)",
-                }}
-              >
+              <p className="bb-card-soft text-xs text-slate-400 leading-relaxed p-3 border border-emerald-400/10 bg-emerald-400/[0.04]">
                 {term.example}
               </p>
             </div>
@@ -123,35 +99,23 @@ function TermCard({
 
           {term.signal && (
             <div>
-              <p className="text-[9px] uppercase tracking-widest font-bold text-slate-600 mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2">
                 Signal
               </p>
               <div className="grid grid-cols-2 gap-2">
-                <div
-                  className="bb-card-soft p-3"
-                  style={{
-                    backgroundColor: "rgba(16,185,129,0.06)",
-                    border: "1px solid rgba(16,185,129,0.15)",
-                  }}
-                >
-                  <p className="text-[9px] uppercase font-bold text-emerald-400 mb-1">
+                <div className="bb-card-soft p-3 border border-emerald-400/15 bg-emerald-400/[0.06]">
+                  <p className="text-xs uppercase font-semibold text-emerald-400 mb-1">
                     High
                   </p>
-                  <p className="text-[10px] text-slate-400 leading-relaxed">
+                  <p className="text-xs text-slate-400 leading-relaxed">
                     {term.signal.high}
                   </p>
                 </div>
-                <div
-                  className="bb-card-soft p-3"
-                  style={{
-                    backgroundColor: "rgba(244,63,94,0.06)",
-                    border: "1px solid rgba(244,63,94,0.15)",
-                  }}
-                >
-                  <p className="text-[9px] uppercase font-bold text-rose-400 mb-1">
+                <div className="bb-card-soft p-3 border border-rose-400/15 bg-rose-400/[0.06]">
+                  <p className="text-xs uppercase font-semibold text-rose-400 mb-1">
                     Low
                   </p>
-                  <p className="text-[10px] text-slate-400 leading-relaxed">
+                  <p className="text-xs text-slate-400 leading-relaxed">
                     {term.signal.low}
                   </p>
                 </div>
@@ -161,7 +125,7 @@ function TermCard({
 
           {term.typical && (
             <div>
-              <p className="text-[9px] uppercase tracking-widest font-bold text-slate-600 mb-1.5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1.5">
                 Typical Range
               </p>
               <p className="text-xs text-slate-400">{term.typical}</p>
@@ -183,16 +147,12 @@ export default function GlossaryPage() {
   const terms = searchGlossary(query, activeCategory ?? undefined);
 
   return (
-    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px] bg-[#060c1a]">
       {/* Background glow */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <div
-          className="absolute top-0 left-1/3 w-[600px] h-[400px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(ellipse, rgba(56,189,248,0.05) 0%, transparent 70%)",
-            filter: "blur(80px)",
-          }}
+          className="absolute top-0 left-1/3 w-[600px] h-[400px] rounded-full animate-orb"
+          style={{ background: "radial-gradient(ellipse, rgba(56,189,248,0.05) 0%, transparent 70%)", filter: "blur(80px)" }}
         />
       </div>
 
@@ -206,13 +166,10 @@ export default function GlossaryPage() {
             <ArrowLeft className="w-3 h-3" /> Back to Home
           </Link>
           <div className="space-y-2">
-            <p
-              className="text-[10px] font-semibold uppercase tracking-widest"
-              style={{ color: "#38bdf8" }}
-            >
+            <p className="text-xs font-semibold uppercase tracking-wide text-sky-400">
               Investor Education
             </p>
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tighter text-blue-50">
+            <h1 className="font-fraunces text-4xl sm:text-5xl font-bold tracking-tight text-blue-50">
               Term Glossary
             </h1>
             <p className="text-slate-500 text-sm max-w-xl leading-relaxed">
@@ -222,13 +179,7 @@ export default function GlossaryPage() {
         </div>
 
         {/* Sticky search + filter bar */}
-        <div
-          className="sticky top-[88px] z-10 pb-4 -mx-6 px-6 pt-2"
-          style={{
-            backgroundColor: "rgba(6,12,26,0.95)",
-            backdropFilter: "blur(12px)",
-          }}
-        >
+        <div className="sticky top-[88px] z-10 pb-4 -mx-6 px-6 pt-2 bg-[#060c1a]/95 backdrop-blur-md">
           {/* Search input */}
           <div className="relative mb-3">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 pointer-events-none" />
@@ -237,16 +188,7 @@ export default function GlossaryPage() {
               placeholder='Search terms... (e.g. "P/E ratio", "beta", "EPS")'
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="bb-card w-full pl-10 pr-10 py-3 text-sm text-blue-50 placeholder-slate-600 outline-none transition-all"
-              style={{
-                borderColor: "rgba(56,189,248,0.12)",
-              }}
-              onFocus={(e) =>
-                (e.currentTarget.style.borderColor = "rgba(56,189,248,0.35)")
-              }
-              onBlur={(e) =>
-                (e.currentTarget.style.borderColor = "rgba(56,189,248,0.12)")
-              }
+              className="bb-card w-full pl-10 pr-10 py-3 text-sm text-blue-50 placeholder-slate-600 outline-none transition-colors focus:border-sky-400/35"
             />
             {query && (
               <button
@@ -262,41 +204,23 @@ export default function GlossaryPage() {
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <button
               onClick={() => setActiveCategory(null)}
-              className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-              style={
-                !activeCategory
-                  ? { backgroundColor: "#38bdf8", color: "#060c1a" }
-                  : {
-                      backgroundColor: "rgba(56,189,248,0.06)",
-                      color: "#475569",
-                      border: "1px solid rgba(56,189,248,0.1)",
-                    }
-              }
+              className={`shrink-0 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors ${
+                !activeCategory ? "bg-sky-400 text-[#060c1a] border-sky-400" : "bg-sky-400/[0.06] text-slate-500 border-sky-400/10 hover:text-slate-300"
+              }`}
             >
               All ({GLOSSARY.length})
             </button>
             {CATEGORIES.map((cat) => {
-              const color = CATEGORY_COLOR[cat];
+              const tone = TONE[CATEGORY_TONE[cat]];
               const isActive = activeCategory === cat;
               const count = GLOSSARY.filter((t) => t.category === cat).length;
               return (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(isActive ? null : cat)}
-                  className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                  style={
-                    isActive
-                      ? {
-                          backgroundColor: color.bg,
-                          color: color.text,
-                          border: `1px solid ${color.border}`,
-                        }
-                      : {
-                          backgroundColor: "rgba(56,189,248,0.04)",
-                          color: "#475569",
-                          border: "1px solid rgba(56,189,248,0.07)",
-                        }
-                  }
+                  className={`shrink-0 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors ${
+                    isActive ? tone.soft : "bg-sky-400/[0.04] text-slate-500 border-sky-400/[0.07] hover:text-slate-300"
+                  }`}
                 >
                   {cat} ({count})
                 </button>
