@@ -53,10 +53,7 @@ export default function SingleTickerSearch({ value = "", onSubmit, placeholder =
 
   return (
     <div ref={containerRef} className="relative w-full">
-      <div
-        className="bb-card relative overflow-hidden"
-        style={{ borderColor: "rgba(56,189,248,0.15)" }}
-      >
+      <div className="bb-card relative overflow-hidden" style={{ borderColor: "rgba(56,189,248,0.15)" }}>
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600 pointer-events-none" />
         <input
           type="text"
@@ -72,19 +69,16 @@ export default function SingleTickerSearch({ value = "", onSubmit, placeholder =
       {showSuggestions && suggestions.length > 0 && (
         <ul
           className="bb-card absolute z-20 mt-1.5 w-full overflow-hidden max-h-52 overflow-y-auto scrollbar-hide"
-          style={{
-            borderColor: "rgba(56,189,248,0.15)",
-          }}
+          style={{ borderColor: "rgba(56,189,248,0.15)" }}
         >
           {suggestions.map((s, i) => (
             <li
               key={`${s.symbol}-${i}`}
               onClick={() => handleSelect(s.symbol)}
-              className="flex items-center gap-3 px-3.5 py-2.5 cursor-pointer transition-colors"
-              style={{
-                backgroundColor: i === selectedIndex ? "rgba(56,189,248,0.08)" : "transparent",
-                borderLeft: i === selectedIndex ? "2px solid #38bdf8" : "2px solid transparent",
-              }}
+              onMouseEnter={() => setSelectedIndex(i)}
+              className={`flex items-center gap-3 border-l-2 px-3.5 py-2.5 cursor-pointer transition-colors ${
+                i === selectedIndex ? "bg-sky-400/[0.08] border-sky-400" : "border-transparent hover:bg-white/[0.04]"
+              }`}
             >
               <span className="font-bold text-blue-50 text-sm">{s.symbol}</span>
               <span className="text-slate-600 text-xs truncate">{s.name}</span>
