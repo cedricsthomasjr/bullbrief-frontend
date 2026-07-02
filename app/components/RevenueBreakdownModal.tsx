@@ -214,10 +214,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
           )}
 
           {error && (
-            <div
-              className="rounded-xl p-4"
-              style={{ backgroundColor: "rgba(244,63,94,0.06)", border: "1px solid rgba(244,63,94,0.2)" }}
-            >
+            <div className="rounded-xl border border-rose-400/20 bg-rose-400/6 p-4">
               <p className="text-sm font-semibold text-rose-400">Could not load revenue data</p>
               <p className="mt-1 text-xs text-slate-600">{error}</p>
             </div>
@@ -226,21 +223,16 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
           {data && (
             <>
               {hasQuarterly && (
-                <div
-                  className="inline-flex rounded-lg p-1"
-                  style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
-                >
+                <div className="inline-flex rounded-lg border border-sky-400/10 bg-[#0f2040]/58 p-1">
                   {(["annual", "quarterly"] as PeriodMode[]).map((option) => {
                     const active = activePeriod === option;
                     return (
                       <button
                         key={option}
                         onClick={() => setPeriod(option)}
-                        className="rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors"
-                        style={{
-                          color: active ? "#eff6ff" : "#64748b",
-                          backgroundColor: active ? "rgba(56,189,248,0.12)" : "transparent",
-                        }}
+                        className={`rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                          active ? "bg-sky-400/12 text-blue-50" : "text-slate-500"
+                        }`}
                       >
                         {option === "annual" ? "Annual" : "Quarterly"}
                       </button>
@@ -252,25 +244,16 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
               {/* Latest period totals */}
               {latest && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div
-                    className="rounded-xl p-3"
-                    style={{ backgroundColor: "rgba(56,189,248,0.06)", border: "1px solid rgba(56,189,248,0.14)" }}
-                  >
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">Latest Total ({latestLabel})</p>
+                  <div className="rounded-xl border border-sky-400/14 bg-sky-400/6 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-600">Latest Total ({latestLabel})</p>
                     <p className="mt-1 text-xl font-bold tabular-nums text-blue-50">{fmt(latest.total)}</p>
                   </div>
-                  <div
-                    className="rounded-xl p-3"
-                    style={{ backgroundColor: "rgba(129,140,248,0.06)", border: "1px solid rgba(129,140,248,0.14)" }}
-                  >
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">Segments Reported</p>
+                  <div className="rounded-xl border border-indigo-400/14 bg-indigo-400/6 p-3">
+                    <p className="text-xs uppercase tracking-wide text-slate-600">Segments Reported</p>
                     <p className="mt-1 text-xl font-bold tabular-nums text-blue-50">{activeSegments.length}</p>
                   </div>
-                  <div
-                    className="rounded-xl p-3 col-span-2 sm:col-span-1"
-                    style={{ backgroundColor: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.14)" }}
-                  >
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">{activePeriod === "quarterly" ? "Quarters of Data" : "Years of Data"}</p>
+                  <div className="rounded-xl border border-emerald-400/14 bg-emerald-400/6 p-3 col-span-2 sm:col-span-1">
+                    <p className="text-xs uppercase tracking-wide text-slate-600">{activePeriod === "quarterly" ? "Quarters of Data" : "Years of Data"}</p>
                     <p className="mt-1 text-xl font-bold tabular-nums text-blue-50">{activeEntries.length}</p>
                   </div>
                 </div>
@@ -278,7 +261,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
 
               {/* Stacked bar chart */}
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-3">
                   {activeHasSegments ? "Revenue by Segment" : "Total Revenue"} - {activePeriod === "quarterly" ? "Quarterly" : "Annual"}
                 </p>
                 <div className="h-[320px] w-full">
@@ -329,7 +312,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                   {activeSegments.map((seg) => (
                     <span
                       key={seg.name}
-                      className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium"
+                      className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium"
                       style={{
                         color: seg.color,
                         backgroundColor: `${seg.color}12`,
@@ -349,7 +332,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
               {/* Latest year breakdown rows */}
               {latest && activeHasSegments && (
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-3">
                     {latestLabel} Breakdown
                   </p>
                   <div className="space-y-2">
@@ -367,7 +350,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                               <span className="text-xs font-medium text-slate-400 truncate">{seg.name}</span>
                             </div>
                             <div className="flex items-center gap-3 shrink-0">
-                              <span className="text-[10px] text-slate-600 tabular-nums">
+                              <span className="text-xs text-slate-600 tabular-nums">
                                 {pct.toFixed(1)}%
                               </span>
                               <span className="text-xs font-bold tabular-nums text-blue-50 min-w-[60px] text-right">
@@ -375,7 +358,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                               </span>
                             </div>
                           </div>
-                          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(15,23,42,0.8)" }}>
+                          <div className="h-1.5 rounded-full overflow-hidden bg-slate-950/80">
                             <div
                               className="h-full rounded-full transition-all duration-700"
                               style={{ width: `${pct}%`, backgroundColor: seg.color, opacity: 0.8 }}
@@ -389,12 +372,9 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
               )}
 
               {/* Source footer */}
-              <div
-                className="flex items-center justify-between gap-4 rounded-xl px-4 py-3"
-                style={{ backgroundColor: "rgba(15,32,64,0.5)", border: "1px solid rgba(56,189,248,0.08)" }}
-              >
+              <div className="flex items-center justify-between gap-4 rounded-xl border border-sky-400/8 bg-[#0f2040]/50 px-4 py-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Data Source</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-600">Data Source</p>
                   <p className="mt-0.5 text-xs text-slate-500">
                     {activeSource ?? "SEC EDGAR XBRL"} · {data.concept_label ?? data.concept}
                   </p>
@@ -403,8 +383,7 @@ export default function RevenueBreakdownModal({ ticker, isOpen, onClose }: Props
                   href={data.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg shrink-0 transition hover:-translate-y-0.5"
-                  style={{ color: "#38bdf8", backgroundColor: "rgba(56,189,248,0.07)", border: "1px solid rgba(56,189,248,0.16)" }}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg shrink-0 transition hover:-translate-y-0.5 text-sky-400 bg-sky-400/[0.07] border border-sky-400/16"
                 >
                   SEC Filing <ArrowUpRight className="w-3 h-3" />
                 </a>

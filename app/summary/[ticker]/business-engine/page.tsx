@@ -21,7 +21,6 @@ import BusinessEngineCylinder, {
   formatCurrencyCompact,
   type RevenueBreakdownData,
 } from "@/app/components/BusinessEngineCylinder";
-import { TONE } from "@/app/lib/tone";
 
 function SectionHeader({ num, title }: { num: string; title: string }) {
   return (
