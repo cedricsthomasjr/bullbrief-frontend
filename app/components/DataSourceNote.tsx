@@ -34,14 +34,14 @@ export default function DataSourceNote({
           target="_blank"
           rel="noopener noreferrer"
           title={`Source: ${label}`}
-          className="inline-flex max-w-full items-center gap-1.5 truncate rounded-md border border-sky-400/[0.06] bg-slate-950/20 px-2 py-1 text-[9px] font-medium uppercase tracking-widest transition-colors hover:border-sky-400/20 hover:text-slate-500"
+          className="inline-flex max-w-full items-center gap-1.5 truncate rounded-md border border-white/[0.06] bg-black/20 px-2 py-1 text-[10px] tracking-wide transition-colors hover:border-white/20 hover:text-slate-500"
         >
           {content}
         </a>
       ) : (
         <span
           title={`Source: ${label}`}
-          className="inline-flex max-w-full items-center gap-1.5 truncate rounded-md border border-sky-400/[0.06] bg-slate-950/20 px-2 py-1 text-[9px] font-medium uppercase tracking-widest"
+          className="inline-flex max-w-full items-center gap-1.5 truncate rounded-md border border-white/[0.06] bg-black/20 px-2 py-1 text-[10px] tracking-wide"
         >
           {content}
         </span>

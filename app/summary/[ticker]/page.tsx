@@ -79,18 +79,11 @@ function fmtVol(v: number): string {
 function SectionHeader({ num, title }: { num: string; title: string }) {
   return (
     <div className="flex items-center gap-4 mb-6">
-      <span
-        className="text-[10px] font-mono font-bold tabular-nums px-2 py-0.5 rounded"
-        style={{
-          color: "#38bdf8",
-          backgroundColor: "rgba(56,189,248,0.08)",
-          border: "1px solid rgba(56,189,248,0.15)",
-        }}
-      >
+      <span className="text-xs font-mono font-semibold tabular-nums px-2 py-0.5 rounded text-sky-400 bg-sky-400/10 border border-sky-400/15">
         {num}
       </span>
-      <h2 className="text-lg font-bold text-blue-50 tracking-tight">{title}</h2>
-      <div className="flex-1 h-px" style={{ background: "rgba(56,189,248,0.07)" }} />
+      <h2 className="font-fraunces text-lg font-bold text-blue-50 tracking-tight">{title}</h2>
+      <div className="flex-1 h-px bg-white/[0.06]" />
     </div>
   );
 }
@@ -208,7 +201,7 @@ export default function TickerPage() {
   if (loading) return <LoadingScreen isLoading={loading} />;
 
   if (error) return (
-    <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen flex items-center justify-center bg-[#060c1a]">
       <div className="text-center space-y-3">
         <p className="text-rose-400 text-sm font-medium">Failed to load stock data</p>
         <p className="text-slate-600 text-xs">{error}</p>
@@ -227,12 +220,12 @@ export default function TickerPage() {
   let sectionIdx = 1;
 
   return (
-    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px] bg-[#060c1a]">
       {/* Page glow */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         <div
-          className="absolute top-0 right-0 w-[500px] h-[400px] rounded-full"
-          style={{ background: "radial-gradient(ellipse, rgba(56,189,248,0.06) 0%, transparent 70%)", filter: "blur(60px)" }}
+          className="absolute top-0 right-0 w-[500px] h-[400px] rounded-full animate-orb"
+          style={{ background: "radial-gradient(ellipse, rgba(56,189,248,0.05) 0%, transparent 70%)", filter: "blur(70px)" }}
         />
       </div>
 
@@ -246,25 +239,19 @@ export default function TickerPage() {
 
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
             <div className="space-y-1.5">
-              <p
-                className="text-[10px] font-semibold uppercase tracking-widest"
-                style={{ color: "#38bdf8" }}
-              >
+              <p className="text-xs font-semibold uppercase tracking-wide text-sky-400">
                 {data.sector}
               </p>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tighter text-blue-50 leading-none">
+              <h1 className="font-fraunces text-4xl sm:text-5xl font-bold tracking-tight text-blue-50 leading-none">
                 {data.company_name}
               </h1>
               <p className="text-slate-500 text-sm font-mono">{data.ticker} · {data.exchange}</p>
             </div>
 
             <div
-              className="inline-flex items-center gap-2 self-start sm:self-auto px-3.5 py-2 rounded-full text-xs font-semibold"
-              style={
-                isBearish
-                  ? { backgroundColor: "rgba(244,63,94,0.1)", color: "#f43f5e", border: "1px solid rgba(244,63,94,0.25)" }
-                  : { backgroundColor: "rgba(16,185,129,0.1)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }
-              }
+              className={`inline-flex items-center gap-2 self-start sm:self-auto px-3.5 py-2 rounded-full border text-xs font-semibold ${
+                isBearish ? "text-rose-400 bg-rose-400/10 border-rose-400/25" : "text-emerald-400 bg-emerald-400/10 border-emerald-400/25"
+              }`}
             >
               {isBearish ? <TrendingDown className="w-3.5 h-3.5" /> : <TrendingUp className="w-3.5 h-3.5" />}
               {isBearish ? "Watch Valuation" : "Constructive Setup"}
@@ -281,11 +268,8 @@ export default function TickerPage() {
               { label: "52W Range", value: data.range_52w },
               { label: "Volume", value: fmtVol(data.volume) },
             ].map((item, i) => (
-              <div
-                key={i}
-                className="bb-card px-3 py-3"
-              >
-                <p className="text-[10px] uppercase tracking-wider text-slate-600">{item.label}</p>
+              <div key={i} className="bb-card px-3 py-3">
+                <p className="text-xs text-slate-600">{item.label}</p>
                 <p className="text-blue-50 font-bold text-sm mt-1 tabular-nums">{item.value}</p>
               </div>
             ))}
@@ -296,18 +280,9 @@ export default function TickerPage() {
         {/* ── AI Analyst Report CTA ── */}
         <section>
           <Link href={`/summary/${ticker}/analyst`}>
-            <div
-              className="bb-card bb-card-hover group p-3 flex items-center justify-between gap-4 cursor-pointer"
-              style={{
-                background: "linear-gradient(135deg, rgba(129,140,248,0.08) 0%, rgba(56,189,248,0.06) 100%)",
-                borderColor: "rgba(129,140,248,0.25)",
-              }}
-            >
+            <div className="bb-card bb-card-hover group p-3 flex items-center justify-between gap-4 cursor-pointer bg-gradient-to-br from-indigo-400/[0.08] to-sky-400/[0.05]" style={{ borderColor: "rgba(129,140,248,0.25)" }}>
               <div className="flex items-center gap-4">
-                <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: "rgba(129,140,248,0.12)", border: "1px solid rgba(129,140,248,0.25)" }}
-                >
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-indigo-400/10 border border-indigo-400/25">
                   <Brain className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
@@ -317,10 +292,7 @@ export default function TickerPage() {
                   </p>
                 </div>
               </div>
-              <div
-                className="shrink-0 flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
-                style={{ backgroundColor: "rgba(129,140,248,0.12)", color: "#818cf8", border: "1px solid rgba(129,140,248,0.2)" }}
-              >
+              <div className="shrink-0 flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg transition-colors bg-indigo-400/10 text-indigo-300 border border-indigo-400/20 group-hover:bg-indigo-400/15">
                 Open Snapshot <ArrowUpRight className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -377,9 +349,7 @@ export default function TickerPage() {
         {/* ── Outlook ── */}
         <section id="outlook" className="scroll-mt-24">
           <SectionHeader num={sectionNum(sectionIdx++)} title="Outlook" />
-          <div
-            className="bb-card p-3 text-sm leading-7 text-slate-400 whitespace-pre-wrap"
-          >
+          <div className="bb-card p-3 text-sm leading-7 text-slate-400 whitespace-pre-wrap">
             {data.outlook}
             <DataSourceNote
               label="Yahoo Finance via yfinance; BullBrief AI outlook summary"
@@ -415,23 +385,17 @@ export default function TickerPage() {
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <span
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.18)" }}
-                  >
+                  <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-sky-400/10 border border-sky-400/20">
                     <Newspaper className="w-4 h-4 text-sky-400" />
                   </span>
                   <div>
                     <p className="text-sm font-bold text-blue-50">Major Outlet Filter</p>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">
+                    <p className="text-xs text-slate-600">
                       Ranked by source, relevance, and recency
                     </p>
                   </div>
                 </div>
-                <span
-                  className="self-start rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
-                  style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
-                >
+                <span className="self-start rounded-lg border border-white/[0.06] bg-[#0f2040]/60 px-3 py-2 text-xs font-medium text-slate-500">
                   {news.length} headlines
                 </span>
               </div>
@@ -446,16 +410,13 @@ export default function TickerPage() {
                   <div className="min-w-0">
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                       <span
-                        className="rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-widest"
-                        style={
-                          news[0].is_industry
-                            ? { color: "#f59e0b", backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }
-                            : { color: "#7dd3fc", backgroundColor: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.16)" }
-                        }
+                        className={`rounded-md border px-2 py-1 text-xs font-semibold uppercase tracking-wide ${
+                          news[0].is_industry ? "text-amber-300 bg-amber-400/10 border-amber-400/20" : "text-sky-300 bg-sky-400/10 border-sky-400/15"
+                        }`}
                       >
                         {newsBadge(news[0])}
                       </span>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-widest text-slate-600">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-600">
                         <Clock3 className="w-3 h-3" />
                         {formatNewsDate(news[0].providerPublishTime)}
                       </span>
@@ -473,14 +434,13 @@ export default function TickerPage() {
                     </p>
                   </div>
                   <div
-                    className="hidden md:flex min-h-32 items-end justify-end rounded-lg p-3"
+                    className="hidden md:flex min-h-32 items-end justify-end rounded-lg border border-sky-400/10 p-3"
                     style={{
                       backgroundImage: news[0].image
                         ? `linear-gradient(180deg, rgba(6,12,26,0.1), rgba(6,12,26,0.82)), url(${news[0].image})`
                         : "linear-gradient(135deg, rgba(56,189,248,0.1), rgba(129,140,248,0.12))",
                       backgroundSize: "cover",
                       backgroundPosition: "center",
-                      border: "1px solid rgba(56,189,248,0.1)",
                     }}
                   >
                     <ArrowUpRight className="w-5 h-5 text-sky-300 opacity-70 group-hover:opacity-100 transition-opacity" />
@@ -496,23 +456,20 @@ export default function TickerPage() {
                       href={item.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bb-card-soft group p-3 transition-all hover:-translate-y-0.5 hover:border-sky-400/30"
+                      className="bb-card-soft group p-3 transition-colors hover:border-sky-400/30 border border-transparent"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
                           <div className="mb-2 flex flex-wrap items-center gap-2">
                             {item.is_industry && (
-                              <span
-                                className="rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest"
-                                style={{ color: "#f59e0b", backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}
-                              >
+                              <span className="rounded-md border border-amber-400/20 bg-amber-400/10 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-300">
                                 {item.industry_label ?? "Industry"}
                               </span>
                             )}
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-sky-400">
                               {item.publisher}
                             </span>
-                            <span className="text-[10px] text-slate-700">
+                            <span className="text-xs text-slate-700">
                               {formatNewsDate(item.providerPublishTime)}
                             </span>
                           </div>

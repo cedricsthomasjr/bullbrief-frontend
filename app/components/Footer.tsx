@@ -4,21 +4,14 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer style={{ borderTop: "1px solid rgba(56, 189, 248, 0.07)", backgroundColor: "#060c1a" }}>
+    <footer className="border-t border-white/[0.06] bg-[#060c1a]">
       <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
         {/* Brand */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="font-black text-sm gradient-text-animated tracking-tight">BullBrief</span>
-            <span
-              className="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
-              style={{
-                color: "rgba(56,189,248,0.45)",
-                backgroundColor: "rgba(56,189,248,0.05)",
-                border: "1px solid rgba(56,189,248,0.1)",
-              }}
-            >
-              v0.1.0
+            <span className="font-fraunces font-bold text-sm gradient-text tracking-tight">BullBrief</span>
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md text-slate-600 bg-white/[0.03] border border-white/[0.06]">
+              v0.1
             </span>
           </div>
           <p className="text-xs text-slate-600">
@@ -52,10 +45,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div
-        className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between"
-        style={{ borderTop: "1px solid rgba(56, 189, 248, 0.04)" }}
-      >
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between border-t border-white/[0.04]">
         <p className="text-xs text-slate-700">
           &copy; {new Date().getFullYear()} BullBrief &mdash; Built by CJ Thomas
         </p>

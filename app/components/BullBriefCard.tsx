@@ -125,8 +125,8 @@ export default function BullBriefCard({
           ...buildFallbackPoints(sector, marketCap, peRatio, isBearish),
         ].slice(0, Math.max(2, rawPoints.length));
   const signal = isBearish
-    ? { label: "Watch Valuation", icon: <TrendingDown className="w-3.5 h-3.5" />, color: "#f43f5e", bg: "rgba(244,63,94,0.1)", border: "rgba(244,63,94,0.22)" }
-    : { label: "Constructive Setup", icon: <TrendingUp className="w-3.5 h-3.5" />, color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.22)" };
+    ? { label: "Watch Valuation", icon: <TrendingDown className="w-3.5 h-3.5" />, classes: "text-rose-400 bg-rose-400/10 border-rose-400/20" }
+    : { label: "Constructive Setup", icon: <TrendingUp className="w-3.5 h-3.5" />, classes: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" };
 
   const snapshot = [
     { label: "Sector", value: sector || "N/A" },
@@ -142,22 +142,16 @@ export default function BullBriefCard({
         <div className="p-4 sm:p-5 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span
-                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.18)" }}
-              >
+              <span className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-sky-400/10 border border-sky-400/20">
                 <Building2 className="w-4 h-4 text-sky-400" />
               </span>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Business Brief</p>
+                <p className="text-xs font-medium text-slate-500">Business Brief</p>
                 <h3 className="text-lg font-bold text-blue-50 tracking-tight truncate">{companyName}</h3>
               </div>
             </div>
 
-            <span
-              className="inline-flex items-center gap-2 self-start rounded-lg px-3 py-2 text-xs font-semibold"
-              style={{ color: signal.color, backgroundColor: signal.bg, border: `1px solid ${signal.border}` }}
-            >
+            <span className={`inline-flex items-center gap-2 self-start rounded-lg border px-3 py-2 text-xs font-semibold ${signal.classes}`}>
               {signal.icon}
               {signal.label}
             </span>
@@ -171,21 +165,14 @@ export default function BullBriefCard({
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Key Takeaways</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Key Takeaways</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {points.map((point, idx) => (
-                  <div
-                    key={`${point}-${idx}`}
-                    className="rounded-lg border p-3"
-                    style={{ backgroundColor: "rgba(15,32,64,0.36)", borderColor: "rgba(56,189,248,0.1)" }}
-                  >
+                  <div key={`${point}-${idx}`} className="rounded-lg border border-sky-400/10 bg-[#0f2040]/40 p-3">
                     <div className="flex gap-3">
-                      <span
-                        className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold tabular-nums"
-                        style={{ color: "#38bdf8", backgroundColor: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.14)" }}
-                      >
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-semibold tabular-nums text-sky-400 bg-sky-400/10 border border-sky-400/15">
                         {idx + 1}
                       </span>
                       <p className="text-sm leading-6 text-slate-400">{point}</p>
@@ -197,31 +184,25 @@ export default function BullBriefCard({
           )}
         </div>
 
-        <aside
-          className="border-t lg:border-t-0 lg:border-l p-4 sm:p-5"
-          style={{ borderColor: "rgba(56,189,248,0.08)", backgroundColor: "rgba(6,12,26,0.28)" }}
-        >
+        <aside className="border-t lg:border-t-0 lg:border-l border-sky-400/10 bg-black/20 p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-4 h-4 text-indigo-400" />
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{ticker.toUpperCase()} Snapshot</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{ticker.toUpperCase()} Snapshot</p>
           </div>
 
           <div className="space-y-3">
             {snapshot.map((item) => (
               <div key={item.label} className="flex items-start justify-between gap-3 border-b border-sky-400/[0.06] pb-3 last:border-b-0 last:pb-0">
-                <p className="text-[10px] uppercase tracking-widest text-slate-600">{item.label}</p>
-                <p className="text-right text-xs font-bold text-blue-50 tabular-nums">{item.value}</p>
+                <p className="text-xs text-slate-500">{item.label}</p>
+                <p className="text-right text-xs font-semibold text-blue-50 tabular-nums">{item.value}</p>
               </div>
             ))}
           </div>
 
-          <div
-            className="mt-5 rounded-lg p-3"
-            style={{ backgroundColor: "rgba(129,140,248,0.07)", border: "1px solid rgba(129,140,248,0.15)" }}
-          >
+          <div className="mt-5 rounded-lg p-3 bg-indigo-400/[0.07] border border-indigo-400/15">
             <div className="flex items-center gap-2 mb-2">
               <Activity className="w-3.5 h-3.5 text-indigo-400" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Research Guidance</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Research Guidance</p>
             </div>
             <p className="text-xs leading-6 text-slate-500">
               Assess business quality first. Then evaluate valuation, growth trajectory, and risk in the sections below.

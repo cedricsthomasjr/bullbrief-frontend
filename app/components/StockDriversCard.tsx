@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { formatNumber } from "@/app/lib/format";
 import DataSourceNote from "@/app/components/DataSourceNote";
+import { TONE, type Tone } from "@/app/lib/tone";
 
 export type StockDriverOperation = {
   name: string;
@@ -49,36 +50,7 @@ type Props = {
   revenueHref?: string;
 };
 
-const ACCENTS = [
-  {
-    color: "#38bdf8",
-    end: "#818cf8",
-    border: "rgba(56, 189, 248, 0.34)",
-    glow: "0 0 28px rgba(56, 189, 248, 0.18)",
-    bg: "rgba(56, 189, 248, 0.08)",
-  },
-  {
-    color: "#818cf8",
-    end: "#a78bfa",
-    border: "rgba(129, 140, 248, 0.34)",
-    glow: "0 0 28px rgba(129, 140, 248, 0.2)",
-    bg: "rgba(129, 140, 248, 0.08)",
-  },
-  {
-    color: "#a78bfa",
-    end: "#38bdf8",
-    border: "rgba(167, 139, 250, 0.34)",
-    glow: "0 0 28px rgba(167, 139, 250, 0.2)",
-    bg: "rgba(167, 139, 250, 0.08)",
-  },
-  {
-    color: "#10b981",
-    end: "#38bdf8",
-    border: "rgba(16, 185, 129, 0.3)",
-    glow: "0 0 28px rgba(16, 185, 129, 0.16)",
-    bg: "rgba(16, 185, 129, 0.08)",
-  },
-] as const;
+const DRIVER_TONES: Tone[] = ["sky", "indigo", "violet", "emerald"];
 
 function formatMoney(value: number | null) {
   if (value === null || value === undefined) return "N/A";
@@ -141,20 +113,14 @@ export default function StockDriversCard({
       <div className="bb-card p-3 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{
-                backgroundColor: "rgba(16,185,129,0.08)",
-                border: "1px solid rgba(16,185,129,0.2)",
-              }}
-            >
+            <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-400/10 border border-emerald-400/20">
               <Building2 className="w-4 h-4 text-emerald-400" />
             </span>
             <div>
               <p className="text-sm font-bold text-blue-50">
                 What Drives The Stock
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-slate-600">
+              <p className="text-xs text-slate-600">
                 SEC 10-K {data.fiscal_year ? `FY${data.fiscal_year}` : ""}
               </p>
             </div>
@@ -162,12 +128,8 @@ export default function StockDriversCard({
 
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className="rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500 cursor-help"
+              className="rounded-lg border border-white/[0.06] bg-[#0f2040]/60 px-3 py-2 text-xs font-medium text-slate-500 cursor-help"
               title={data.summary}
-              style={{
-                backgroundColor: "rgba(15,32,64,0.58)",
-                border: "1px solid rgba(56,189,248,0.1)",
-              }}
             >
               Filing Context
             </span>
@@ -176,12 +138,7 @@ export default function StockDriversCard({
                 href={data.source.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg shrink-0 transition hover:-translate-y-0.5"
-                style={{
-                  color: "#38bdf8",
-                  backgroundColor: "rgba(56,189,248,0.07)",
-                  border: "1px solid rgba(56,189,248,0.16)",
-                }}
+                className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg shrink-0 transition-colors text-sky-400 bg-sky-400/[0.07] border border-sky-400/20 hover:bg-sky-400/10"
               >
                 SEC Filing <ArrowUpRight className="w-3.5 h-3.5" />
               </a>
@@ -195,18 +152,18 @@ export default function StockDriversCard({
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <BarChart3 className="w-4 h-4 text-sky-400" />
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     SEC Financial Signals
                   </p>
                 </div>
-                <span className="text-[10px] text-slate-600 tabular-nums">
+                <span className="text-xs text-slate-600 tabular-nums">
                   {financialDrivers.length} signals
                 </span>
               </div>
 
               <div className="space-y-3">
                 {financialDrivers.map((driver, idx) => {
-                  const accent = ACCENTS[idx % ACCENTS.length];
+                  const tone = DRIVER_TONES[idx % DRIVER_TONES.length];
                   const width = barWidth(
                     driverMagnitude(driver),
                     maxDriverValue,
@@ -215,28 +172,16 @@ export default function StockDriversCard({
                   return (
                     <div
                       key={driver.label}
-                      className="group rounded-lg border p-3 transition-all duration-300 hover:-translate-y-0.5"
+                      className="group rounded-lg border border-white/[0.06] p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20"
                       title={driver.description}
-                      style={{
-                        backgroundColor: accent.bg,
-                        borderColor: "rgba(56, 189, 248, 0.1)",
-                      }}
-                      onMouseEnter={(event) => {
-                        event.currentTarget.style.borderColor = accent.border;
-                        event.currentTarget.style.boxShadow = accent.glow;
-                      }}
-                      onMouseLeave={(event) => {
-                        event.currentTarget.style.borderColor =
-                          "rgba(56, 189, 248, 0.1)";
-                        event.currentTarget.style.boxShadow = "none";
-                      }}
+                      style={{ backgroundColor: `${TONE[tone].hex}0d` }}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="truncate text-xs font-bold text-blue-50">
                             {driver.label}
                           </p>
-                          <p className="text-[10px] uppercase tracking-widest text-slate-600">
+                          <p className="text-xs text-slate-600">
                             SEC line item
                           </p>
                         </div>
@@ -245,17 +190,14 @@ export default function StockDriversCard({
                         </p>
                       </div>
 
-                      <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-950/70">
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/40">
                         <div
-                          className="h-full rounded-full transition-all duration-500 group-hover:brightness-125"
-                          style={{
-                            width: `${width}%`,
-                            background: `linear-gradient(90deg, ${accent.color}, ${accent.end})`,
-                          }}
+                          className={`h-full rounded-full transition-all duration-500 ${TONE[tone].bar}`}
+                          style={{ width: `${width}%` }}
                         />
                       </div>
 
-                      <p className="mt-2 min-h-8 text-[11px] leading-4 text-slate-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <p className="mt-2 min-h-8 text-xs leading-4 text-slate-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                         {driver.description}
                       </p>
                     </div>
@@ -270,21 +212,17 @@ export default function StockDriversCard({
           )}
 
           <div className="grid grid-cols-2 content-start gap-3 self-start">
-            <div className="group bb-card-soft p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-400/40">
-              <Gauge className="mb-4 w-4 h-4 text-sky-400 transition group-hover:scale-110" />
-              <p className="text-[10px] uppercase tracking-widest text-slate-600">
-                Filing Date
-              </p>
+            <div className="bb-card-soft p-3 transition-colors duration-200 hover:border-sky-400/30">
+              <Gauge className="mb-4 w-4 h-4 text-sky-400" />
+              <p className="text-xs text-slate-600">Filing Date</p>
               <p className="mt-1 text-sm font-bold text-blue-50">
                 {formatFilingDate(data.filing_date)}
               </p>
             </div>
 
-            <div className="group bb-card-soft p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-400/40">
-              <Network className="mb-4 w-4 h-4 text-indigo-400 transition group-hover:scale-110" />
-              <p className="text-[10px] uppercase tracking-widest text-slate-600">
-                Segments
-              </p>
+            <div className="bb-card-soft p-3 transition-colors duration-200 hover:border-indigo-400/30">
+              <Network className="mb-4 w-4 h-4 text-indigo-400" />
+              <p className="text-xs text-slate-600">Segments</p>
               <p className="mt-1 text-sm font-bold text-blue-50 tabular-nums">
                 {operations.length}
               </p>
@@ -292,62 +230,37 @@ export default function StockDriversCard({
 
             <Link
               href={revenueHref ?? "#business-engine"}
-              className="bb-rotating-gradient-border group relative col-span-2 rounded-xl p-3 text-left transition-transform duration-300 hover:-translate-y-0.5"
+              className="bb-card-feature group relative col-span-2 rounded-xl p-3 text-left transition-transform duration-200 hover:-translate-y-0.5"
             >
-              <div
-                className="pointer-events-none absolute inset-0 rounded-xl opacity-70 transition-opacity duration-300 group-hover:opacity-100"
-                style={{
-                  background:
-                    "radial-gradient(circle at 88% 22%, rgba(129,140,248,0.18), transparent 32%), radial-gradient(circle at 12% 88%, rgba(56,189,248,0.12), transparent 38%)",
-                }}
-              />
               <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-sky-400/25 bg-sky-400/10 transition-transform duration-300 group-hover:scale-105 group-hover:border-sky-300/45">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-sky-400/25 bg-sky-400/10">
                     <ChartColumnStacked className="h-5 w-5 text-sky-300" />
                   </span>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-bold text-blue-50">
                       See Revenue Breakdown
                     </p>
-                    <p className="mt-0.5 text-[11px] leading-4 text-slate-500">
+                    <p className="mt-0.5 text-xs leading-4 text-slate-500">
                       Segment mix, reported totals, and fiscal-period history.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-2">
-                  <div className="hidden h-9 items-end gap-1.5 rounded-lg border border-sky-400/10 bg-slate-950/35 px-2 py-1.5 sm:flex">
-                    {[44, 66, 54, 78].map((height, idx) => (
-                      <span
-                        key={idx}
-                        className="w-1.5 rounded-t-full transition-all duration-300 group-hover:brightness-125"
-                        style={{
-                          height: `${height}%`,
-                          backgroundColor: ["#38bdf8", "#818cf8", "#a78bfa", "#38bdf8"][idx],
-                          opacity: 0.86,
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <span className="btn-gradient inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white">
-                    Open
-                    <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  </span>
-                </div>
+                <span className="btn-gradient inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg px-3 py-2 text-xs font-semibold text-white">
+                  Open
+                  <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </span>
               </div>
             </Link>
           </div>
         </div>
 
         {data.watch_items.length > 0 && (
-          <div
-            className="bb-card p-3"
-            style={{ borderColor: "rgba(245,158,11,0.14)" }}
-          >
+          <div className="bb-card p-3" style={{ borderColor: "rgba(245,158,11,0.16)" }}>
             <div className="mb-3 flex items-center gap-2">
               <CircleAlert className="w-4 h-4 text-amber-400" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-400">
                 Investor Watch Items
               </p>
             </div>
@@ -355,18 +268,9 @@ export default function StockDriversCard({
               {data.watch_items.slice(0, 3).map((item, idx) => (
                 <div
                   key={idx}
-                  className="group rounded-lg border border-amber-400/10 bg-amber-400/[0.04] p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-400/35 hover:bg-amber-400/[0.07]"
+                  className="rounded-lg border border-amber-400/10 bg-amber-400/[0.04] p-3 transition-colors duration-200 hover:border-amber-400/30 hover:bg-amber-400/[0.07]"
                   title={item}
                 >
-                  <div className="mb-3 flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, markerIdx) => (
-                      <span
-                        key={markerIdx}
-                        className="h-1.5 flex-1 rounded-full bg-amber-400/20 transition-colors group-hover:bg-amber-400/60"
-                        style={{ opacity: markerIdx <= idx + 2 ? 1 : 0.35 }}
-                      />
-                    ))}
-                  </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
                     {item}
                   </p>

@@ -141,7 +141,7 @@ export default function AboutPage() {
               >
                 Stock research,
                 <br />
-                <span className="gradient-text-animated italic">
+                <span className="gradient-text italic">
                   without the fog.
                 </span>
               </h1>
@@ -158,7 +158,7 @@ export default function AboutPage() {
                   key={item.label}
                   className="bb-card px-3 py-4 text-center space-y-1"
                 >
-                  <p className="font-fraunces font-black gradient-text-animated text-4xl">
+                  <p className="font-fraunces font-black gradient-text text-4xl">
                     {item.value}
                   </p>
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-600 font-mono">

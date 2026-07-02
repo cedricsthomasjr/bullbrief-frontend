@@ -111,30 +111,18 @@ export default function MarketTicker() {
     ? `Source: ${TICKER_SOURCE}; updated ${new Date(updatedAt).toLocaleTimeString()}`
     : `Source: ${TICKER_SOURCE}`;
   const statusLabel = loading ? "Loading" : error ? "Offline" : "Live";
-  const statusColor = error ? "#f43f5e" : loading ? "#64748b" : "#10b981";
+  const statusToneClass = error ? "text-rose-400" : loading ? "text-slate-500" : "text-emerald-400";
+  const dotToneClass = error ? "bg-rose-400" : loading ? "bg-slate-500" : "bg-emerald-400";
 
   return (
     <div
-      className="w-full overflow-hidden h-8 flex items-center"
+      className="w-full overflow-hidden h-8 flex items-center bg-[#04091a] border-b border-white/[0.05]"
       title={sourceTitle}
-      style={{
-        backgroundColor: "rgba(4,9,20,0.95)",
-        borderBottom: "1px solid rgba(56,189,248,0.06)",
-      }}
     >
       {/* Live dot */}
-      <div
-        className="shrink-0 flex items-center gap-1.5 px-4 h-full border-r"
-        style={{ borderColor: "rgba(56,189,248,0.08)" }}
-      >
-        <span
-          className="w-1.5 h-1.5 rounded-full animate-live"
-          style={{ backgroundColor: statusColor }}
-        />
-        <span
-          className="text-[9px] font-black uppercase tracking-[0.18em] font-mono"
-          style={{ color: statusColor }}
-        >
+      <div className="shrink-0 flex items-center gap-1.5 px-4 h-full border-r border-white/[0.06]">
+        <span className={`w-1.5 h-1.5 rounded-full animate-live ${dotToneClass}`} />
+        <span className={`text-[10px] font-semibold uppercase tracking-wide font-mono ${statusToneClass}`}>
           {statusLabel}
         </span>
       </div>
@@ -152,31 +140,25 @@ export default function MarketTicker() {
                   <span className="text-slate-500 tabular-nums">
                     {formatPrice(ticker.price)}
                   </span>
-                  <span
-                    className="font-semibold tabular-nums"
-                    style={{ color: up ? "#10b981" : "#f43f5e" }}
-                  >
+                  <span className={`font-semibold tabular-nums ${up ? "text-emerald-400" : "text-rose-400"}`}>
                     {up ? "▲" : "▼"} {Math.abs(percent).toFixed(2)}%
                   </span>
                 </span>
               );
             })
           ) : (
-            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-700">
+            <span className="text-[10px] font-mono uppercase tracking-wide text-slate-700">
               {loading ? "Loading market data..." : "Market data unavailable"}
             </span>
           )}
         </div>
       </div>
 
-      <div
-        className="hidden sm:flex shrink-0 items-center gap-1.5 px-3 h-full border-l"
-        style={{ borderColor: "rgba(56,189,248,0.08)" }}
-      >
-        <span className="text-[8px] font-medium uppercase tracking-widest text-slate-700">
+      <div className="hidden sm:flex shrink-0 items-center gap-1.5 px-3 h-full border-l border-white/[0.06]">
+        <span className="text-[9px] font-medium uppercase tracking-wide text-slate-700">
           Source:
         </span>
-        <span className="text-[8px] font-semibold uppercase tracking-widest text-slate-600">
+        <span className="text-[9px] font-semibold uppercase tracking-wide text-slate-600">
           FMP
         </span>
       </div>

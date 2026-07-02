@@ -9,13 +9,8 @@ export default function VerticalStatCard({ data, loading = false }: Props) {
 
   if (loading) {
     return (
-      <div
-        className="bb-card p-3 flex flex-col items-center justify-center min-h-[120px] gap-3"
-      >
-        <div
-          className="w-5 h-5 rounded-full animate-spin"
-          style={{ borderTop: "2px solid #38bdf8", borderRight: "2px solid transparent", borderBottom: "2px solid transparent", borderLeft: "2px solid transparent" }}
-        />
+      <div className="bb-card p-3 flex flex-col items-center justify-center min-h-[120px] gap-3">
+        <div className="w-5 h-5 rounded-full border-2 border-transparent border-t-sky-400 animate-spin" />
         <p className="text-xs text-slate-700">Analyzing...</p>
       </div>
     );
@@ -23,9 +18,7 @@ export default function VerticalStatCard({ data, loading = false }: Props) {
 
   if (!data) {
     return (
-      <div
-        className="bb-card p-3 flex items-center justify-center min-h-[120px]"
-      >
+      <div className="bb-card p-3 flex items-center justify-center min-h-[120px]">
         <p className="text-xs text-slate-700">No data loaded.</p>
       </div>
     );
@@ -39,17 +32,12 @@ export default function VerticalStatCard({ data, loading = false }: Props) {
   ];
 
   return (
-    <div
-      className="bb-card overflow-hidden"
-    >
-      <div
-        className="px-3 py-3"
-        style={{ borderBottom: "1px solid rgba(56,189,248,0.08)" }}
-      >
+    <div className="bb-card overflow-hidden">
+      <div className="px-3 py-3 border-b border-white/[0.06]">
         <p className="text-sm font-bold text-blue-50">{data.company_name}</p>
         <p className="text-xs text-slate-600 font-mono mt-0.5">{data.ticker}</p>
       </div>
-      <div className="divide-y" style={{ borderColor: "rgba(56,189,248,0.05)" }}>
+      <div className="divide-y divide-white/[0.05]">
         {stats.map((s) => (
           <div key={s.label} className="flex items-center justify-between px-3 py-2.5">
             <p className="text-xs text-slate-600">{s.label}</p>

@@ -12,6 +12,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import DataSourceNote from "@/app/components/DataSourceNote";
+import { TONE } from "@/app/lib/tone";
 
 type SupportedFilter = "gainers" | "losers" | "actives";
 type DisabledFilter = "large-cap" | "mid-cap" | "small-cap";
@@ -135,29 +136,24 @@ function SkeletonCard() {
 function MoverCard({ mover, rank }: { mover: MarketMover; rank: number }) {
   const direction = getMoveDirection(mover);
   const positive = direction !== "down";
-  const accent = positive ? "#10b981" : "#f43f5e";
+  const tone = positive ? TONE.emerald : TONE.rose;
   const href = `/summary/${encodeURIComponent(mover.symbol)}`;
 
   return (
     <Link
       href={href}
-      className="bb-card bb-card-hover group block overflow-hidden p-3 transition-all duration-300 hover:-translate-y-0.5"
-      style={{
-        borderColor: positive ? "rgba(16,185,129,0.14)" : "rgba(244,63,94,0.14)",
-      }}
+      className="bb-card bb-card-hover group block overflow-hidden p-3 transition-all duration-200"
+      style={{ borderColor: `${tone.hex}26` }}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold tabular-nums"
-              style={{ color: accent, backgroundColor: `${accent}12`, border: `1px solid ${accent}24` }}
-            >
+            <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-xs font-semibold tabular-nums ${tone.soft}`}>
               {rank}
             </span>
             <p className="font-mono text-sm font-black text-blue-50">{mover.symbol}</p>
             {mover.exchange && (
-              <span className="truncate rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-widest text-slate-700">
+              <span className="truncate rounded-md px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-slate-700">
                 {mover.exchange}
               </span>
             )}
@@ -167,45 +163,42 @@ function MoverCard({ mover, rank }: { mover: MarketMover; rank: number }) {
           </p>
         </div>
 
-        <span
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold tabular-nums"
-          style={{ color: accent, backgroundColor: `${accent}12`, border: `1px solid ${accent}24` }}
-        >
+        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-bold tabular-nums ${tone.soft}`}>
           {positive ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
           {formatPercent(mover.changesPercentage)}
         </span>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2">
-        <div className="rounded-lg p-2.5" style={{ backgroundColor: "rgba(15,32,64,0.42)", border: "1px solid rgba(56,189,248,0.07)" }}>
-          <p className="text-[9px] uppercase tracking-widest text-slate-600">Price</p>
+        <div className="rounded-lg p-2.5 bg-[#0f2040]/40 border border-white/[0.05]">
+          <p className="text-xs text-slate-600">Price</p>
           <p className="mt-1 text-xs font-bold tabular-nums text-blue-50">{formatCurrencyCompact(mover.price)}</p>
         </div>
-        <div className="rounded-lg p-2.5" style={{ backgroundColor: "rgba(15,32,64,0.42)", border: "1px solid rgba(56,189,248,0.07)" }}>
-          <p className="text-[9px] uppercase tracking-widest text-slate-600">Change</p>
-          <p className="mt-1 text-xs font-bold tabular-nums" style={{ color: accent }}>
+        <div className="rounded-lg p-2.5 bg-[#0f2040]/40 border border-white/[0.05]">
+          <p className="text-xs text-slate-600">Change</p>
+          <p className={`mt-1 text-xs font-bold tabular-nums ${tone.text}`}>
             {formatCurrencyCompact(mover.change)}
           </p>
         </div>
-        <div className="rounded-lg p-2.5" style={{ backgroundColor: "rgba(15,32,64,0.42)", border: "1px solid rgba(56,189,248,0.07)" }}>
-          <p className="text-[9px] uppercase tracking-widest text-slate-600">Volume</p>
+        <div className="rounded-lg p-2.5 bg-[#0f2040]/40 border border-white/[0.05]">
+          <p className="text-xs text-slate-600">Volume</p>
           <p className="mt-1 text-xs font-bold tabular-nums text-blue-50">{formatLargeNumber(mover.volume)}</p>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <div className="rounded-lg p-2.5" style={{ backgroundColor: "rgba(8,18,36,0.52)", border: "1px solid rgba(56,189,248,0.06)" }}>
-          <p className="text-[9px] uppercase tracking-widest text-slate-600">Market Cap</p>
+        <div className="rounded-lg p-2.5 bg-black/20 border border-white/[0.04]">
+          <p className="text-xs text-slate-600">Market Cap</p>
           <p className="mt-1 truncate text-xs font-semibold text-slate-400">{formatCurrencyCompact(mover.marketCap)}</p>
         </div>
-        <div className="rounded-lg p-2.5" style={{ backgroundColor: "rgba(8,18,36,0.52)", border: "1px solid rgba(56,189,248,0.06)" }}>
-          <p className="text-[9px] uppercase tracking-widest text-slate-600">Sector</p>
+        <div className="rounded-lg p-2.5 bg-black/20 border border-white/[0.04]">
+          <p className="text-xs text-slate-600">Sector</p>
           <p className="mt-1 truncate text-xs font-semibold text-slate-400">{mover.sector || "N/A"}</p>
         </div>
       </div>
 
-      <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: `${accent}08`, border: `1px solid ${accent}18` }}>
-        <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: accent }}>
+      <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: `${tone.hex}0d`, border: `1px solid ${tone.hex}20` }}>
+        <p className={`text-xs font-semibold uppercase tracking-wide ${tone.text}`}>
           Possible Reason
         </p>
         <p className="mt-1 text-xs leading-5 text-slate-500">
@@ -213,8 +206,8 @@ function MoverCard({ mover, rank }: { mover: MarketMover; rank: number }) {
         </p>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-sky-400/[0.06] pt-3">
-        <span className="text-[10px] font-medium uppercase tracking-widest text-slate-700">
+      <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3">
+        <span className="text-xs font-medium text-slate-700">
           See what moved. Understand why it matters.
         </span>
         <span className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-400 transition-colors group-hover:text-sky-300">
@@ -277,21 +270,11 @@ export default function MoversPage() {
   const updatedLabel = lastUpdatedLabel(source?.updated_at);
 
   return (
-    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px] bg-[#060c1a]">
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         <div
-          className="absolute -top-32 left-1/2 h-[440px] w-[760px] -translate-x-1/2 rounded-full"
-          style={{
-            background: "radial-gradient(ellipse, rgba(56,189,248,0.08) 0%, transparent 70%)",
-            filter: "blur(70px)",
-          }}
-        />
-        <div
-          className="absolute right-[-10%] top-[30%] h-[420px] w-[420px] rounded-full"
-          style={{
-            background: "radial-gradient(ellipse, rgba(129,140,248,0.06) 0%, transparent 70%)",
-            filter: "blur(80px)",
-          }}
+          className="absolute -top-32 left-1/2 h-[440px] w-[760px] -translate-x-1/2 rounded-full animate-orb"
+          style={{ background: "radial-gradient(ellipse, rgba(56,189,248,0.07) 0%, transparent 70%)", filter: "blur(80px)" }}
         />
       </div>
 
@@ -299,10 +282,10 @@ export default function MoversPage() {
         <section className="space-y-5 pt-4">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-sky-400">
                 Market Discovery
               </p>
-              <h1 className="text-4xl font-bold tracking-tighter text-blue-50 sm:text-5xl">
+              <h1 className="font-fraunces text-4xl font-bold tracking-tight text-blue-50 sm:text-5xl">
                 Biggest Movers of the Day
               </h1>
               <p className="max-w-2xl text-sm leading-7 text-slate-500">
@@ -312,17 +295,11 @@ export default function MoversPage() {
 
             <div className="flex flex-wrap items-center gap-2">
               {updatedLabel && (
-                <span
-                  className="rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
-                  style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
-                >
+                <span className="rounded-lg border border-white/[0.06] bg-[#0f2040]/60 px-3 py-2 text-xs font-medium text-slate-500">
                   Last updated: {updatedLabel}
                 </span>
               )}
-              <span
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500"
-                style={{ backgroundColor: "rgba(129,140,248,0.08)", border: "1px solid rgba(129,140,248,0.16)" }}
-              >
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-400/20 bg-indigo-400/[0.08] px-3 py-2 text-xs font-medium text-slate-500">
                 <Activity className="h-3.5 w-3.5 text-indigo-300" />
                 Live Market Data
               </span>
@@ -344,19 +321,20 @@ export default function MoversPage() {
                         if (!disabled && isSupportedFilter(filter.id)) setActiveFilter(filter.id);
                       }}
                       title={disabled ? "Market-cap filters require data not available in the current feed. Use Gainers, Losers, or Most Active to explore today's movers." : undefined}
-                      className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all ${disabled ? "cursor-not-allowed opacity-35" : "hover:-translate-y-0.5"}`}
-                      style={
-                        active
-                          ? { color: "#38bdf8", backgroundColor: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.28)" }
-                          : { color: "#64748b", backgroundColor: "rgba(15,32,64,0.36)", border: "1px solid rgba(56,189,248,0.08)" }
-                      }
+                      className={`rounded-lg border px-4 py-2 text-xs font-semibold transition-colors ${
+                        disabled
+                          ? "cursor-not-allowed opacity-35 text-slate-500 bg-[#0f2040]/40 border-white/[0.05]"
+                          : active
+                          ? "text-sky-400 bg-sky-400/10 border-sky-400/25"
+                          : "text-slate-500 bg-[#0f2040]/40 border-white/[0.05] hover:text-slate-300"
+                      }`}
                     >
                       {filter.label}
                     </button>
                   );
                 })}
               </div>
-              <p className="mt-3 text-[11px] leading-5 text-slate-700">
+              <p className="mt-3 text-xs leading-5 text-slate-700">
                 Market-cap filters are not yet supported by the current data feed. Use Gainers, Losers, or Most Active to explore today&apos;s moves.
               </p>
             </div>
@@ -364,7 +342,7 @@ export default function MoversPage() {
             <div className="bb-card p-3">
               <div className="flex items-center gap-2 text-sky-400">
                 <BarChart3 className="h-4 w-4" />
-                <p className="text-[10px] font-bold uppercase tracking-widest">Current Leader</p>
+                <p className="text-xs font-semibold uppercase tracking-wide">Current Leader</p>
               </div>
               {leader ? (
                 <div className="mt-3 flex items-end justify-between gap-3">
@@ -372,10 +350,7 @@ export default function MoversPage() {
                     <p className="font-mono text-lg font-black text-blue-50">{leader.symbol}</p>
                     <p className="truncate text-xs text-slate-600">{leader.name}</p>
                   </div>
-                  <p
-                    className="shrink-0 text-sm font-bold tabular-nums"
-                    style={{ color: getMoveDirection(leader) === "down" ? "#f43f5e" : "#10b981" }}
-                  >
+                  <p className={`shrink-0 text-sm font-bold tabular-nums ${getMoveDirection(leader) === "down" ? "text-rose-400" : "text-emerald-400"}`}>
                     {formatPercent(leader.changesPercentage)}
                   </p>
                 </div>
@@ -403,7 +378,7 @@ export default function MoversPage() {
             <p className="mt-1 text-xs leading-6 text-slate-600">
               The mover feed may be rate-limited or down. Try refreshing, or search a specific ticker to open a BullBrief.
             </p>
-            <p className="mt-2 text-[10px] uppercase tracking-widest text-slate-700">{error}</p>
+            <p className="mt-2 text-xs text-slate-700">{error}</p>
           </section>
         )}
 

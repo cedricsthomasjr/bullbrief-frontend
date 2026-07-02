@@ -10,6 +10,7 @@ import { formatFixed, formatNumber, formatPercent } from "@/app/lib/format";
 import EPSChartModal from "@/app/components/EPSChartModal";
 import TermTooltip from "@/app/components/TermTooltip";
 import DataSourceNote from "@/app/components/DataSourceNote";
+import { TONE, type Tone } from "@/app/lib/tone";
 
 type BackendSummary = {
   company_name: string; ticker: string; business_summary: string; swot: string; outlook: string;
@@ -20,10 +21,10 @@ type BackendSummary = {
   institutional_ownership: number; short_percent: number; raw_summary: string;
 };
 
-const GROUP_ACCENT = {
-  "Valuation":              { color: "#38bdf8", bg: "rgba(56,189,248,0.06)",  border: "rgba(56,189,248,0.12)" },
-  "Risk & Ownership":       { color: "#818cf8", bg: "rgba(129,140,248,0.06)", border: "rgba(129,140,248,0.12)" },
-  "Profitability & Cash":   { color: "#10b981", bg: "rgba(16,185,129,0.06)",  border: "rgba(16,185,129,0.12)" },
+const GROUP_TONE: Record<string, Tone> = {
+  "Valuation": "sky",
+  "Risk & Ownership": "indigo",
+  "Profitability & Cash": "emerald",
 };
 
 export default function FinancialMetricsGrid({ data }: { data: BackendSummary }) {
@@ -65,12 +66,12 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
   return (
     <div className="space-y-10">
       {metricGroups.map((group, gi) => {
-        const accent = GROUP_ACCENT[group.title as keyof typeof GROUP_ACCENT];
+        const tone = GROUP_TONE[group.title] ?? "slate";
         return (
           <div key={gi} className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: accent.color }} />
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: accent.color }}>{group.title}</p>
+              <span className={`w-1.5 h-1.5 rounded-full ${TONE[tone].dot}`} />
+              <p className={`text-xs font-semibold uppercase tracking-wide ${TONE[tone].text}`}>{group.title}</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
               {group.metrics.map((item, idx) => {
@@ -78,26 +79,21 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
                 return (
                   <div
                     key={idx}
-                    className="bb-card group relative p-3 transition-all cursor-default"
-                    style={{ borderColor: accent.border }}
+                    className="bb-card group relative p-3 transition-colors cursor-default"
+                    style={{ borderColor: `${TONE[tone].hex}33` }}
                   >
-                    <div className="flex items-center gap-1.5 mb-2" style={{ color: accent.color, opacity: 0.7 }}>
+                    <div className={`flex items-center gap-1.5 mb-2 opacity-80 ${TONE[tone].text}`}>
                       {item.icon}
-                      <p className="text-[9px] uppercase tracking-wider font-medium text-slate-500">{item.label}</p>
+                      <p className="text-[11px] uppercase tracking-wide font-medium text-slate-500">{item.label}</p>
                       {"termId" in item && item.termId && (
-                        <TermTooltip termId={item.termId} accentColor={accent.color} />
+                        <TermTooltip termId={item.termId} tone={tone} />
                       )}
                     </div>
                     <p className="text-blue-50 text-sm font-bold tabular-nums">{item.value}</p>
                     {isEPS && (
                       <button
                         onClick={() => setShowModal(true)}
-                        className="absolute top-2.5 right-2.5 text-[9px] px-2 py-0.5 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{
-                          color: accent.color,
-                          backgroundColor: accent.bg,
-                          border: `1px solid ${accent.border}`,
-                        }}
+                        className={`absolute top-2.5 right-2.5 rounded-full border px-2 py-0.5 text-[11px] font-medium opacity-0 transition-opacity group-hover:opacity-100 ${TONE[tone].soft}`}
                       >
                         Chart
                       </button>

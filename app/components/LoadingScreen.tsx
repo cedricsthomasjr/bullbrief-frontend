@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { TONE, type Tone } from "@/app/lib/tone";
 
 type Fact = {
   text: string;
@@ -177,40 +178,13 @@ const FACTS: Fact[] = [
   },
 ];
 
-const CATEGORY_ACCENT: Record<
-  Fact["category"],
-  { text: string; bg: string; border: string }
-> = {
-  history: {
-    text: "#a78bfa",
-    bg: "rgba(167,139,250,0.12)",
-    border: "rgba(167,139,250,0.3)",
-  },
-  markets: {
-    text: "#38bdf8",
-    bg: "rgba(56,189,248,0.12)",
-    border: "rgba(56,189,248,0.3)",
-  },
-  investing: {
-    text: "#34d399",
-    bg: "rgba(52,211,153,0.12)",
-    border: "rgba(52,211,153,0.3)",
-  },
-  companies: {
-    text: "#f472b6",
-    bg: "rgba(244,114,182,0.12)",
-    border: "rgba(244,114,182,0.3)",
-  },
-  macro: {
-    text: "#fbbf24",
-    bg: "rgba(251,191,36,0.12)",
-    border: "rgba(251,191,36,0.3)",
-  },
-  trivia: {
-    text: "#94a3b8",
-    bg: "rgba(148,163,184,0.12)",
-    border: "rgba(148,163,184,0.3)",
-  },
+const CATEGORY_TONE: Record<Fact["category"], Tone> = {
+  history: "violet",
+  markets: "sky",
+  investing: "emerald",
+  companies: "rose",
+  macro: "amber",
+  trivia: "slate",
 };
 
 const CATEGORY_LABEL: Record<Fact["category"], string> = {
@@ -242,45 +216,21 @@ export default function LoadingScreen({
   }, [isLoading, queue.length]);
 
   const fact = queue[idx];
-  const accent = CATEGORY_ACCENT[fact.category];
+  const tone = CATEGORY_TONE[fact.category];
 
   return (
     <AnimatePresence>
       {isLoading && (
         <motion.div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8"
-          style={{ backgroundColor: "#060c1a" }}
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-[#060c1a]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(ellipse at 50% 40%, rgba(56,189,248,0.08) 0%, transparent 65%)",
-            }}
-          />
-
           <div className="relative w-12 h-12">
-            <div
-              className="absolute inset-0 rounded-full"
-              style={{ border: "1px solid rgba(56,189,248,0.1)" }}
-            />
-            <div
-              className="absolute inset-0 rounded-full animate-spin"
-              style={{
-                borderTop: `2px solid ${accent.text}`,
-                borderRight: "2px solid transparent",
-                borderBottom: "2px solid transparent",
-                borderLeft: "2px solid transparent",
-              }}
-            />
-            <div
-              className="absolute inset-2 rounded-full"
-              style={{ backgroundColor: "rgba(56,189,248,0.04)" }}
-            />
+            <div className="absolute inset-0 rounded-full border border-sky-400/10" />
+            <div className={`absolute inset-0 rounded-full border-2 border-transparent animate-spin ${TONE[tone].spinnerBorder}`} />
           </div>
 
           <div className="text-center space-y-4 max-w-md px-6 relative">
@@ -297,14 +247,7 @@ export default function LoadingScreen({
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.45 }}
               >
-                <span
-                  className="inline-flex rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-widest"
-                  style={{
-                    color: accent.text,
-                    backgroundColor: accent.bg,
-                    border: `1px solid ${accent.border}`,
-                  }}
-                >
+                <span className={`inline-flex rounded-md border px-2 py-1 text-xs font-semibold uppercase tracking-wide ${TONE[tone].soft}`}>
                   {CATEGORY_LABEL[fact.category]}
                 </span>
                 <p className="text-sm text-slate-400 leading-relaxed">

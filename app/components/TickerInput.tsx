@@ -49,10 +49,7 @@ export default function TickerInput() {
   return (
     <div className="w-full max-w-lg relative">
       {/* Input row */}
-      <div
-        className="bb-card relative flex items-center overflow-hidden"
-        style={{ borderColor: "rgba(56,189,248,0.18)" }}
-      >
+      <div className="bb-card relative flex items-center overflow-hidden" style={{ borderColor: "rgba(56,189,248,0.2)" }}>
         <Search className="absolute left-4 w-4 h-4 text-slate-600 pointer-events-none shrink-0" />
         <input
           ref={inputRef}
@@ -80,28 +77,19 @@ export default function TickerInput() {
             animate={{ opacity: 1, y: 0, scaleY: 1 }}
             exit={{ opacity: 0, y: -8, scaleY: 0.95 }}
             transition={{ duration: 0.14, ease: "easeOut" }}
-            className="bb-card absolute top-full mt-2 w-full overflow-hidden scrollbar-hide z-50 origin-top"
-            style={{
-              maxHeight: "288px",
-              overflowY: "auto",
-              borderColor: "rgba(56,189,248,0.15)",
-            }}
+            className="bb-card absolute top-full mt-2 max-h-72 w-full overflow-y-auto overflow-x-hidden scrollbar-hide z-50 origin-top"
+            style={{ borderColor: "rgba(56,189,248,0.15)" }}
           >
             {suggestions.map((s, i) => (
               <li
                 key={s.symbol}
                 onClick={() => handleSelect(s.symbol)}
-                className="flex justify-between items-center px-4 py-3 cursor-pointer transition-all"
-                style={{
-                  backgroundColor: i === activeIndex ? "rgba(56,189,248,0.08)" : "transparent",
-                  borderLeft: i === activeIndex ? "2px solid #38bdf8" : "2px solid transparent",
-                }}
-                onMouseEnter={(e) => {
-                  if (i !== activeIndex) (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(56,189,248,0.04)";
-                }}
-                onMouseLeave={(e) => {
-                  if (i !== activeIndex) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-                }}
+                onMouseEnter={() => setActiveIndex(i)}
+                className={`flex justify-between items-center px-4 py-3 cursor-pointer border-l-2 transition-colors ${
+                  i === activeIndex
+                    ? "bg-sky-400/[0.08] border-sky-400"
+                    : "border-transparent hover:bg-white/[0.04]"
+                }`}
               >
                 <div className="flex flex-col min-w-0">
                   <span className="font-bold text-blue-50 text-sm font-mono">{s.symbol}</span>

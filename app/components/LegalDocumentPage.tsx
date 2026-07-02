@@ -14,13 +14,13 @@ function slugify(value: string) {
 
 export default function LegalDocumentPage({ document }: Props) {
   return (
-    <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
+    <main className="min-h-screen pt-[88px] bg-[#060c1a]">
       <div className="max-w-7xl mx-auto px-6 py-12 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-8 lg:gap-10">
           <aside className="lg:sticky lg:top-28 lg:self-start space-y-4">
             <div className="bb-card p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">{document.eyebrow}</p>
-              <h1 className="mt-2 text-2xl font-black tracking-tight text-blue-50">{document.title}</h1>
+              <p className="text-xs font-semibold uppercase tracking-wide text-sky-400">{document.eyebrow}</p>
+              <h1 className="mt-2 font-fraunces text-2xl font-black tracking-tight text-blue-50">{document.title}</h1>
               <p className="mt-2 text-xs text-slate-600">Updated {document.updated}</p>
               <div className="mt-5 grid grid-cols-1 gap-2">
                 <Link href="/terms" className="text-xs text-slate-500 hover:text-sky-400 transition-colors">Terms of Service</Link>
@@ -30,7 +30,7 @@ export default function LegalDocumentPage({ document }: Props) {
             </div>
 
             <nav className="hidden lg:block bb-card p-4 max-h-[58vh] overflow-y-auto">
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-600">Contents</p>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-600">Contents</p>
               <div className="space-y-2">
                 {document.sections.map((section) => (
                   <a
@@ -47,8 +47,8 @@ export default function LegalDocumentPage({ document }: Props) {
 
           <article className="space-y-6">
             <section className="bb-card p-5 sm:p-6">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">{document.eyebrow}</p>
-              <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight text-blue-50">{document.title}</h2>
+              <p className="text-xs font-semibold uppercase tracking-wide text-sky-400">{document.eyebrow}</p>
+              <h2 className="mt-3 font-fraunces text-3xl sm:text-5xl font-black tracking-tight text-blue-50">{document.title}</h2>
               <div className="mt-5 space-y-4">
                 {document.intro.map((paragraph) => (
                   <p key={paragraph} className="text-sm sm:text-[15px] leading-8 text-slate-400">
@@ -56,10 +56,7 @@ export default function LegalDocumentPage({ document }: Props) {
                   </p>
                 ))}
               </div>
-              <div
-                className="mt-6 rounded-lg p-4"
-                style={{ backgroundColor: "rgba(244,63,94,0.07)", border: "1px solid rgba(244,63,94,0.18)" }}
-              >
+              <div className="mt-6 rounded-lg p-4 bg-rose-400/[0.07] border border-rose-400/20">
                 <p className="text-sm font-bold text-rose-300">Core disclosure</p>
                 <p className="mt-2 text-sm leading-7 text-slate-400">
                   BullBrief is not investment advice. BullBrief is not a registered investment adviser or broker-dealer. You are solely responsible for your own financial decisions.

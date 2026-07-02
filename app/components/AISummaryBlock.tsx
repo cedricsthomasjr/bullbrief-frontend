@@ -1,24 +1,20 @@
 import type { InsightSection } from "@//app/types/stock";
 import DataSourceNote from "@/app/components/DataSourceNote";
+import { TONE, type Tone } from "@/app/lib/tone";
 
-const SECTIONS = [
-  { key: "valuation",    label: "Valuation",    color: "#38bdf8", border: "rgba(56,189,248,0.2)",  bg: "rgba(56,189,248,0.04)" },
-  { key: "profitability",label: "Profitability", color: "#10b981", border: "rgba(16,185,129,0.2)",  bg: "rgba(16,185,129,0.04)" },
-  { key: "margins",      label: "Margins",       color: "#f59e0b", border: "rgba(245,158,11,0.2)",  bg: "rgba(245,158,11,0.04)" },
-  { key: "outlook",      label: "Outlook",       color: "#818cf8", border: "rgba(129,140,248,0.2)", bg: "rgba(129,140,248,0.04)" },
-] as const;
+const SECTIONS: { key: "valuation" | "profitability" | "margins" | "outlook"; label: string; tone: Tone }[] = [
+  { key: "valuation", label: "Valuation", tone: "sky" },
+  { key: "profitability", label: "Profitability", tone: "emerald" },
+  { key: "margins", label: "Margins", tone: "amber" },
+  { key: "outlook", label: "Outlook", tone: "indigo" },
+];
 
 export default function AISummaryBlock({ insight }: { insight: InsightSection }) {
   return (
-    <div
-      className="bb-card overflow-hidden"
-    >
+    <div className="bb-card overflow-hidden">
       {/* Header */}
-      <div
-        className="px-3 py-3"
-        style={{ borderBottom: "1px solid rgba(56,189,248,0.08)" }}
-      >
-        <p className="text-[10px] text-slate-600 uppercase tracking-widest font-medium">AI Summary</p>
+      <div className="px-3 py-3 border-b border-white/[0.06]">
+        <p className="text-xs font-medium text-slate-500">AI Summary</p>
         <p className="text-sm font-bold text-blue-50 mt-0.5 gradient-text">{insight.ticker}</p>
       </div>
 
@@ -27,22 +23,14 @@ export default function AISummaryBlock({ insight }: { insight: InsightSection })
         {SECTIONS.map((s) => (
           <div
             key={s.key}
-            className="px-3 py-3"
+            className="px-3 py-3 border-b border-white/[0.03]"
             style={{
-              backgroundColor: s.bg,
-              borderLeft: `2px solid ${s.color}`,
-              borderBottom: "1px solid rgba(56,189,248,0.04)",
+              backgroundColor: `${TONE[s.tone].hex}0a`,
+              borderLeft: `2px solid ${TONE[s.tone].hex}`,
             }}
           >
-            <p
-              className="text-[9px] font-bold uppercase tracking-widest mb-1.5"
-              style={{ color: s.color }}
-            >
-              {s.label}
-            </p>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              {insight[s.key]}
-            </p>
+            <p className={`text-xs font-semibold uppercase tracking-wide mb-1.5 ${TONE[s.tone].text}`}>{s.label}</p>
+            <p className="text-xs text-slate-400 leading-relaxed">{insight[s.key]}</p>
           </div>
         ))}
       </div>

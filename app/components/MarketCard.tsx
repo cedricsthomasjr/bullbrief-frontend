@@ -31,7 +31,7 @@ export default function MarketCard({ symbol }: Props) {
         setData(result);
         setError(false);
       } catch (err) {
-        console.error(`❌ Failed to fetch ${symbol}:`, err);
+        console.error(`Failed to fetch ${symbol}:`, err);
         setError(true);
       } finally {
         setLoading(false);
@@ -54,7 +54,7 @@ export default function MarketCard({ symbol }: Props) {
 
   if (error || !data) {
     return (
-      <div className={`${cardClasses} text-red-400 text-sm text-center`} style={{ borderColor: "rgba(244,63,94,0.18)" }}>
+      <div className={`${cardClasses} text-rose-400 text-sm text-center`} style={{ borderColor: "rgba(244,63,94,0.18)" }}>
         Failed to load {symbol}
       </div>
     );
@@ -62,7 +62,7 @@ export default function MarketCard({ symbol }: Props) {
 
   const isUp = data.change >= 0;
   const arrow = isUp ? "▲" : "▼";
-  const changeColor = isUp ? "text-green-400" : "text-red-400";
+  const changeColor = isUp ? "text-emerald-400" : "text-rose-400";
 
   return (
     <Link
