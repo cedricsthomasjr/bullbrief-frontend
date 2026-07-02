@@ -40,7 +40,6 @@ type MetricPoint = {
 };
 
 type PeriodMode = "annual" | "quarterly";
-  
 
 function displayLabel(point: MetricPoint, period: PeriodMode) {
   if (period === "quarterly") {
@@ -92,25 +91,20 @@ export default function MetricChart({
       className="bb-card p-3"
     >
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-bold text-white capitalize tracking-tight">
+        <h2 className="text-lg font-bold text-blue-50 capitalize tracking-tight">
           {title} Trend
         </h2>
         {hasQuarterly && (
-          <div
-            className="inline-flex self-start rounded-lg p-1"
-            style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
-          >
+          <div className="inline-flex self-start rounded-lg p-1 bg-[#0f2040]/60 border border-sky-400/10">
             {(["annual", "quarterly"] as PeriodMode[]).map((option) => {
               const active = activePeriod === option;
               return (
                 <button
                   key={option}
                   onClick={() => setPeriod(option)}
-                  className="rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors"
-                  style={{
-                    color: active ? "#eff6ff" : "#64748b",
-                    backgroundColor: active ? "rgba(59,130,246,0.16)" : "transparent",
-                  }}
+                  className={`rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                    active ? "text-blue-50 bg-sky-400/15" : "text-slate-500"
+                  }`}
                 >
                   {option === "annual" ? "Annual" : "Quarterly"}
                 </button>
@@ -121,38 +115,38 @@ export default function MetricChart({
       </div>
       <ResponsiveContainer width="100%" height={350}>
         <LineChart data={sortedData} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
           <XAxis
             dataKey="displayLabel"
-            stroke="#ccc"
+            stroke="#64748b"
             fontSize={12}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
-            stroke="#ccc"
+            stroke="#64748b"
             fontSize={12}
             tickFormatter={(v) => formatNumber(v)}
             tickLine={false}
             axisLine={false}
           />
           <Tooltip
-            contentStyle={{ backgroundColor: "#1f2937", border: "none" }}
-            labelStyle={{ color: "#ccc" }}
+            contentStyle={{ backgroundColor: "#0f1e38", border: "1px solid rgba(56,189,248,0.18)" }}
+            labelStyle={{ color: "#cbd5e1" }}
             formatter={(value: number | string) => {
               const num = typeof value === "number" ? value : parseFloat(value);
               return isNaN(num) ? "-" : formatNumber(num);
             }}
-            
+
           />
-          <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ color: '#ccc' }} />
+          <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ color: '#94a3b8' }} />
           <Line
             type="monotone"
             dataKey="value"
             name={title}
-            stroke="#3b82f6"
+            stroke="#38bdf8"
             strokeWidth={3}
-            dot={{ r: 4, stroke: "#fff", strokeWidth: 2 }}
+            dot={{ r: 4, stroke: "#060c1a", strokeWidth: 2 }}
             activeDot={{ r: 6 }}
           />
         </LineChart>

@@ -103,25 +103,20 @@ export default function EPSChartCard({ ticker }: { ticker: string }) {
   return (
     <div className="space-y-4">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-white text-lg font-semibold">
+        <h2 className="text-blue-50 text-lg font-bold">
           EPS History ({ticker.toUpperCase()})
         </h2>
         {hasQuarterly && (
-          <div
-            className="inline-flex self-start rounded-lg p-1"
-            style={{ backgroundColor: "rgba(15,32,64,0.58)", border: "1px solid rgba(56,189,248,0.1)" }}
-          >
+          <div className="inline-flex self-start rounded-lg p-1 bg-[#0f2040]/60 border border-sky-400/10">
             {(["annual", "quarterly"] as PeriodMode[]).map((option) => {
               const active = activePeriod === option;
               return (
                 <button
                   key={option}
                   onClick={() => setPeriod(option)}
-                  className="rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-colors"
-                  style={{
-                    color: active ? "#eff6ff" : "#64748b",
-                    backgroundColor: active ? "rgba(59,130,246,0.16)" : "transparent",
-                  }}
+                  className={`rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                    active ? "text-blue-50 bg-sky-400/15" : "text-slate-500"
+                  }`}
                 >
                   {option === "annual" ? "Annual" : "Quarterly"}
                 </button>
@@ -132,21 +127,21 @@ export default function EPSChartCard({ ticker }: { ticker: string }) {
       </div>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={activeData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-          <XAxis dataKey="label" stroke="#999" />
-          <YAxis stroke="#999" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+          <XAxis dataKey="label" stroke="#64748b" />
+          <YAxis stroke="#64748b" />
           <Tooltip
-            contentStyle={{ backgroundColor: "#111", border: "none" }}
-            labelStyle={{ color: "#fff" }}
-            itemStyle={{ color: "#3b82f6" }}
+            contentStyle={{ backgroundColor: "#0f1e38", border: "1px solid rgba(56,189,248,0.18)" }}
+            labelStyle={{ color: "#eff6ff" }}
+            itemStyle={{ color: "#38bdf8" }}
           />
-          <Bar dataKey="eps" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="eps" fill="#38bdf8" radius={[4, 4, 0, 0]} />
           <Line
             type="monotone"
             dataKey="eps"
-            stroke="#60a5fa"
+            stroke="#818cf8"
             strokeWidth={2}
-            dot={{ r: 3, fill: "#60a5fa" }}
+            dot={{ r: 3, fill: "#818cf8" }}
             activeDot={{ r: 5 }}
           />
         </BarChart>

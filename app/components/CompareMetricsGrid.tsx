@@ -22,7 +22,7 @@ export default function CompareMetricsGrid({ data }: { data: CompanyMetric[] | u
   const renderValue = (value: number | null, suffix = "", divisor = 1) =>
     value != null
       ? `${(value / divisor).toFixed(2)}${suffix}`
-      : <span style={{ color: "#1e293b" }}>-</span>;
+      : <span className="text-slate-800">-</span>;
 
   const columns = [
     { label: "Market Cap",    key: "market_cap" as const, suffix: "B", divisor: 1e9 },
@@ -38,10 +38,10 @@ export default function CompareMetricsGrid({ data }: { data: CompanyMetric[] | u
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr style={{ borderBottom: "1px solid rgba(56,189,248,0.08)" }}>
-              <th className="text-left px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-sky-400">Ticker</th>
+            <tr className="border-b border-sky-400/10">
+              <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wide text-sky-400">Ticker</th>
               {columns.map((col) => (
-                <th key={col.key} className="text-left px-3 py-3 text-[10px] font-medium uppercase tracking-widest text-slate-600">
+                <th key={col.key} className="text-left px-3 py-3 text-xs font-medium uppercase tracking-wide text-slate-600">
                   {col.label}
                 </th>
               ))}
@@ -51,9 +51,7 @@ export default function CompareMetricsGrid({ data }: { data: CompanyMetric[] | u
             {data.map((c, i) => (
               <tr
                 key={c.ticker}
-                style={{ borderBottom: i < data.length - 1 ? "1px solid rgba(56,189,248,0.05)" : "none" }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(56,189,248,0.03)")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                className={`transition-colors duration-150 hover:bg-sky-400/[0.03] ${i < data.length - 1 ? "border-b border-sky-400/5" : ""}`}
               >
                 <td className="px-3 py-3 font-bold text-blue-50 font-mono">{c.ticker}</td>
                 {columns.map((col) => (

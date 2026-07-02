@@ -11,26 +11,14 @@ export default function StockChartToggle({ symbol }: { symbol: string }) {
   return (
     <div className="space-y-4 p-4">
       {/* Toggle */}
-      <div
-        className="flex items-center gap-1 w-fit rounded-xl p-1"
-        style={{ backgroundColor: "rgba(56,189,248,0.05)", border: "1px solid rgba(56,189,248,0.1)" }}
-      >
+      <div className="flex items-center gap-1 w-fit rounded-xl p-1 bg-sky-400/5 border border-sky-400/10">
         {(["mini", "full"] as const).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
-            className="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all"
-            style={
-              view === v
-                ? { backgroundColor: "#38bdf8", color: "#060c1a" }
-                : { color: "#475569" }
-            }
-            onMouseEnter={(e) => {
-              if (view !== v) (e.currentTarget as HTMLElement).style.color = "#94a3b8";
-            }}
-            onMouseLeave={(e) => {
-              if (view !== v) (e.currentTarget as HTMLElement).style.color = "#475569";
-            }}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+              view === v ? "bg-sky-400 text-[#060c1a]" : "text-slate-600 hover:text-slate-400"
+            }`}
           >
             {v === "mini" ? "Overview" : "Full Chart"}
           </button>

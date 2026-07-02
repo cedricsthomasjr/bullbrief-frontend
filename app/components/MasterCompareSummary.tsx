@@ -1,3 +1,5 @@
+import { TONE } from "@/app/lib/tone";
+
 export default function MasterCompareSummary({ summary }: { summary: string }) {
   if (!summary) return null;
 
@@ -5,16 +7,13 @@ export default function MasterCompareSummary({ summary }: { summary: string }) {
     <div
       className="bb-card overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, rgba(14,165,233,0.07) 0%, rgba(99,102,241,0.07) 100%)",
-        borderColor: "rgba(56,189,248,0.2)",
+        background: `linear-gradient(135deg, ${TONE.sky.hex}12 0%, ${TONE.indigo.hex}12 100%)`,
+        borderColor: `${TONE.sky.hex}33`,
       }}
     >
-      <div
-        className="px-3 py-3 flex items-center gap-2.5"
-        style={{ borderBottom: "1px solid rgba(56,189,248,0.1)" }}
-      >
+      <div className="px-3 py-3 flex items-center gap-2.5 border-b border-sky-400/10">
         <span className="w-2 h-2 rounded-full bg-sky-400 animate-live" />
-        <p className="text-xs font-bold text-sky-400 uppercase tracking-widest">
+        <p className="text-xs font-semibold text-sky-400 uppercase tracking-wide">
           AI Master Comparison
         </p>
       </div>

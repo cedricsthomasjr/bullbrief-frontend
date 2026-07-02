@@ -13,6 +13,7 @@ import {
   LabelList,
 } from "recharts";
 import DataSourceNote from "@/app/components/DataSourceNote";
+import { TONE, type Tone } from "@/app/lib/tone";
 
 type TickerData = {
   ticker: string;
@@ -69,7 +70,7 @@ const STATS: StatConfig[] = [
   },
 ];
 
-const COMPANY_COLORS = ["#38bdf8", "#818cf8", "#10b981"];
+const COMPANY_TONES: Tone[] = ["sky", "indigo", "emerald"];
 
 function CustomTooltipContent({
   active,
@@ -83,14 +84,7 @@ function CustomTooltipContent({
   if (!active || !payload?.length) return null;
   const { value, payload: item } = payload[0];
   return (
-    <div
-      className="bb-card px-3 py-2 text-xs"
-      style={{
-        backgroundColor: "#0f1e38",
-        border: "1px solid rgba(56,189,248,0.18)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-      }}
-    >
+    <div className="rounded-xl bg-[#0f1e38] border border-sky-400/20 shadow-lg px-3 py-2 text-xs">
       <p className="font-black font-mono mb-0.5" style={{ color: item.color }}>
         {item.ticker}
       </p>
@@ -120,10 +114,11 @@ export default function CompareCharts({ data }: { data: TickerData[] | undefined
     .map((d) => {
       const raw = d[activeStat.key];
       const colorIdx = data.findIndex((x) => x.ticker === d.ticker);
+      const tone = COMPANY_TONES[colorIdx % COMPANY_TONES.length];
       return {
         ticker: d.ticker,
         value: raw != null ? activeStat.toDisplay(raw) : 0,
-        color: COMPANY_COLORS[colorIdx % COMPANY_COLORS.length],
+        color: TONE[tone].hex,
         noData: raw == null,
       };
     });
@@ -133,32 +128,28 @@ export default function CompareCharts({ data }: { data: TickerData[] | undefined
       className="bb-card overflow-hidden"
     >
       {/* Header row */}
-      <div
-        className="px-3 py-3 flex items-center justify-between gap-3 flex-wrap"
-        style={{ borderBottom: "1px solid rgba(56,189,248,0.07)" }}
-      >
+      <div className="px-3 py-3 flex items-center justify-between gap-3 flex-wrap border-b border-sky-400/10">
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-          <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">
+          <p className="text-xs font-semibold text-sky-400 uppercase tracking-wide">
             Financial Metrics Explorer
           </p>
         </div>
-        <p className="text-[10px] uppercase tracking-widest text-slate-600">
+        <p className="text-xs uppercase tracking-wide text-slate-600">
           Toggle companies and metrics
         </p>
         {/* Company toggles */}
         <div className="flex gap-3 flex-wrap">
           {data.map((d, i) => {
-            const color = COMPANY_COLORS[i % COMPANY_COLORS.length];
+            const tone = COMPANY_TONES[i % COMPANY_TONES.length];
             const isActive = !hiddenTickers.includes(d.ticker);
             return (
               <button
                 key={d.ticker}
                 onClick={() => toggleTicker(d.ticker)}
-                className="flex items-center gap-1.5 text-[11px] font-bold font-mono transition-all duration-150"
-                style={{ opacity: isActive ? 1 : 0.28, color }}
+                className={`flex items-center gap-1.5 text-xs font-bold font-mono transition-opacity duration-150 ${TONE[tone].text} ${isActive ? "opacity-100" : "opacity-30"}`}
               >
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                <span className={`w-2 h-2 rounded-full ${TONE[tone].dot}`} />
                 {d.ticker}
               </button>
             );
@@ -174,20 +165,11 @@ export default function CompareCharts({ data }: { data: TickerData[] | undefined
             <button
               key={stat.key}
               onClick={() => setActiveStat(stat)}
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
-              style={
+              className={`px-4 py-1.5 rounded-lg border text-xs font-semibold transition-colors duration-150 ${
                 active
-                  ? {
-                      color: "#38bdf8",
-                      backgroundColor: "rgba(56,189,248,0.1)",
-                      border: "1px solid rgba(56,189,248,0.28)",
-                    }
-                  : {
-                      color: "#475569",
-                      backgroundColor: "transparent",
-                      border: "1px solid rgba(56,189,248,0.07)",
-                    }
-              }
+                  ? "text-sky-400 bg-sky-400/10 border-sky-400/25"
+                  : "text-slate-500 bg-transparent border-sky-400/10 hover:text-slate-300"
+              }`}
             >
               {stat.label}
             </button>
@@ -256,34 +238,28 @@ export default function CompareCharts({ data }: { data: TickerData[] | undefined
       </div>
 
       {/* All-stats mini grid */}
-      <div
-        className="grid grid-cols-2 sm:grid-cols-4 gap-px"
-        style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}
-      >
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px border-t border-sky-400/10">
         {STATS.map((stat) => (
           <button
             key={stat.key}
             onClick={() => setActiveStat(stat)}
-            className="px-3 py-3 text-left transition-all duration-150 hover:bg-sky-400/[0.03]"
-            style={
-              activeStat.key === stat.key
-                ? { backgroundColor: "rgba(56,189,248,0.04)" }
-                : {}
-            }
+            className={`px-3 py-3 text-left transition-colors duration-150 hover:bg-sky-400/[0.03] ${
+              activeStat.key === stat.key ? "bg-sky-400/[0.04]" : ""
+            }`}
           >
-            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2">
               {stat.shortLabel}
             </p>
             <div className="flex flex-col gap-1">
               {data.map((d, i) => {
                 const raw = d[stat.key];
-                const color = COMPANY_COLORS[i % COMPANY_COLORS.length];
+                const tone = COMPANY_TONES[i % COMPANY_TONES.length];
                 return (
                   <div key={d.ticker} className="flex items-center justify-between gap-2">
-                    <span className="text-[9px] font-mono" style={{ color, opacity: 0.7 }}>
+                    <span className={`text-xs font-mono opacity-70 ${TONE[tone].text}`}>
                       {d.ticker}
                     </span>
-                    <span className="text-[10px] font-bold tabular-nums text-slate-400">
+                    <span className="text-xs font-bold tabular-nums text-slate-400">
                       {raw != null ? stat.formatDisplay(stat.toDisplay(raw)) : "-"}
                     </span>
                   </div>
