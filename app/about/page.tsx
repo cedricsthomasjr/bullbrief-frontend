@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   SquareArrowOutUpRight,
 } from "lucide-react";
+import { TONE, type Tone } from "@/app/lib/tone";
 
 export const metadata: Metadata = {
   title: "About | BullBrief",
@@ -21,47 +22,47 @@ export const metadata: Metadata = {
     "Learn what BullBrief is, who built it, and where its data comes from.",
 };
 
-const PROVIDERS = [
+const PROVIDERS: { name: string; share: number; tone: Tone; role: string }[] = [
   {
     name: "Yahoo Finance",
     share: 32,
-    accent: "#38bdf8",
+    tone: "sky",
     role: "Company profiles, real-time quotes, key ratios, market snapshot fields, live ticker bar, market movers (gainers/losers/actives), peers, executives, and fallback headlines.",
   },
   {
     name: "SEC EDGAR",
     share: 22,
-    accent: "#10b981",
+    tone: "emerald",
     role: "Company filings used for 10-K style business drivers, filing links, fiscal-year context, and operating signals.",
   },
   {
     name: "Financial Modeling Prep",
     share: 12,
-    accent: "#818cf8",
+    tone: "indigo",
     role: "Historical financial statements, forward estimates, key ratios, and stock-news fallback.",
   },
   {
     name: "OpenAI",
     share: 14,
-    accent: "#a78bfa",
+    tone: "violet",
     role: "Plain-English summaries, analyst-style reports, peer comparison language, SWOT framing, and interpretation.",
   },
   {
     name: "NewsAPI / Finnhub / Yahoo / FMP",
     share: 10,
-    accent: "#f59e0b",
+    tone: "amber",
     role: "Recent-news candidate pools that are filtered by source quality, ticker relevance, market keywords, and recency.",
   },
   {
     name: "TradingView",
     share: 6,
-    accent: "#06b6d4",
+    tone: "slate",
     role: "Embedded price charts and stock-performance views.",
   },
   {
     name: "Local ticker datasets",
     share: 4,
-    accent: "#f43f5e",
+    tone: "rose",
     role: "Search autocomplete, ticker mapping, exchange metadata, and fast local lookup support.",
   },
 ];
@@ -97,39 +98,18 @@ const FEATURE_STACK = [
 
 export default function AboutPage() {
   return (
-    <main
-      className="min-h-screen pt-[88px]"
-      style={{ backgroundColor: "#060c1a" }}
-    >
+    <main className="min-h-screen pt-[88px] bg-[#060c1a]">
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         <div
-          className="absolute top-0 right-0 w-[640px] h-[440px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(ellipse, rgba(129,140,248,0.08) 0%, transparent 70%)",
-            filter: "blur(70px)",
-          }}
-        />
-        <div
-          className="absolute bottom-24 left-[-8%] w-[520px] h-[420px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(ellipse, rgba(56,189,248,0.06) 0%, transparent 70%)",
-            filter: "blur(72px)",
-          }}
+          className="absolute top-0 right-0 w-[640px] h-[440px] rounded-full animate-orb"
+          style={{ background: "radial-gradient(ellipse, rgba(129,140,248,0.07) 0%, transparent 70%)", filter: "blur(80px)" }}
         />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12 lg:py-16 space-y-16">
         <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-8 lg:gap-12 items-end">
           <div className="space-y-6">
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-sky-400 font-mono"
-              style={{
-                backgroundColor: "rgba(56,189,248,0.06)",
-                border: "1px solid rgba(56,189,248,0.18)",
-              }}
-            >
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/[0.06] px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-sky-400 font-mono">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
               About BullBrief
             </div>
@@ -161,7 +141,7 @@ export default function AboutPage() {
                   <p className="font-fraunces font-black gradient-text text-4xl">
                     {item.value}
                   </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-600 font-mono">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 font-mono">
                     {item.label}
                   </p>
                 </div>
@@ -171,17 +151,11 @@ export default function AboutPage() {
 
           <div className="bb-card p-4 space-y-4">
             <div className="flex items-center gap-3">
-              <span
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{
-                  backgroundColor: "rgba(129,140,248,0.1)",
-                  border: "1px solid rgba(129,140,248,0.2)",
-                }}
-              >
+              <span className="w-10 h-10 rounded-lg flex items-center justify-center bg-indigo-400/10 border border-indigo-400/20">
                 <Code2 className="w-5 h-5 text-indigo-400" />
               </span>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                   Developer
                 </p>
                 <h2 className="text-xl font-black tracking-tight text-blue-50">
@@ -200,11 +174,7 @@ export default function AboutPage() {
                 href="https://github.com/cedricsthomasjr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-400 hover:text-sky-300 transition-colors"
-                style={{
-                  backgroundColor: "rgba(15,32,64,0.5)",
-                  border: "1px solid rgba(56,189,248,0.1)",
-                }}
+                className="inline-flex items-center gap-2 rounded-lg border border-sky-400/10 bg-[#0f2040]/50 px-3 py-2 text-xs font-semibold text-slate-400 hover:text-sky-300 transition-colors"
               >
                 <Github className="w-3.5 h-3.5" />
                 GitHub
@@ -213,11 +183,7 @@ export default function AboutPage() {
                 href="https://www.linkedin.com/in/cedric-thomas-jr/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-400 hover:text-sky-300 transition-colors"
-                style={{
-                  backgroundColor: "rgba(15,32,64,0.5)",
-                  border: "1px solid rgba(56,189,248,0.1)",
-                }}
+                className="inline-flex items-center gap-2 rounded-lg border border-sky-400/10 bg-[#0f2040]/50 px-3 py-2 text-xs font-semibold text-slate-400 hover:text-sky-300 transition-colors"
               >
                 <Linkedin className="w-3.5 h-3.5" />
                 LinkedIn
@@ -226,8 +192,7 @@ export default function AboutPage() {
                 href="https://www.cjst.dev/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-400 hover:text-sky-300 transition-colors"
-                style={{ backgroundColor: "rgba(15,32,64,0.5)", border: "1px solid rgba(56,189,248,0.1)" }}
+                className="inline-flex items-center gap-2 rounded-lg border border-sky-400/10 bg-[#0f2040]/50 px-3 py-2 text-xs font-semibold text-slate-400 hover:text-sky-300 transition-colors"
               >
                 <SquareArrowOutUpRight className="w-3.5 h-3.5" />
                 Portfolio
@@ -239,7 +204,7 @@ export default function AboutPage() {
         <section className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-sky-400">
                 How It Works
               </p>
               <h2 className="mt-2 text-3xl font-black tracking-tight text-blue-50">
@@ -257,16 +222,10 @@ export default function AboutPage() {
             {FLOW.map((item, idx) => (
               <div key={item.label} className="bb-card p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-sky-400"
-                    style={{
-                      backgroundColor: "rgba(56,189,248,0.08)",
-                      border: "1px solid rgba(56,189,248,0.16)",
-                    }}
-                  >
+                  <span className="w-9 h-9 rounded-lg flex items-center justify-center text-sky-400 bg-sky-400/10 border border-sky-400/15">
                     {item.icon}
                   </span>
-                  <span className="text-[10px] font-mono text-slate-700 tabular-nums">
+                  <span className="text-xs font-mono text-slate-700 tabular-nums">
                     0{idx + 1}
                   </span>
                 </div>
@@ -286,7 +245,7 @@ export default function AboutPage() {
         <section className="space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400">
                 Data Providers
               </p>
               <h2 className="mt-2 text-3xl font-black tracking-tight text-blue-50">
@@ -307,10 +266,7 @@ export default function AboutPage() {
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: provider.accent }}
-                        />
+                        <span className={`h-2 w-2 rounded-full ${TONE[provider.tone].dot}`} />
                         <p className="text-sm font-bold text-blue-50">
                           {provider.name}
                         </p>
@@ -319,21 +275,12 @@ export default function AboutPage() {
                         {provider.role}
                       </p>
                     </div>
-                    <p
-                      className="font-fraunces text-3xl font-black tabular-nums"
-                      style={{ color: provider.accent }}
-                    >
+                    <p className={`font-fraunces text-3xl font-black tabular-nums ${TONE[provider.tone].text}`}>
                       {provider.share}%
                     </p>
                   </div>
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-950/70">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${provider.share}%`,
-                        background: `linear-gradient(90deg, ${provider.accent}, rgba(56,189,248,0.55))`,
-                      }}
-                    />
+                    <div className={`h-full rounded-full ${TONE[provider.tone].bar}`} style={{ width: `${provider.share}%` }} />
                   </div>
                 </div>
               ))}
@@ -343,7 +290,7 @@ export default function AboutPage() {
               <div className="bb-card p-4 space-y-4">
                 <div className="flex items-center gap-2">
                   <LineChart className="w-4 h-4 text-sky-400" />
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     Charting Layer
                   </p>
                 </div>
@@ -357,7 +304,7 @@ export default function AboutPage() {
               <div className="bb-card p-4 space-y-4">
                 <div className="flex items-center gap-2">
                   <Newspaper className="w-4 h-4 text-amber-400" />
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     News Layer
                   </p>
                 </div>
@@ -371,7 +318,7 @@ export default function AboutPage() {
               <div className="bb-card p-4 space-y-4">
                 <div className="flex items-center gap-2">
                   <BarChart3 className="w-4 h-4 text-emerald-400" />
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     Filing Layer
                   </p>
                 </div>
@@ -387,7 +334,7 @@ export default function AboutPage() {
         <section className="bb-card p-5 sm:p-6">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-5 lg:items-center">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                 Research, not advice
               </p>
               <h2 className="mt-2 text-2xl font-black tracking-tight text-blue-50">
@@ -401,11 +348,7 @@ export default function AboutPage() {
             </div>
             <Link
               href="/disclaimer"
-              className="inline-flex items-center gap-2 rounded-lg px-4 py-3 text-xs font-bold uppercase tracking-widest text-sky-300 transition hover:-translate-y-0.5"
-              style={{
-                backgroundColor: "rgba(56,189,248,0.08)",
-                border: "1px solid rgba(56,189,248,0.16)",
-              }}
+              className="inline-flex items-center gap-2 rounded-lg border border-sky-400/15 bg-sky-400/[0.08] px-4 py-3 text-xs font-bold uppercase tracking-wide text-sky-300 transition-transform hover:-translate-y-0.5"
             >
               Read Disclaimer <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
