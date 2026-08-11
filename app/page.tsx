@@ -237,7 +237,7 @@ const MARQUEE_ITEMS = [
   "EARNINGS",
   "REVENUE GROWTH",
   "P/E RATIO",
-  "SWOT ANALYSIS",
+  "PIOTROSKI F-SCORE",
   "MARKET CAP",
   "PLAIN-ENGLISH BRIEFS",
   "ROE",
@@ -245,7 +245,7 @@ const MARQUEE_ITEMS = [
   "PEER COMPARISON",
   "EPS TRENDS",
   "PROFIT MARGINS",
-  "ANALYST RATING",
+  "SEC ITEM 1A",
 ];
 
 const QUICK_TICKERS = ["NVDA", "AAPL", "GOOGL", "META", "TSLA", "JPM"];
@@ -279,7 +279,7 @@ const BRIEF_SECTIONS = [
   {
     Icon: BarChart3,
     title: "Financial Snapshot",
-    desc: "Revenue, margins, cash flow, and profitability context in one clean view.",
+    desc: "Revenue, margins, cash flow, FCF yield, and profitability context in one clean view.",
     accent: "#38bdf8",
   },
   {
@@ -290,26 +290,26 @@ const BRIEF_SECTIONS = [
   },
   {
     Icon: TrendingUp,
-    title: "Valuation",
-    desc: "Understand whether investor expectations look stretched, reasonable, or discounted.",
+    title: "Valuation Pillars",
+    desc: "Peer-relative multiples and history percentiles — inspectable, not opaque grades.",
     accent: "#10b981",
   },
   {
     Icon: AlertTriangle,
-    title: "Risks",
-    desc: "The biggest business, market, filing, and execution risks — identified and explained.",
+    title: "SEC Risks",
+    desc: "Material Item 1A risk factors extracted from the latest 10-K, with filing evidence.",
     accent: "#f43f5e",
   },
   {
     Icon: Target,
-    title: "SWOT",
-    desc: "Strengths, weaknesses, opportunities, and threats in plain language.",
+    title: "Quality Checklist",
+    desc: "Piotroski F-Score tests and Altman Z″ bands with the underlying numbers shown.",
     accent: "#f59e0b",
   },
   {
     Icon: Users,
     title: "Peer Comparison",
-    desc: "Compare the company against relevant competitors and sector benchmarks.",
+    desc: "Cap-banded competitors and sector benchmarks — metrics only, no moat essays.",
     accent: "#a78bfa",
   },
   {

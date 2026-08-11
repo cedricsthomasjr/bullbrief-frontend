@@ -44,7 +44,7 @@ const PROVIDERS = [
     name: "OpenAI",
     share: 14,
     accent: "#a78bfa",
-    role: "Plain-English summaries, analyst-style reports, peer comparison language, SWOT framing, and interpretation.",
+    role: "Plain-English summaries, analyst-style pillar explanations, peer comparison language, and optional chart interpretation.",
   },
   {
     name: "NewsAPI / Finnhub / Yahoo / FMP",

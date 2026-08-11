@@ -34,6 +34,7 @@ export type StockDriversData = {
   operations: StockDriverOperation[];
   financial_drivers: StockFinancialDriver[];
   watch_items: string[];
+  risk_factors?: { title: string; evidence: string }[];
   fiscal_year?: number | null;
   filing_date?: string | null;
   source?: {
@@ -370,6 +371,31 @@ export default function StockDriversCard({
                   <p className="text-xs text-slate-400 leading-relaxed">
                     {item}
                   </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {(data.risk_factors?.length ?? 0) > 0 && (
+          <div
+            className="bb-card p-3"
+            style={{ borderColor: "rgba(244,63,94,0.16)" }}
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <CircleAlert className="w-4 h-4 text-rose-400" />
+              <p className="text-[10px] font-bold uppercase tracking-widest text-rose-400">
+                SEC Item 1A Risks
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {data.risk_factors!.slice(0, 4).map((risk, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-lg border border-rose-400/10 bg-rose-400/[0.04] p-3"
+                >
+                  <p className="text-xs font-semibold text-blue-50">{risk.title}</p>
+                  <p className="mt-1 text-[11px] leading-5 text-slate-500">{risk.evidence}</p>
                 </div>
               ))}
             </div>

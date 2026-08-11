@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, BarChart3, Building2, CheckCircle2, TrendingDown, TrendingUp } from "lucide-react";
+import { Activity, BarChart3, Building2, CheckCircle2 } from "lucide-react";
 import DataSourceNote from "@/app/components/DataSourceNote";
 
 type Props = {
@@ -12,7 +12,6 @@ type Props = {
   peRatio: number;
   currentPrice: number;
   range52w: string;
-  isBearish: boolean;
 };
 
 function fmtMoney(value: number | null | undefined) {
@@ -56,7 +55,6 @@ function splitBrief(summary: string) {
     .filter(Boolean) ?? [];
 
   const source = sentenceMatches.length > 1 ? sentenceMatches : bulletPoints;
-  // Use only the first sentence as lead so more content is available for points
   const lead = source[0] ?? cleaned;
   const points = source.slice(1, 5);
 
@@ -70,7 +68,6 @@ function buildFallbackPoints(
   sector: string,
   marketCap: number,
   peRatio: number,
-  isBearish: boolean,
 ): string[] {
   const pts: string[] = [];
 
@@ -98,10 +95,6 @@ function buildFallbackPoints(
     }
   }
 
-  if (isBearish) {
-    pts.push(`Current valuation warrants caution — elevated multiples leave less room for error.`);
-  }
-
   return pts;
 }
 
@@ -114,7 +107,6 @@ export default function BullBriefCard({
   peRatio,
   currentPrice,
   range52w,
-  isBearish,
 }: Props) {
   const { lead, points: rawPoints } = splitBrief(summary);
   const points =
@@ -122,11 +114,15 @@ export default function BullBriefCard({
       ? rawPoints
       : [
           ...rawPoints,
-          ...buildFallbackPoints(sector, marketCap, peRatio, isBearish),
+          ...buildFallbackPoints(sector, marketCap, peRatio),
         ].slice(0, Math.max(2, rawPoints.length));
-  const signal = isBearish
-    ? { label: "Watch Valuation", icon: <TrendingDown className="w-3.5 h-3.5" />, color: "#f43f5e", bg: "rgba(244,63,94,0.1)", border: "rgba(244,63,94,0.22)" }
-    : { label: "Constructive Setup", icon: <TrendingUp className="w-3.5 h-3.5" />, color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.22)" };
+  const signal = {
+    label: "Business Summary",
+    icon: <Building2 className="w-3.5 h-3.5" />,
+    color: "#38bdf8",
+    bg: "rgba(56,189,248,0.1)",
+    border: "rgba(56,189,248,0.22)",
+  };
 
   const snapshot = [
     { label: "Sector", value: sector || "N/A" },

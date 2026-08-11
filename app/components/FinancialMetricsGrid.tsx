@@ -12,12 +12,13 @@ import TermTooltip from "@/app/components/TermTooltip";
 import DataSourceNote from "@/app/components/DataSourceNote";
 
 type BackendSummary = {
-  company_name: string; ticker: string; business_summary: string; swot: string; outlook: string;
+  company_name: string; ticker: string; business_summary: string; swot?: string; outlook?: string;
   market_cap: number; pe_ratio: number; range_52w: string; sector: string; current_price: number;
   eps_ttm: number; forward_pe: number; dividend_yield: number; beta: number; volume: number;
   avg_volume: number; peg_ratio: number; price_to_sales: number; price_to_book: number;
-  roe: number; free_cashflow: number; debt_to_equity: number; profit_margin: number;
-  institutional_ownership: number; short_percent: number; raw_summary: string;
+  roe: number; free_cashflow: number; fcf_yield?: number; debt_to_equity: number; profit_margin: number;
+  operating_margin?: number; revenue_growth?: number; enterprise_value?: number; ebitda?: number;
+  ev_ebitda?: number; institutional_ownership: number; short_percent: number; raw_summary: string;
 };
 
 const GROUP_ACCENT = {
@@ -26,8 +27,21 @@ const GROUP_ACCENT = {
   "Profitability & Cash":   { color: "#10b981", bg: "rgba(16,185,129,0.06)",  border: "rgba(16,185,129,0.12)" },
 };
 
+function derivedFcfYield(data: BackendSummary) {
+  if (typeof data.fcf_yield === "number" && Number.isFinite(data.fcf_yield)) return data.fcf_yield;
+  if (
+    typeof data.free_cashflow === "number" &&
+    typeof data.market_cap === "number" &&
+    data.market_cap !== 0
+  ) {
+    return data.free_cashflow / data.market_cap;
+  }
+  return null;
+}
+
 export default function FinancialMetricsGrid({ data }: { data: BackendSummary }) {
   const [showModal, setShowModal] = useState(false);
+  const fcfYield = derivedFcfYield(data);
 
   const metricGroups = [
     {
@@ -38,6 +52,7 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
         { label: "PEG Ratio",    value: formatFixed(data.peg_ratio),      icon: <TrendingUp className="w-3.5 h-3.5" />, termId: "peg-ratio" },
         { label: "Price / Sales",value: formatFixed(data.price_to_sales), icon: <PieChart className="w-3.5 h-3.5" />,   termId: "price-to-sales" },
         { label: "Price / Book", value: formatFixed(data.price_to_book),  icon: <BookOpen className="w-3.5 h-3.5" />,   termId: "price-to-book" },
+        { label: "EV / EBITDA",  value: formatFixed(data.ev_ebitda),      icon: <AreaChart className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -53,10 +68,13 @@ export default function FinancialMetricsGrid({ data }: { data: BackendSummary })
     {
       title: "Profitability & Cash",
       metrics: [
+        { label: "Revenue Growth", value: formatPercent(data.revenue_growth), icon: <TrendingUp className="w-3.5 h-3.5" /> },
+        { label: "Operating Margin", value: formatPercent(data.operating_margin), icon: <Percent className="w-3.5 h-3.5" /> },
         { label: "Dividend Yield", value: formatPercent(data.dividend_yield),     icon: <PiggyBank className="w-3.5 h-3.5" />,      termId: "dividend-yield" },
         { label: "ROE",            value: formatPercent(data.roe),                icon: <Percent className="w-3.5 h-3.5" />,         termId: "roe" },
         { label: "Profit Margin",  value: formatPercent(data.profit_margin),      icon: <CircleDollarSign className="w-3.5 h-3.5" />,termId: "profit-margin" },
         { label: "Free Cash Flow", value: `$${formatNumber(data.free_cashflow)}`, icon: <Banknote className="w-3.5 h-3.5" />,        termId: "free-cash-flow" },
+        { label: "FCF Yield", value: fcfYield == null ? "—" : formatPercent(fcfYield), icon: <Banknote className="w-3.5 h-3.5" />, termId: "free-cash-flow" },
         { label: "Debt / Equity",  value: formatFixed(data.debt_to_equity),      icon: <AreaChart className="w-3.5 h-3.5" />,        termId: "debt-to-equity" },
       ],
     },
