@@ -1,28 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  Activity,
   AlertTriangle,
   ArrowLeft,
-  BarChart3,
-  Brain,
-  BriefcaseBusiness,
-  ChevronDown,
+  CheckCircle2,
   CircleHelp,
-  Gauge,
   Landmark,
-  LineChart,
   Scale,
   Shield,
-  Sparkles,
   Target,
   TrendingDown,
   TrendingUp,
-  WalletCards,
+  XCircle,
 } from "lucide-react";
 import { cachedFetch } from "@/app/lib/summaryCache";
 import LoadingScreen from "@/app/components/LoadingScreen";
@@ -31,64 +24,73 @@ import { useSideNavSections } from "@/app/hooks/useSideNavSections";
 
 type OverallSignal = "Bullish" | "Neutral" | "Bearish";
 type Confidence = "Low" | "Medium" | "High";
-type Grade =
-  | "Strong"
-  | "Improving"
-  | "Mixed"
-  | "Weak"
-  | "Concerning"
-  | "Cheap"
-  | "Reasonable"
-  | "Expensive"
-  | "Low"
-  | "Moderate"
-  | "High";
 
-type ScorecardItem = {
-  grade: Grade | string;
-  rationale: string;
-};
-
-type CompetitivePeer = {
-  company: string;
-  ticker: string;
-  positioning: string;
-  growth: string;
-  margins: string;
-  valuation: string;
-  main_strength: string;
-  main_weakness: string;
-  moat: string;
-};
-
-type StockDriver = {
-  driver: string;
-  why_it_matters: string;
+type PiotroskiTest = {
+  key: string;
+  label: string;
+  passed: boolean | null;
+  available: boolean;
   evidence: string;
-  trend: string;
 };
 
-type LegacyAnalystReport = {
-  rating?: string;
-  confidence?: string | number;
-  executive_summary?: string;
-  scores?: Partial<Record<LegacyScoreKey, number>>;
-  score_rationale?: Partial<Record<LegacyScoreKey, string>>;
-  bull_thesis?: string[];
-  bear_thesis?: string[];
-  catalysts?: { title?: string; description?: string; timeline?: string }[];
-  risks?: { title?: string; description?: string; severity?: string }[];
+type Pillars = {
+  schema?: string;
+  piotroski: {
+    score: number;
+    max_score: number;
+    display: string;
+    tests: PiotroskiTest[];
+    coverage: number;
+  };
+  altman: {
+    applicable: boolean;
+    skipped_reason?: string | null;
+    band?: string | null;
+    z?: number | null;
+    components?: Record<string, number | null>;
+    formula?: string;
+    notes?: string[];
+    bands?: Record<string, string>;
+  };
+  valuation: {
+    forward_pe?: number | null;
+    price_to_sales?: number | null;
+    fcf_yield?: number | null;
+    peer_percentiles?: Record<string, number | null | number>;
+    history_percentiles?: Record<string, number | null | number>;
+    composite_percentile?: number | null;
+    label?: string;
+    coverage?: number;
+    notes?: string[];
+  };
+  signal: {
+    overall_signal: OverallSignal | string;
+    signal_label: string;
+    confidence: Confidence | string;
+    coverage: number;
+    suppressed?: boolean;
+    reasons?: string[];
+  };
 };
 
-type LegacyScoreKey =
-  | "valuation"
-  | "growth"
-  | "profitability"
-  | "financial_health"
-  | "competitive_position"
-  | "momentum";
+type MetricPeer = {
+  company?: string;
+  ticker?: string;
+  market_cap?: string;
+  revenue_growth?: string;
+  profit_margin?: string;
+  forward_pe?: string;
+  price_to_sales?: string;
+  fcf_yield?: string;
+};
+
+type RiskFactor = {
+  title: string;
+  evidence: string;
+};
 
 type AnalystReport = {
+  schema?: string;
   company_name: string;
   ticker: string;
   sector: string;
@@ -97,138 +99,52 @@ type AnalystReport = {
   market_cap?: number | null;
   wk52_low?: number | null;
   wk52_high?: number | null;
-  overall_signal: OverallSignal;
-  signal_label: "Bullish Setup" | "Watch / Hold Zone" | "Risk-Off / Bearish Setup" | string;
-  confidence: Confidence;
+  overall_signal: OverallSignal | string;
+  signal_label: string;
+  confidence: Confidence | string;
+  coverage?: number;
   summary: string;
   why_signal_appears: string[];
   what_could_change_signal: string[];
-  key_upside_drivers: string[];
-  key_downside_risks: string[];
-  scorecard: Record<string, ScorecardItem>;
-  competitive_analysis: {
-    summary: string;
-    peers: CompetitivePeer[];
-    where_company_wins: string[];
-    where_competitors_may_be_stronger: string[];
-  };
-  bull_case: string[];
-  bear_case: string[];
-  stock_drivers: StockDriver[];
+  pillars: Pillars;
+  peers: MetricPeer[];
+  risk_factors: RiskFactor[];
   uncertainty: string[];
   disclaimer: string;
   source?: {
     market_data?: string;
     segment_data?: string | null;
     ai?: string;
+    schema?: string;
   };
 };
 
-type DeepDiveTab = "bullBear" | "competition" | "drivers" | "change" | "risks";
-
-const SIGNAL_CONFIG: Record<OverallSignal, { color: string; bg: string; border: string; glow: string; icon: React.ReactNode }> = {
+const SIGNAL_CONFIG: Record<OverallSignal, { color: string; bg: string; border: string; icon: React.ReactNode }> = {
   Bullish: {
     color: "#10b981",
     bg: "rgba(16,185,129,0.1)",
     border: "rgba(16,185,129,0.34)",
-    glow: "0 0 40px rgba(16,185,129,0.16)",
     icon: <TrendingUp className="w-4 h-4" />,
   },
   Neutral: {
     color: "#f59e0b",
     bg: "rgba(245,158,11,0.09)",
     border: "rgba(245,158,11,0.3)",
-    glow: "0 0 36px rgba(245,158,11,0.12)",
     icon: <Scale className="w-4 h-4" />,
   },
   Bearish: {
     color: "#f43f5e",
     bg: "rgba(244,63,94,0.09)",
     border: "rgba(244,63,94,0.32)",
-    glow: "0 0 38px rgba(244,63,94,0.14)",
     icon: <TrendingDown className="w-4 h-4" />,
   },
 };
 
-const CONFIDENCE_CONFIG: Record<Confidence, { color: string; width: string }> = {
-  Low: { color: "#94a3b8", width: "34%" },
-  Medium: { color: "#38bdf8", width: "66%" },
-  High: { color: "#10b981", width: "100%" },
-};
-
-const GRADE_CONFIG: Record<string, { color: string; width: string }> = {
-  Strong: { color: "#10b981", width: "92%" },
-  Improving: { color: "#38bdf8", width: "74%" },
-  Mixed: { color: "#f59e0b", width: "54%" },
-  Weak: { color: "#fb7185", width: "34%" },
-  Concerning: { color: "#f43f5e", width: "22%" },
-  Cheap: { color: "#10b981", width: "84%" },
-  Reasonable: { color: "#38bdf8", width: "66%" },
-  Expensive: { color: "#f59e0b", width: "42%" },
-  Low: { color: "#10b981", width: "78%" },
-  Moderate: { color: "#f59e0b", width: "55%" },
-  High: { color: "#f43f5e", width: "30%" },
-};
-
-const SCORECARD_META: Record<string, { label: string; icon: React.ReactNode }> = {
-  revenue_growth: { label: "Revenue Growth", icon: <TrendingUp className="w-4 h-4" /> },
-  earnings_growth: { label: "Earnings Growth", icon: <LineChart className="w-4 h-4" /> },
-  margin_trend: { label: "Margin Trend", icon: <BarChart3 className="w-4 h-4" /> },
-  valuation: { label: "Valuation", icon: <Target className="w-4 h-4" /> },
-  balance_sheet: { label: "Balance Sheet", icon: <Landmark className="w-4 h-4" /> },
-  free_cash_flow: { label: "Free Cash Flow", icon: <WalletCards className="w-4 h-4" /> },
-  analyst_sentiment: { label: "Analyst Sentiment", icon: <Brain className="w-4 h-4" /> },
-  price_momentum: { label: "Price Momentum", icon: <Activity className="w-4 h-4" /> },
-  competitive_position: { label: "Competitive Position", icon: <Shield className="w-4 h-4" /> },
-  business_segment_strength: { label: "Segment Strength", icon: <BriefcaseBusiness className="w-4 h-4" /> },
-  risk_level: { label: "Risk Level", icon: <AlertTriangle className="w-4 h-4" /> },
-};
-
-const SCORECARD_ORDER = [
-  "revenue_growth",
-  "earnings_growth",
-  "margin_trend",
-  "valuation",
-  "balance_sheet",
-  "free_cash_flow",
-  "analyst_sentiment",
-  "price_momentum",
-  "competitive_position",
-  "business_segment_strength",
-  "risk_level",
-];
-
-const TABS: { key: DeepDiveTab; label: string; icon: React.ReactNode }[] = [
-  { key: "bullBear", label: "Bull vs Bear", icon: <Scale className="w-4 h-4" /> },
-  { key: "competition", label: "Competition", icon: <Shield className="w-4 h-4" /> },
-  { key: "drivers", label: "Stock Drivers", icon: <Gauge className="w-4 h-4" /> },
-  { key: "change", label: "Signal Changes", icon: <Sparkles className="w-4 h-4" /> },
-  { key: "risks", label: "Risks", icon: <AlertTriangle className="w-4 h-4" /> },
-];
-
 function normalizeOverallSignal(value?: string | null): OverallSignal {
   const normalized = String(value ?? "").trim().toLowerCase();
-
-  if (
-    normalized.includes("bear") ||
-    normalized.includes("risk-off") ||
-    normalized.includes("risk off") ||
-    normalized.includes("sell")
-  ) {
-    return "Bearish";
-  }
-
-  if (normalized.includes("bull") || normalized.includes("buy")) {
-    return "Bullish";
-  }
-
+  if (normalized.includes("bear") || normalized.includes("risk-off")) return "Bearish";
+  if (normalized.includes("bull")) return "Bullish";
   return "Neutral";
-}
-
-function signalFallbackLabel(signal: OverallSignal) {
-  if (signal === "Bullish") return "Bullish Setup";
-  if (signal === "Bearish") return "Risk-Off / Bearish Setup";
-  return "Watch / Hold Zone";
 }
 
 function normalizeConfidence(value?: string | number | null): Confidence {
@@ -237,226 +153,10 @@ function normalizeConfidence(value?: string | number | null): Confidence {
     if (value >= 45) return "Medium";
     return "Low";
   }
-
   const normalized = String(value ?? "").trim().toLowerCase();
   if (normalized === "high") return "High";
   if (normalized === "medium") return "Medium";
   return "Low";
-}
-
-function legacyRating(report: Partial<AnalystReport> | null) {
-  return (report as unknown as LegacyAnalystReport | null)?.rating;
-}
-
-function legacySummary(report: Partial<AnalystReport>) {
-  return (report as unknown as LegacyAnalystReport).executive_summary;
-}
-
-function safeStringList(value: unknown) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
-    : [];
-}
-
-function legacyGrade(score?: number, kind: "general" | "valuation" | "risk" = "general") {
-  if (typeof score !== "number" || Number.isNaN(score)) {
-    return kind === "risk" ? "Moderate" : "Mixed";
-  }
-
-  if (kind === "risk") {
-    if (score >= 7) return "Low";
-    if (score >= 4) return "Moderate";
-    return "High";
-  }
-
-  if (kind === "valuation") {
-    if (score >= 7) return "Reasonable";
-    if (score >= 4) return "Expensive";
-    return "Expensive";
-  }
-
-  if (score >= 8) return "Strong";
-  if (score >= 6) return "Improving";
-  if (score >= 4) return "Mixed";
-  if (score >= 2) return "Weak";
-  return "Concerning";
-}
-
-function cleanSummary(summary: string | undefined, companyName: string, signal: OverallSignal) {
-  if (!summary?.trim()) {
-    return `${companyName} screens as a ${signal.toLowerCase()} market signal based on available fundamentals, valuation, momentum, and risk inputs. Missing fields are treated as uncertainty rather than filled in.`;
-  }
-
-  return summary
-    .replace(/\bcompelling investment opportunity\b/gi, `${signal.toLowerCase()} market-signal setup`)
-    .replace(/\binvestment case\b/gi, "market-signal setup")
-    .replace(/\binvestment thesis\b/gi, "market-signal setup")
-    .replace(/\binvestors should remain cautious of\b/gi, "key uncertainties include")
-    .replace(/\binvestors should remain cautious about\b/gi, "key uncertainties include")
-    .replace(/\brecommendation\b/gi, "research snapshot");
-}
-
-function legacyRiskItems(raw: LegacyAnalystReport) {
-  return (raw.risks ?? [])
-    .map((risk) => [risk.title, risk.description].filter(Boolean).join(": "))
-    .filter(Boolean);
-}
-
-function legacyCatalystItems(raw: LegacyAnalystReport) {
-  return (raw.catalysts ?? [])
-    .map((catalyst) => [catalyst.title, catalyst.description].filter(Boolean).join(": "))
-    .filter(Boolean);
-}
-
-function scorecardFromLegacy(raw: LegacyAnalystReport): Record<string, ScorecardItem> {
-  const scores = raw.scores ?? {};
-  const rationales = raw.score_rationale ?? {};
-
-  return {
-    revenue_growth: {
-      grade: legacyGrade(scores.growth),
-      rationale:
-        rationales.growth ||
-        "Growth was translated from available analyst inputs; the response did not split revenue and earnings growth.",
-    },
-    earnings_growth: {
-      grade: legacyGrade(scores.growth),
-      rationale: "Separate earnings growth detail was not returned, so this uses the available growth input as context.",
-    },
-    margin_trend: {
-      grade: legacyGrade(scores.profitability),
-      rationale:
-        rationales.profitability ||
-        "Profitability inputs were used as the closest available margin signal.",
-    },
-    valuation: {
-      grade: legacyGrade(scores.valuation, "valuation"),
-      rationale:
-        rationales.valuation ||
-        "Valuation was translated from the available analyst valuation input; no raw score is shown.",
-    },
-    balance_sheet: {
-      grade: legacyGrade(scores.financial_health),
-      rationale:
-        rationales.financial_health ||
-        "Financial health inputs were used as the balance sheet signal.",
-    },
-    free_cash_flow: {
-      grade: legacyGrade(scores.financial_health),
-      rationale: "Free cash flow detail was not separated, so financial health is used as a proxy signal.",
-    },
-    analyst_sentiment: {
-      grade: "Mixed",
-      rationale: "Analyst sentiment detail was not returned in this response.",
-    },
-    price_momentum: {
-      grade: legacyGrade(scores.momentum),
-      rationale:
-        rationales.momentum ||
-        "Momentum was translated from the available price-action input.",
-    },
-    competitive_position: {
-      grade: legacyGrade(scores.competitive_position),
-      rationale:
-        rationales.competitive_position ||
-        "Competitive positioning was translated from the available moat input.",
-    },
-    business_segment_strength: {
-      grade: "Mixed",
-      rationale: "Business segment detail was not returned in this response.",
-    },
-    risk_level: {
-      grade: (raw.risks ?? []).some((risk) => risk.severity?.toLowerCase() === "high")
-        ? "High"
-        : "Moderate",
-      rationale: "Risk level was translated from the available risk-factor list.",
-    },
-  };
-}
-
-function coerceAnalystReport(rawReport: Partial<AnalystReport> & LegacyAnalystReport, routeTicker: string): AnalystReport {
-  const signal = normalizeOverallSignal(rawReport.overall_signal ?? rawReport.rating);
-  const confidence = normalizeConfidence(rawReport.confidence);
-  const companyName = rawReport.company_name || routeTicker.toUpperCase();
-  const bullCase = safeStringList(rawReport.bull_case).length
-    ? safeStringList(rawReport.bull_case)
-    : safeStringList(rawReport.bull_thesis);
-  const bearCase = safeStringList(rawReport.bear_case).length
-    ? safeStringList(rawReport.bear_case)
-    : safeStringList(rawReport.bear_thesis);
-  const catalysts = legacyCatalystItems(rawReport);
-  const risks = legacyRiskItems(rawReport);
-  const scorecard =
-    rawReport.scorecard && Object.keys(rawReport.scorecard).length > 0
-      ? rawReport.scorecard
-      : scorecardFromLegacy(rawReport);
-  const whySignalAppears = safeStringList(rawReport.why_signal_appears);
-
-  return {
-    company_name: companyName,
-    ticker: rawReport.ticker || routeTicker.toUpperCase(),
-    sector: rawReport.sector || "Sector unavailable",
-    industry: rawReport.industry || "Industry unavailable",
-    current_price: rawReport.current_price ?? null,
-    market_cap: rawReport.market_cap ?? null,
-    wk52_low: rawReport.wk52_low ?? null,
-    wk52_high: rawReport.wk52_high ?? null,
-    overall_signal: signal,
-    signal_label: rawReport.signal_label || signalFallbackLabel(signal),
-    confidence,
-    summary: cleanSummary(rawReport.summary || rawReport.executive_summary, companyName, signal),
-    why_signal_appears:
-      whySignalAppears.length > 0
-        ? whySignalAppears
-        : Object.values(scorecard)
-            .map((item) => item.rationale)
-            .filter(Boolean)
-            .slice(0, 3),
-    what_could_change_signal:
-      safeStringList(rawReport.what_could_change_signal).length > 0
-        ? safeStringList(rawReport.what_could_change_signal)
-        : [...catalysts, ...risks].slice(0, 4),
-    key_upside_drivers:
-      safeStringList(rawReport.key_upside_drivers).length > 0
-        ? safeStringList(rawReport.key_upside_drivers)
-        : (bullCase.length ? bullCase : catalysts).slice(0, 4),
-    key_downside_risks:
-      safeStringList(rawReport.key_downside_risks).length > 0
-        ? safeStringList(rawReport.key_downside_risks)
-        : (risks.length ? risks : bearCase).slice(0, 4),
-    scorecard,
-    competitive_analysis: {
-      summary:
-        rawReport.competitive_analysis?.summary ||
-        "Competitive peer detail was not returned in this response.",
-      peers: rawReport.competitive_analysis?.peers ?? [],
-      where_company_wins: rawReport.competitive_analysis?.where_company_wins ?? [],
-      where_competitors_may_be_stronger:
-        rawReport.competitive_analysis?.where_competitors_may_be_stronger ?? [],
-    },
-    bull_case: bullCase,
-    bear_case: bearCase,
-    stock_drivers:
-      rawReport.stock_drivers?.length
-        ? rawReport.stock_drivers
-        : (rawReport.catalysts ?? []).slice(0, 4).map((catalyst) => ({
-            driver: catalyst.title || "Potential catalyst",
-            why_it_matters: catalyst.description || "Catalyst detail was not returned.",
-            evidence: catalyst.timeline ? `${catalyst.timeline} catalyst` : "Legacy analyst catalyst",
-            trend: "monitoring",
-          })),
-    uncertainty:
-      safeStringList(rawReport.uncertainty).length > 0
-        ? safeStringList(rawReport.uncertainty)
-        : [
-            "Some detailed fields were not returned by the analyst data source.",
-            "Unavailable peer, segment, or sentiment fields are shown as missing rather than estimated.",
-          ],
-    disclaimer:
-      rawReport.disclaimer ||
-      "This is an AI-generated research summary for educational purposes only. It is not financial advice.",
-    source: rawReport.source,
-  };
 }
 
 function fmtMoney(value?: number | null) {
@@ -474,26 +174,14 @@ function fmtPrice(value?: number | null) {
   return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function normalizeList(items?: string[], fallback = "Data unavailable.") {
-  return Array.isArray(items) && items.length > 0 ? items : [fallback];
+function fmtPct(value?: number | null) {
+  if (value == null || Number.isNaN(value)) return "N/A";
+  return `${(value * 100).toFixed(1)}%`;
 }
 
-function gradeStyle(grade: string) {
-  return GRADE_CONFIG[grade] ?? { color: "#94a3b8", width: "50%" };
-}
-
-function PanelShell({ children }: { children: React.ReactNode }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.18 }}
-      className="space-y-4"
-    >
-      {children}
-    </motion.div>
-  );
+function fmtRatio(value?: number | null) {
+  if (value == null || Number.isNaN(value)) return "N/A";
+  return `${value.toFixed(1)}x`;
 }
 
 function SectionTitle({ icon, title, kicker }: { icon: React.ReactNode; title: string; kicker?: string }) {
@@ -508,91 +196,11 @@ function SectionTitle({ icon, title, kicker }: { icon: React.ReactNode; title: s
   );
 }
 
-function SignalBadge({
-  signal,
-  label,
-}: {
-  signal?: string | null;
-  label?: string | null;
-}) {
-  const normalizedSignal = normalizeOverallSignal(signal);
-  const cfg = SIGNAL_CONFIG[normalizedSignal];
-  const displayLabel = label?.trim() || signalFallbackLabel(normalizedSignal);
-
-  return (
-    <span
-      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest"
-      style={{ color: cfg.color, backgroundColor: cfg.bg, border: `1px solid ${cfg.border}` }}
-    >
-      {cfg.icon}
-      {displayLabel}
-    </span>
-  );
-}
-
-function ScorecardTile({ itemKey, item }: { itemKey: string; item: ScorecardItem }) {
-  const meta = SCORECARD_META[itemKey] ?? { label: itemKey.replaceAll("_", " "), icon: <CircleHelp className="w-4 h-4" /> };
-  const style = gradeStyle(item.grade);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg border p-3"
-      style={{ backgroundColor: "rgba(15,32,64,0.46)", borderColor: "rgba(56,189,248,0.1)" }}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span style={{ color: style.color }}>{meta.icon}</span>
-          <p className="truncate text-xs font-bold text-blue-50">{meta.label}</p>
-        </div>
-        <span
-          className="shrink-0 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-widest"
-          style={{ color: style.color, backgroundColor: `${style.color}14`, border: `1px solid ${style.color}28` }}
-        >
-          {item.grade}
-        </span>
-      </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-950/70">
-        <motion.div
-          className="h-full rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: style.width }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          style={{ backgroundColor: style.color, boxShadow: `0 0 14px ${style.color}55` }}
-        />
-      </div>
-      <p className="mt-3 text-[11px] leading-5 text-slate-500">{item.rationale || "Data unavailable."}</p>
-    </motion.div>
-  );
-}
-
-function BulletPanel({ title, tone, items }: { title: string; tone: "bull" | "bear" | "neutral"; items: string[] }) {
-  const color = tone === "bull" ? "#10b981" : tone === "bear" ? "#f43f5e" : "#38bdf8";
-  return (
-    <div className="rounded-lg border p-3" style={{ backgroundColor: `${color}08`, borderColor: `${color}24` }}>
-      <p className="mb-3 text-sm font-bold" style={{ color }}>{title}</p>
-      <div className="space-y-3">
-        {normalizeList(items).map((item, idx) => (
-          <div key={idx} className="flex gap-3">
-            <span
-              className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
-              style={{ color, backgroundColor: `${color}18` }}
-            >
-              {idx + 1}
-            </span>
-            <p className="text-xs leading-6 text-slate-400">{item}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function CompactList({ items, color = "#38bdf8" }: { items: string[]; color?: string }) {
+  const list = items.length ? items : ["Data unavailable."];
   return (
     <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-      {normalizeList(items).map((item, idx) => (
+      {list.map((item, idx) => (
         <div
           key={idx}
           className="rounded-lg border px-3 py-2.5"
@@ -608,71 +216,11 @@ function CompactList({ items, color = "#38bdf8" }: { items: string[]; color?: st
   );
 }
 
-function CompetitionTable({ report }: { report: AnalystReport }) {
-  const peers = report.competitive_analysis?.peers ?? [];
-  if (peers.length === 0) {
-    return (
-      <div className="rounded-lg border p-4" style={{ backgroundColor: "rgba(15,32,64,0.42)", borderColor: "rgba(56,189,248,0.09)" }}>
-        <p className="text-sm text-slate-500">Competitive peer data is unavailable for this ticker.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="overflow-x-auto rounded-lg border" style={{ borderColor: "rgba(56,189,248,0.1)" }}>
-      <table className="min-w-[980px] w-full text-left text-xs">
-        <thead style={{ backgroundColor: "rgba(15,32,64,0.7)" }}>
-          <tr className="text-[10px] uppercase tracking-widest text-slate-600">
-            <th className="px-3 py-3">Company</th>
-            <th className="px-3 py-3">Ticker</th>
-            <th className="px-3 py-3">Positioning</th>
-            <th className="px-3 py-3">Growth</th>
-            <th className="px-3 py-3">Margins</th>
-            <th className="px-3 py-3">Valuation</th>
-            <th className="px-3 py-3">Main Strength</th>
-            <th className="px-3 py-3">Main Weakness</th>
-          </tr>
-        </thead>
-        <tbody>
-          {peers.map((peer, idx) => (
-            <tr key={`${peer.ticker}-${idx}`} style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}>
-              <td className="px-3 py-3 font-semibold text-blue-50">{peer.company || "N/A"}</td>
-              <td className="px-3 py-3 font-mono text-sky-400">{peer.ticker || "N/A"}</td>
-              <td className="px-3 py-3 text-slate-400">{peer.positioning || "N/A"}</td>
-              <td className="px-3 py-3 text-slate-400">{peer.growth || "N/A"}</td>
-              <td className="px-3 py-3 text-slate-400">{peer.margins || "N/A"}</td>
-              <td className="px-3 py-3 text-slate-400">{peer.valuation || "N/A"}</td>
-              <td className="px-3 py-3 text-slate-400">{peer.main_strength || "N/A"}</td>
-              <td className="px-3 py-3 text-slate-400">{peer.main_weakness || "N/A"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function DriverGrid({ drivers }: { drivers: StockDriver[] }) {
-  return (
-    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-      {(drivers.length ? drivers : [{ driver: "Business drivers", why_it_matters: "Driver data is unavailable.", evidence: "N/A", trend: "unknown" }]).map((driver, idx) => (
-        <div
-          key={`${driver.driver}-${idx}`}
-          className="rounded-lg border p-3"
-          style={{ backgroundColor: "rgba(15,32,64,0.42)", borderColor: "rgba(56,189,248,0.1)" }}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-sm font-bold text-blue-50">{driver.driver}</p>
-            <span className="rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-500" style={{ backgroundColor: "rgba(15,23,42,0.75)" }}>
-              {driver.trend || "unknown"}
-            </span>
-          </div>
-          <p className="mt-2 text-xs leading-6 text-slate-400">{driver.why_it_matters}</p>
-          <p className="mt-3 text-[10px] uppercase tracking-widest text-slate-600">{driver.evidence || "N/A"}</p>
-        </div>
-      ))}
-    </div>
-  );
+function bandColor(band?: string | null) {
+  if (band === "safe") return "#10b981";
+  if (band === "grey") return "#f59e0b";
+  if (band === "distress") return "#f43f5e";
+  return "#94a3b8";
 }
 
 export default function AnalystReportPage() {
@@ -680,57 +228,45 @@ export default function AnalystReportPage() {
   const [report, setReport] = useState<AnalystReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<DeepDiveTab>("bullBear");
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!ticker) return;
     setLoading(true);
     setError(null);
     setReport(null);
-    cachedFetch<Partial<AnalystReport> & LegacyAnalystReport & { error?: string }>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/analyst/${encodeURIComponent(ticker)}?schema=market-signal-v4`
+    cachedFetch<AnalystReport & { error?: string }>(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/analyst/${encodeURIComponent(ticker)}?schema=market-signal-v5`,
     )
       .then((json) => {
-        if (json.error) {
-          setError(json.error);
-        } else {
-          setReport(coerceAnalystReport(json, ticker));
-        }
+        if (json.error) setError(json.error);
+        else setReport(json);
       })
       .catch(() => setError("Failed to generate AI research snapshot."))
       .finally(() => setLoading(false));
   }, [ticker]);
 
-  const signal = normalizeOverallSignal(report?.overall_signal ?? legacyRating(report));
+  const signal = normalizeOverallSignal(report?.overall_signal);
   const signalCfg = SIGNAL_CONFIG[signal];
 
   useSideNavSections(
     [
       { id: "overview", label: "Overview" },
-      { id: "scorecard", label: "Scorecard" },
-      { id: "deep-dive", label: "Deep Dive" },
-      { id: "competition", label: "Competition" },
+      { id: "pillars", label: "Pillars" },
+      { id: "peers", label: "Peers" },
+      { id: "risks", label: "SEC Risks" },
       { id: "uncertainty", label: "Uncertainty" },
     ],
     signalCfg.color,
   );
 
-  const scorecardItems = useMemo(() => {
-    if (!report?.scorecard) return [];
-    return SCORECARD_ORDER
-      .filter((key) => report.scorecard[key])
-      .map((key) => [key, report.scorecard[key]] as const);
-  }, [report]);
-
   if (loading) return <LoadingScreen isLoading />;
 
-  if (error || !report) {
+  if (error || !report || !report.pillars) {
     return (
       <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#060c1a" }}>
         <div className="bb-card-danger max-w-md p-5 text-center">
-          <p className="text-sm font-semibold text-rose-400">AI research snapshot unavailable</p>
-          <p className="mt-2 text-xs leading-6 text-slate-500">{error ?? "No report returned."}</p>
+          <p className="text-sm font-semibold text-rose-400">Research snapshot unavailable</p>
+          <p className="mt-2 text-xs leading-6 text-slate-500">{error ?? "No pillar report returned."}</p>
           <Link href={`/summary/${ticker}`} className="mt-4 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-sky-400 transition-colors">
             <ArrowLeft className="w-3 h-3" /> Back to Summary
           </Link>
@@ -739,8 +275,10 @@ export default function AnalystReportPage() {
     );
   }
 
-  const confidenceLevel = normalizeConfidence(report.confidence);
-  const confidence = CONFIDENCE_CONFIG[confidenceLevel];
+  const confidence = normalizeConfidence(report.confidence);
+  const { piotroski, altman, valuation } = report.pillars;
+  const peers = report.peers ?? [];
+  const risks = report.risk_factors ?? [];
 
   return (
     <main className="min-h-screen pt-[88px]" style={{ backgroundColor: "#060c1a" }}>
@@ -749,216 +287,224 @@ export default function AnalystReportPage() {
           <Link href={`/summary/${ticker}`} className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-sky-400 transition-colors">
             <ArrowLeft className="w-3 h-3" /> Back to Summary
           </Link>
-          <div className="inline-flex items-center gap-2 text-xs text-slate-700">
-            <Brain className="w-3.5 h-3.5 text-indigo-400" />
-            <span>AI-generated research snapshot</span>
-          </div>
+          <p className="text-[10px] uppercase tracking-widest text-slate-600">market-signal-v5 · inspectable pillars</p>
         </div>
 
         <motion.section
           id="overview"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45 }}
-          className="scroll-mt-24"
-        >
-          <div className="bb-card overflow-hidden" style={{ borderColor: signalCfg.border, boxShadow: signalCfg.glow }}>
-            <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.6fr]">
-              <div className="p-4" style={{ background: `linear-gradient(135deg, ${signalCfg.bg}, rgba(15,32,64,0.32))` }}>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{report.sector} / {report.industry}</p>
-                <h1 className="mt-2 text-4xl font-bold tracking-tighter text-blue-50 sm:text-5xl">{report.company_name}</h1>
-                <p className="mt-2 font-mono text-sm text-slate-500">{report.ticker} / {fmtMoney(report.market_cap)}</p>
-
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <SignalBadge signal={report.overall_signal ?? legacyRating(report)} label={report.signal_label} />
-                  <span
-                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest"
-                    style={{ color: confidence.color, backgroundColor: `${confidence.color}12`, border: `1px solid ${confidence.color}28` }}
-                  >
-                    <Gauge className="w-4 h-4" />
-                    {confidenceLevel} Confidence
-                  </span>
-                </div>
-
-                <div className="mt-5 grid grid-cols-2 gap-2">
-                  <div className="rounded-lg border px-3 py-2" style={{ backgroundColor: "rgba(8,18,36,0.5)", borderColor: "rgba(56,189,248,0.08)" }}>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">Current</p>
-                    <p className="mt-1 text-sm font-bold tabular-nums text-blue-50">{fmtPrice(report.current_price)}</p>
-                  </div>
-                  <div className="rounded-lg border px-3 py-2" style={{ backgroundColor: "rgba(8,18,36,0.5)", borderColor: "rgba(56,189,248,0.08)" }}>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-600">52W Range</p>
-                    <p className="mt-1 text-sm font-bold tabular-nums text-blue-50">{fmtPrice(report.wk52_low)} - {fmtPrice(report.wk52_high)}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 space-y-4">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-sky-400">Market Signal Summary</p>
-                  <p className="mt-3 text-sm leading-8 text-slate-300">
-                    {report.summary || legacySummary(report) || "Research summary is unavailable."}
-                  </p>
-                </div>
-
-                <div>
-                  <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-600">
-                    <span>Signal Conviction</span>
-                    <span style={{ color: confidence.color }}>{confidenceLevel}</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-950/80">
-                    <motion.div
-                      className="h-full rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: confidence.width }}
-                      transition={{ duration: 0.8, ease: "easeOut" }}
-                      style={{ backgroundColor: confidence.color, boxShadow: `0 0 18px ${confidence.color}55` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                  <CompactList items={report.why_signal_appears} color={signalCfg.color} />
-                </div>
-
-                <DataSourceNote
-                  label={`${report.source?.market_data ?? "Yahoo Finance via yfinance"}; AI-generated research snapshot`}
-                />
-              </div>
-            </div>
-          </div>
-        </motion.section>
-
-        <motion.section
-          id="scorecard"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.08 }}
           className="bb-card scroll-mt-24 overflow-hidden"
         >
-          <SectionTitle icon={<BarChart3 className="w-4 h-4" />} title="AI Scorecard" kicker="Category labels, no raw score" />
-          <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 lg:grid-cols-3">
-            {scorecardItems.map(([key, item]) => (
-              <ScorecardTile key={key} itemKey={key} item={item} />
-            ))}
-          </div>
-        </motion.section>
-
-        <motion.section
-          id="deep-dive"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.12 }}
-          className="bb-card scroll-mt-24 overflow-hidden"
-        >
-          <SectionTitle icon={<Sparkles className="w-4 h-4" />} title="Deep Dive" />
-          <div className="flex gap-2 overflow-x-auto p-3" style={{ borderBottom: "1px solid rgba(56,189,248,0.08)" }}>
-            {TABS.map((tab) => {
-              const active = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition"
-                  style={{
-                    color: active ? "#eff6ff" : "#64748b",
-                    backgroundColor: active ? "rgba(56,189,248,0.12)" : "rgba(15,32,64,0.34)",
-                    border: `1px solid ${active ? "rgba(56,189,248,0.28)" : "rgba(56,189,248,0.08)"}`,
-                  }}
+          <div className="p-3 sm:p-4 space-y-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  {report.sector} · {report.industry}
+                </p>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter text-blue-50 leading-none">
+                  {report.company_name}
+                </h1>
+                <p className="text-sm font-mono text-slate-500">{report.ticker}</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold uppercase tracking-widest"
+                  style={{ color: signalCfg.color, backgroundColor: signalCfg.bg, border: `1px solid ${signalCfg.border}` }}
                 >
-                  {tab.icon}
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="p-3">
-            <AnimatePresence mode="wait">
-              {activeTab === "bullBear" && (
-                <PanelShell key="bullBear">
-                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                    <BulletPanel title="Bull Case" tone="bull" items={report.bull_case} />
-                    <BulletPanel title="Bear Case" tone="bear" items={report.bear_case} />
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                    <BulletPanel title="Key Upside Drivers" tone="bull" items={report.key_upside_drivers} />
-                    <BulletPanel title="Key Downside Risks" tone="bear" items={report.key_downside_risks} />
-                  </div>
-                </PanelShell>
-              )}
-
-              {activeTab === "competition" && (
-                <PanelShell key="competition">
-                  <p className="text-sm leading-7 text-slate-400">{report.competitive_analysis?.summary || "Peer analysis is unavailable."}</p>
-                  <CompetitionTable report={report} />
-                  <div id="competition" className="grid grid-cols-1 gap-3 scroll-mt-24 lg:grid-cols-2">
-                    <BulletPanel title="Where This Company Wins" tone="bull" items={report.competitive_analysis?.where_company_wins ?? []} />
-                    <BulletPanel title="Where Competitors May Be Stronger" tone="neutral" items={report.competitive_analysis?.where_competitors_may_be_stronger ?? []} />
-                  </div>
-                </PanelShell>
-              )}
-
-              {activeTab === "drivers" && (
-                <PanelShell key="drivers">
-                  <DriverGrid drivers={report.stock_drivers ?? []} />
-                </PanelShell>
-              )}
-
-              {activeTab === "change" && (
-                <PanelShell key="change">
-                  <CompactList items={report.what_could_change_signal} color="#a78bfa" />
-                </PanelShell>
-              )}
-
-              {activeTab === "risks" && (
-                <PanelShell key="risks">
-                  <CompactList items={report.key_downside_risks} color="#f43f5e" />
-                </PanelShell>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.section>
-
-        <motion.section
-          id="uncertainty"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.16 }}
-          className="bb-card scroll-mt-24 overflow-hidden"
-        >
-          <button
-            type="button"
-            onClick={() => setExpanded((current) => ({ ...current, uncertainty: !current.uncertainty }))}
-            className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left"
-            style={{ borderBottom: expanded.uncertainty ? "1px solid rgba(56,189,248,0.08)" : "none" }}
-          >
-            <div className="flex items-center gap-2">
-              <CircleHelp className="w-4 h-4 text-sky-400" />
-              <p className="text-sm font-bold text-blue-50">Uncertainty And Data Gaps</p>
+                  {signalCfg.icon}
+                  {report.signal_label || signal}
+                </span>
+                <span className="rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                  style={{ backgroundColor: "rgba(15,32,64,0.6)", border: "1px solid rgba(56,189,248,0.1)" }}>
+                  Confidence {confidence}
+                </span>
+                <span className="rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                  style={{ backgroundColor: "rgba(15,32,64,0.6)", border: "1px solid rgba(56,189,248,0.1)" }}>
+                  Coverage {Math.round((report.coverage ?? report.pillars.signal.coverage ?? 0) * 100)}%
+                </span>
+              </div>
             </div>
-            <ChevronDown className={`w-4 h-4 text-slate-600 transition ${expanded.uncertainty ? "rotate-180" : ""}`} />
-          </button>
-          <AnimatePresence initial={false}>
-            {expanded.uncertainty && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="p-3">
-                  <CompactList items={report.uncertainty} color="#94a3b8" />
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: "Price", value: fmtPrice(report.current_price) },
+                { label: "Market Cap", value: fmtMoney(report.market_cap) },
+                { label: "52W Low", value: fmtPrice(report.wk52_low) },
+                { label: "52W High", value: fmtPrice(report.wk52_high) },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(15,32,64,0.5)", border: "1px solid rgba(56,189,248,0.08)" }}>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-600">{item.label}</p>
+                  <p className="text-sm font-bold tabular-nums text-blue-50 mt-1">{item.value}</p>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              ))}
+            </div>
+
+            <p className="text-sm leading-7 text-slate-400">{report.summary}</p>
+            <CompactList items={report.why_signal_appears} color={signalCfg.color} />
+            <DataSourceNote
+              label={`${report.source?.market_data ?? "Yahoo Finance via yfinance"}; pillar math + AI narrative`}
+            />
+          </div>
         </motion.section>
 
-        <div className="pb-10">
-          <p className="mx-auto max-w-2xl text-center text-[11px] leading-6 text-slate-700">
-            {report.disclaimer || "This is an AI-generated research summary for educational purposes only. It is not financial advice."}
-          </p>
-        </div>
+        <motion.section id="pillars" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="scroll-mt-24 space-y-4">
+          <div className="bb-card overflow-hidden">
+            <SectionTitle icon={<CheckCircle2 className="w-4 h-4" />} title="Piotroski F-Score" kicker={piotroski.display} />
+            <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+              {piotroski.tests.map((test) => {
+                const ok = test.available && test.passed;
+                const fail = test.available && test.passed === false;
+                const color = ok ? "#10b981" : fail ? "#f43f5e" : "#64748b";
+                return (
+                  <div key={test.key} className="rounded-lg border px-3 py-2.5" style={{ borderColor: `${color}33`, backgroundColor: `${color}0d` }}>
+                    <div className="flex items-start gap-2">
+                      {ok ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" style={{ color }} /> :
+                        fail ? <XCircle className="w-4 h-4 shrink-0 mt-0.5" style={{ color }} /> :
+                        <CircleHelp className="w-4 h-4 shrink-0 mt-0.5" style={{ color }} />}
+                      <div>
+                        <p className="text-xs font-semibold text-blue-50">{test.label}</p>
+                        <p className="text-[11px] leading-5 text-slate-500 mt-1">{test.evidence}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bb-card overflow-hidden">
+              <SectionTitle icon={<Landmark className="w-4 h-4" />} title="Altman Z″" kicker={altman.applicable ? (altman.band || "n/a") : "skipped"} />
+              <div className="p-3 space-y-3">
+                {!altman.applicable ? (
+                  <p className="text-sm text-slate-400">{altman.skipped_reason}</p>
+                ) : (
+                  <>
+                    <div className="flex items-end gap-3">
+                      <p className="text-3xl font-bold tabular-nums" style={{ color: bandColor(altman.band) }}>
+                        {altman.z != null ? altman.z.toFixed(2) : "N/A"}
+                      </p>
+                      <p className="text-xs uppercase tracking-widest mb-1" style={{ color: bandColor(altman.band) }}>
+                        {altman.band || "insufficient_data"}
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-mono">{altman.formula}</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(altman.components || {}).map(([key, value]) => (
+                        <div key={key} className="rounded-lg px-2.5 py-2" style={{ backgroundColor: "rgba(15,32,64,0.5)", border: "1px solid rgba(56,189,248,0.08)" }}>
+                          <p className="text-[9px] uppercase tracking-widest text-slate-600">{key}</p>
+                          <p className="text-xs font-semibold tabular-nums text-blue-50 mt-1">
+                            {value == null ? "N/A" : Number(value).toFixed(3)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    {(altman.notes || []).map((note, idx) => (
+                      <p key={idx} className="text-[11px] text-slate-600">{note}</p>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="bb-card overflow-hidden">
+              <SectionTitle icon={<Target className="w-4 h-4" />} title="Relative Valuation" kicker={valuation.label || "unknown"} />
+              <div className="p-3 space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-lg px-2.5 py-2" style={{ backgroundColor: "rgba(15,32,64,0.5)", border: "1px solid rgba(56,189,248,0.08)" }}>
+                    <p className="text-[9px] uppercase tracking-widest text-slate-600">Fwd P/E</p>
+                    <p className="text-sm font-bold tabular-nums text-blue-50 mt-1">{fmtRatio(valuation.forward_pe)}</p>
+                  </div>
+                  <div className="rounded-lg px-2.5 py-2" style={{ backgroundColor: "rgba(15,32,64,0.5)", border: "1px solid rgba(56,189,248,0.08)" }}>
+                    <p className="text-[9px] uppercase tracking-widest text-slate-600">P/S</p>
+                    <p className="text-sm font-bold tabular-nums text-blue-50 mt-1">{fmtRatio(valuation.price_to_sales)}</p>
+                  </div>
+                  <div className="rounded-lg px-2.5 py-2" style={{ backgroundColor: "rgba(15,32,64,0.5)", border: "1px solid rgba(56,189,248,0.08)" }}>
+                    <p className="text-[9px] uppercase tracking-widest text-slate-600">FCF Yield</p>
+                    <p className="text-sm font-bold tabular-nums text-blue-50 mt-1">{fmtPct(valuation.fcf_yield)}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400">
+                  Composite richness percentile:{" "}
+                  <span className="font-semibold text-blue-50">
+                    {valuation.composite_percentile != null ? `${valuation.composite_percentile}th` : "N/A"}
+                  </span>
+                  {" "}(lower = cheaper vs peers/history)
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500">
+                  <p>Peer Fwd PE pct: {valuation.peer_percentiles?.forward_pe ?? "N/A"}</p>
+                  <p>Peer P/S pct: {valuation.peer_percentiles?.price_to_sales ?? "N/A"}</p>
+                  <p>Hist PE pct: {valuation.history_percentiles?.forward_pe ?? "N/A"}</p>
+                  <p>Peer count: {valuation.peer_percentiles?.peer_count ?? 0}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        <motion.section id="peers" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="bb-card scroll-mt-24 overflow-hidden">
+          <SectionTitle icon={<Shield className="w-4 h-4" />} title="Cap-Banded Peers" kicker="0.25x–4x market cap" />
+          <div className="overflow-x-auto">
+            {peers.length === 0 ? (
+              <p className="p-4 text-sm text-slate-500">Peer metrics unavailable for this ticker.</p>
+            ) : (
+              <table className="min-w-[760px] w-full text-left text-xs">
+                <thead style={{ backgroundColor: "rgba(15,32,64,0.7)" }}>
+                  <tr className="text-[10px] uppercase tracking-widest text-slate-600">
+                    <th className="px-3 py-3">Company</th>
+                    <th className="px-3 py-3">Ticker</th>
+                    <th className="px-3 py-3">Market Cap</th>
+                    <th className="px-3 py-3">Growth</th>
+                    <th className="px-3 py-3">Margin</th>
+                    <th className="px-3 py-3">Fwd P/E</th>
+                    <th className="px-3 py-3">P/S</th>
+                    <th className="px-3 py-3">FCF Yield</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {peers.map((peer, idx) => (
+                    <tr key={`${peer.ticker}-${idx}`} style={{ borderTop: "1px solid rgba(56,189,248,0.07)" }}>
+                      <td className="px-3 py-3 font-semibold text-blue-50">{peer.company || "N/A"}</td>
+                      <td className="px-3 py-3 font-mono text-sky-400">{peer.ticker || "N/A"}</td>
+                      <td className="px-3 py-3 text-slate-400">{peer.market_cap || "N/A"}</td>
+                      <td className="px-3 py-3 text-slate-400">{peer.revenue_growth || "N/A"}</td>
+                      <td className="px-3 py-3 text-slate-400">{peer.profit_margin || "N/A"}</td>
+                      <td className="px-3 py-3 text-slate-400">{peer.forward_pe || "N/A"}</td>
+                      <td className="px-3 py-3 text-slate-400">{peer.price_to_sales || "N/A"}</td>
+                      <td className="px-3 py-3 text-slate-400">{peer.fcf_yield || "N/A"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </motion.section>
+
+        <motion.section id="risks" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="bb-card scroll-mt-24 overflow-hidden">
+          <SectionTitle icon={<AlertTriangle className="w-4 h-4" />} title="SEC Item 1A Risks" kicker="filing-grounded" />
+          <div className="p-3 space-y-2">
+            {risks.length === 0 ? (
+              <p className="text-sm text-slate-500">No Item 1A risk factors extracted for this ticker.</p>
+            ) : (
+              risks.map((risk, idx) => (
+                <div key={idx} className="rounded-lg border px-3 py-3" style={{ borderColor: "rgba(244,63,94,0.18)", backgroundColor: "rgba(244,63,94,0.05)" }}>
+                  <p className="text-sm font-semibold text-blue-50">{risk.title}</p>
+                  <p className="text-xs leading-6 text-slate-400 mt-1">{risk.evidence}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </motion.section>
+
+        <motion.section id="uncertainty" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="bb-card scroll-mt-24 overflow-hidden">
+          <SectionTitle icon={<CircleHelp className="w-4 h-4" />} title="What Could Change / Uncertainty" />
+          <div className="p-3 space-y-4">
+            <CompactList items={report.what_could_change_signal} />
+            <CompactList items={report.uncertainty} color="#94a3b8" />
+            <p className="text-[11px] text-slate-600">{report.disclaimer}</p>
+          </div>
+        </motion.section>
       </div>
     </main>
   );

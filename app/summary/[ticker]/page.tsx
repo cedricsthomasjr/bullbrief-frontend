@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { cachedFetch } from "@/app/lib/summaryCache";
-import SWOTCard from "@/app/components/SWOTCard";
 import Link from "next/link";
-import { ArrowLeft, TrendingUp, TrendingDown, ArrowUpRight, Brain, Clock3, Newspaper } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Brain, Clock3, Newspaper } from "lucide-react";
 import LoadingScreen from "@/app/components/LoadingScreen";
 import StockChartToggle from "@/app/components/StockChartToggle";
 import FinancialMetricsGrid from "@/app/components/FinancialMetricsGrid";
@@ -22,8 +21,8 @@ type BackendSummary = {
   exchange: string;
   exchange_symbol: string;
   business_summary: string;
-  swot: string;
-  outlook: string;
+  swot?: string;
+  outlook?: string;
   market_cap: number;
   pe_ratio: number;
   range_52w: string;
@@ -40,8 +39,14 @@ type BackendSummary = {
   price_to_book: number;
   roe: number;
   free_cashflow: number;
+  fcf_yield?: number;
   debt_to_equity: number;
   profit_margin: number;
+  operating_margin?: number;
+  revenue_growth?: number;
+  enterprise_value?: number;
+  ebitda?: number;
+  ev_ebitda?: number;
   institutional_ownership: number;
   short_percent: number;
   raw_summary: string;
@@ -196,8 +201,6 @@ export default function TickerPage() {
       { id: "bullbrief", label: "The BullBrief" },
       { id: "what-drives", label: "What Drives The Stock" },
       { id: "business-engine-page", label: "Business Engine", href: revenueEngineHref },
-      { id: "swot", label: "SWOT Analysis" },
-      { id: "outlook", label: "Outlook" },
       { id: "financials", label: "Financial Metrics" },
       ...(execs.length > 0 ? [{ id: "executives", label: "Executive Team" }] : []),
       { id: "news", label: "Recent News" },
@@ -222,7 +225,6 @@ export default function TickerPage() {
   if (!data) return null;
 
   const peRatio = typeof data.pe_ratio === "string" ? parseFloat(data.pe_ratio) : data.pe_ratio;
-  const isBearish = peRatio > 100;
   const sectionNum = (n: number) => String(n).padStart(2, "0");
   let sectionIdx = 1;
 
@@ -260,14 +262,9 @@ export default function TickerPage() {
 
             <div
               className="inline-flex items-center gap-2 self-start sm:self-auto px-3.5 py-2 rounded-full text-xs font-semibold"
-              style={
-                isBearish
-                  ? { backgroundColor: "rgba(244,63,94,0.1)", color: "#f43f5e", border: "1px solid rgba(244,63,94,0.25)" }
-                  : { backgroundColor: "rgba(16,185,129,0.1)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }
-              }
+              style={{ backgroundColor: "rgba(56,189,248,0.1)", color: "#38bdf8", border: "1px solid rgba(56,189,248,0.25)" }}
             >
-              {isBearish ? <TrendingDown className="w-3.5 h-3.5" /> : <TrendingUp className="w-3.5 h-3.5" />}
-              {isBearish ? "Watch Valuation" : "Constructive Setup"}
+              Research Brief
             </div>
           </div>
 
@@ -313,7 +310,7 @@ export default function TickerPage() {
                 <div>
                   <p className="text-sm font-bold text-blue-50">AI Analyst Report</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    AI-generated signal snapshot, scorecard, peer context, stock drivers, bull/bear cases, and risks
+                    AI-generated pillar snapshot: Piotroski, Altman Z″, relative valuation, peers, and SEC risks
                   </p>
                 </div>
               </div>
@@ -353,7 +350,6 @@ export default function TickerPage() {
             peRatio={peRatio}
             currentPrice={data.current_price}
             range52w={data.range_52w}
-            isBearish={isBearish}
           />
         </section>
 
@@ -366,25 +362,6 @@ export default function TickerPage() {
             error={driversError}
             revenueHref={revenueEngineHref}
           />
-        </section>
-
-        {/* ── SWOT ── */}
-        <section id="swot" className="scroll-mt-24">
-          <SectionHeader num={sectionNum(sectionIdx++)} title="SWOT Analysis" />
-          <SWOTCard content={data.swot} />
-        </section>
-
-        {/* ── Outlook ── */}
-        <section id="outlook" className="scroll-mt-24">
-          <SectionHeader num={sectionNum(sectionIdx++)} title="Outlook" />
-          <div
-            className="bb-card p-3 text-sm leading-7 text-slate-400 whitespace-pre-wrap"
-          >
-            {data.outlook}
-            <DataSourceNote
-              label="Yahoo Finance via yfinance; BullBrief AI outlook summary"
-            />
-          </div>
         </section>
 
         {/* ── Financials ── */}
