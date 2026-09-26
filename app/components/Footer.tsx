@@ -36,6 +36,8 @@ export default function Footer() {
             <Link href="/" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Home</Link>
             <Link href="/about" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">About</Link>
             <Link href="/compare" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Compare</Link>
+            <Link href="/explore" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Explore</Link>
+            <Link href="/movers" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Movers</Link>
             <Link href="/glossary" className="text-slate-500 hover:text-sky-400 transition-colors text-xs">Glossary</Link>
           </div>
           <div className="flex flex-col gap-2">

@@ -14,6 +14,7 @@ import ExploreMetricsChart from "@/app/components/ExploreMetricsChart";
 import BullBriefCard from "@/app/components/BullBriefCard";
 import { useSideNavSections } from "@/app/hooks/useSideNavSections";
 import DataSourceNote from "@/app/components/DataSourceNote";
+import { PeerChapter, PeerHeaderLine } from "@/app/components/PeerLinks";
 
 type BackendSummary = {
   company_name: string;
@@ -196,6 +197,7 @@ export default function TickerPage() {
   const revenueEngineHref = `/summary/${ticker}/business-engine`;
   useSideNavSections(
     [
+      { id: "peers", label: "Peers" },
       { id: "stock-performance", label: "Stock Performance" },
       { id: "explore-metrics", label: "Explore Metrics" },
       { id: "bullbrief", label: "The BullBrief" },
@@ -258,6 +260,7 @@ export default function TickerPage() {
                 {data.company_name}
               </h1>
               <p className="text-slate-500 text-sm font-mono">{data.ticker} · {data.exchange}</p>
+              <PeerHeaderLine ticker={data.ticker} />
             </div>
 
             <div
@@ -288,6 +291,10 @@ export default function TickerPage() {
             ))}
           </div>
           <DataSourceNote label="Yahoo Finance via yfinance" />
+        </section>
+
+        <section id="peers" className="scroll-mt-24">
+          <PeerChapter ticker={data.ticker} />
         </section>
 
         {/* ── AI Analyst Report CTA ── */}

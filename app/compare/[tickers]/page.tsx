@@ -6,6 +6,7 @@ import CompareMetricsGrid from "@/app/components/CompareMetricsGrid";
 import CompareCharts from "@/app/components/CompareCharts";
 import LoadingScreen from "@/app/components/LoadingScreen";
 import { cachedFetch } from "@/app/lib/summaryCache";
+import { parseCompareParam } from "@/app/lib/explore/compareHref";
 import Link from "next/link";
 import { ArrowLeft, Lightbulb, Layers3, Scale } from "lucide-react";
 
@@ -32,10 +33,11 @@ export default function ComparePage() {
 
   useEffect(() => {
     if (!tickers) return;
+    const tickerList = parseCompareParam(tickers);
     cachedFetch<CompareSummaryResponse>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/compare-summary`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tickers: tickers.split(",") }),
+      body: JSON.stringify({ tickers: tickerList }),
     })
       .then((j) => { setData(j); setLoading(false); })
       .catch((err) => { console.error(err); setLoading(false); });
@@ -43,7 +45,7 @@ export default function ComparePage() {
 
   if (loading) return <LoadingScreen />;
 
-  const tickerList = tickers.split(",");
+  const tickerList = parseCompareParam(tickers);
   const sectors = Array.from(new Set((data?.tickers ?? []).map((item) => item.sector).filter(Boolean)));
   const industries = Array.from(new Set((data?.tickers ?? []).map((item) => item.industry).filter(Boolean)));
   const sectorAligned = (data?.tickers?.length ?? 0) > 1 && sectors.length === 1;

@@ -1,6 +1,18 @@
 "use client";
 
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import TripleTickerCompare from "@/app/components/TripleTickerCompare";
+
+function CompareLauncher() {
+  const params = useSearchParams();
+  const initialTickers = (params.get("tickers") ?? "")
+    .split(",")
+    .map((symbol) => symbol.trim().toUpperCase())
+    .filter(Boolean)
+    .slice(0, 3);
+  return <TripleTickerCompare initialTickers={initialTickers} />;
+}
 
 export default function ComparePage() {
   return (
@@ -26,7 +38,9 @@ export default function ComparePage() {
           </p>
         </div>
 
-        <TripleTickerCompare />
+        <Suspense fallback={null}>
+          <CompareLauncher />
+        </Suspense>
       </div>
     </main>
   );
