@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   BookOpen,
+  Compass,
   GitCompare,
   Home,
   Info,
@@ -16,6 +17,7 @@ import { useSideNavContext } from "@/app/context/SideNavContext";
 const SITE_LINKS = [
   { href: "/",         label: "Home",     Icon: Home,       match: (p: string) => p === "/" },
   { href: "/movers",   label: "Movers",   Icon: Activity,   match: (p: string) => p === "/movers" },
+  { href: "/explore",  label: "Explore",  Icon: Compass,    match: (p: string) => p === "/explore" },
   { href: "/compare",  label: "Compare",  Icon: GitCompare, match: (p: string) => p.startsWith("/compare") },
   { href: "/about",    label: "About",    Icon: Info,       match: (p: string) => p === "/about" },
   { href: "/glossary", label: "Glossary", Icon: BookOpen,   match: (p: string) => p === "/glossary" },
