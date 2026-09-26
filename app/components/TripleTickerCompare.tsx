@@ -15,8 +15,12 @@ type CompareSummaryResponse = {
   master_insight?: string;
 };
 
-export default function TripleTickerCompare() {
-  const [tickers, setTickers] = useState(["", "", ""]);
+export default function TripleTickerCompare({ initialTickers = [] }: { initialTickers?: string[] }) {
+  const [tickers, setTickers] = useState([
+    initialTickers[0] ?? "",
+    initialTickers[1] ?? "",
+    initialTickers[2] ?? "",
+  ]);
   const [data, setData] = useState<(SingleSummaryData | null)[]>([null, null, null]);
   const [insights, setInsights] = useState<InsightSection[]>([]);
   const [loading, setLoading] = useState(false);

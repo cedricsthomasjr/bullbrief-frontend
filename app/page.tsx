@@ -507,6 +507,12 @@ export default function HomePage() {
                       {t}
                     </button>
                   ))}
+                  <Link
+                    href="/explore"
+                    className="font-mono font-bold text-[10px] px-2 py-0.5 text-slate-400 hover:text-sky-300"
+                  >
+                    Explore
+                  </Link>
                 </div>
 
                 {/* Keyboard hint */}

@@ -100,19 +100,22 @@ def fetch_fmp_peer_symbols(ticker: str) -> list[str]:
     return []
 
 
-def resolve_peer_symbols(ticker: str, sector: str | None) -> list[str]:
+def resolve_peer_symbols(ticker: str, sector: str | None) -> tuple[list[str], str]:
+    """Tiered: FMP peers, then a hand list, then the sector basket. Not mixed."""
     symbols = fetch_fmp_peer_symbols(ticker)
     if symbols:
-        return symbols
-    symbols = list(peer_map.get(ticker.upper(), []))
-    if sector:
-        symbols.extend(SECTOR_FALLBACK.get(sector, []))
-    deduped = []
-    for symbol in symbols:
+        return symbols, "fmp"
+    curated = [symbol.upper() for symbol in peer_map.get(ticker.upper(), []) if symbol.upper() != ticker.upper()]
+    if curated:
+        return curated[:12], "curated"
+    fallback = []
+    for symbol in SECTOR_FALLBACK.get(sector or "", []):
         symbol = symbol.upper()
-        if symbol != ticker.upper() and symbol not in deduped:
-            deduped.append(symbol)
-    return deduped[:12]
+        if symbol != ticker.upper() and symbol not in fallback:
+            fallback.append(symbol)
+    if fallback:
+        return fallback[:12], "sector_static"
+    return [], "none"
 
 
 def filter_cap_band(target_cap: float | None, peers: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -138,7 +141,7 @@ def compare_peers(ticker):
     if not target_data or not target_data.get("market_cap"):
         return jsonify({"error": "Ticker not found or data incomplete"}), 404
 
-    peer_tickers = resolve_peer_symbols(ticker, target_data.get("sector"))
+    peer_tickers, source = resolve_peer_symbols(ticker, target_data.get("sector"))
     peers = []
     for pt in peer_tickers:
         data = get_metrics(pt)
@@ -152,6 +155,7 @@ def compare_peers(ticker):
             "ticker": ticker,
             "target": target_data,
             "sector": target_data.get("sector"),
+            "source": source,
             "peers": peers,
             "filter": {"market_cap_band": "0.25x–4x", "limit": 5},
         }

@@ -17,6 +17,7 @@ from .analyst import analyst_bp
 from .drivers import drivers_bp
 from .revenue_breakdown import revenue_breakdown_bp
 from .movers import movers_bp
+from .explore import explore_bp
 
 def register_routes(app):
     app.register_blueprint(summary_bp)
@@ -39,3 +40,4 @@ def register_routes(app):
     app.register_blueprint(drivers_bp)
     app.register_blueprint(revenue_breakdown_bp)
     app.register_blueprint(movers_bp)
+    app.register_blueprint(explore_bp)
